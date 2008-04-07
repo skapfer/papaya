@@ -134,11 +134,11 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     tang0 /= tang0.norm ();
     ++it;
     vec_t tang1 = vertex(it->vert1);
-    tang0 -= vertex(it->vert0);
+    tang1 -= vertex(it->vert0);
     tang1 /= tang1.norm ();
     // z component of cross prod.
     double cz = tang0[0] * tang1[1] - tang1[0] * tang0[1];
-    return asin (cz);
+    return asin (-cz);
 }
 
 static inline void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {

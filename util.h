@@ -1,5 +1,7 @@
 // vim: et:sw=4:ts=4
 // general utilities.
+#ifndef UTIL_H_INCLUDED 
+#define UTIL_H_INCLUDED 
 
 #include <string>
 #include <assert.h>
@@ -226,3 +228,5 @@ inline const Boundary::edge_t &Boundary::edge_iterator::operator* () const {
 inline const Boundary::edge_t *Boundary::edge_iterator::operator-> () const {
     return &(operator* ());
 }
+
+#endif /* UTIL_H_INCLUDED */
