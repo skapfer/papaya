@@ -108,7 +108,11 @@ public:
     // in radians, in range [-pi/2, pi/2]
     // positive means convex edge
     double inflection_after_edge (edge_iterator it) const;
-    
+    double inflection_before_edge (edge_iterator it) const;
+    // return outward-pointing normal vector
+    vec_t edge_normal (edge_iterator) const;
+    vec_t edge_tangent (edge_iterator) const;
+
 private:
     vec_t &vertex (int i);
     edge_t &edge (int);
@@ -227,6 +231,11 @@ inline const Boundary::edge_t &Boundary::edge_iterator::operator* () const {
 
 inline const Boundary::edge_t *Boundary::edge_iterator::operator-> () const {
     return &(operator* ());
+}
+
+inline double Boundary::inflection_before_edge (Boundary::edge_iterator it) const {
+    --it;
+    return inflection_after_edge (it);
 }
 
 #endif /* UTIL_H_INCLUDED */

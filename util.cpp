@@ -141,6 +141,20 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     return asin (-cz);
 }
 
+Boundary::vec_t Boundary::edge_tangent (Boundary::edge_iterator it) const {
+    vec_t ret = vertex(it->vert1);
+    ret -= vertex(it->vert0);
+    ret /= ret.norm ();
+    return ret;
+}
+
+Boundary::vec_t Boundary::edge_normal (Boundary::edge_iterator it) const {
+    vec_t tmp = vertex(it->vert1);
+    tmp -= vertex(it->vert0);
+    tmp /= tmp.norm ();
+    return vec_t (tmp[1], -tmp[0]);
+}
+
 static inline void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
     const Boundary::vec_t &v = b.vertex (vertex);
     os << std::setprecision (18) << v.x () << " "
