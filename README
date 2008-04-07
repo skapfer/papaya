@@ -1,0 +1,19 @@
+
+
+===========================
+2D MINKOWSKI TENSOR PACKAGE
+===========================
+
+
+
+
+
+The program uses an external library called "Eigen" for the vector subroutines.
+For your convenience, the relevant headers are included in this package.
+"Eigen" can be obtained from
+
+    http://eigen.tuxfamily.org
+
+and is available under the GNU General Public License.
+
+
