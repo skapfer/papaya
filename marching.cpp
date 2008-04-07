@@ -262,8 +262,10 @@ int main () {
     MarchingSquares m;
     m.run (&b, p, 50, true);
     dump_contours (std::cout, b);
-    std::cout << "W100 " << W100 (b) << std::endl;
-    std::cout << "W200 " << W200 (b) << std::endl;
+    std::cerr << "W100 " << W100 (b) << std::endl;
+    std::cerr << "W200 " << W200 (b) << std::endl;
+    std::cerr << "W101 " << W101 (b) << std::endl;
+    std::cerr << "W110 " << W110 (b) << std::endl;
     return 0;
 }
 
