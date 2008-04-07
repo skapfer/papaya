@@ -10,7 +10,7 @@
 
 class MarchingSquares {
 public:
-    void run (Boundary *, const Pixmap &dataset, Pixmap::val_t threshold);
+    void run (Boundary *, const Pixmap &dataset, Pixmap::val_t threshold, bool connectblack);
 
 private:
     enum {
@@ -25,6 +25,7 @@ private:
     Boundary *boundary;
     Pixmap dataset;
     val_t threshold;
+    bool connectblack;
     Pixmap visited;
     int dualxmax;
     int dualymax;
@@ -37,10 +38,12 @@ private:
     val_t upperleft  (int x, int y);
 };
 
-void MarchingSquares::run (Boundary *b, const Pixmap &dataset_, Pixmap::val_t threshold_) {
+void MarchingSquares::run (Boundary *b, const Pixmap &dataset_, Pixmap::val_t threshold_,
+                           bool connectblack_) {
     assert (b);
     boundary = b;
     threshold = threshold_;
+    connectblack = connectblack_;
     // create a copy of dataset, padded by a one pixel border
     // so that contours definitely end there
     log ("init\n");
@@ -142,25 +145,43 @@ void MarchingSquares::trace_contour (int thisx, int thisy) {
         case UPPERLEFT|LOWERRIGHT:
             // ambiguous squares are traversed twice
             visited(thisx,thisy) = 0;
-            // for now, only connect white phase FIXME
-            if (prevx < thisx) {
-                movedown;
-            } else if (prevx > thisx) {
-                moveup;
+            if (connectblack) {
+                if (prevx < thisx) {
+                    moveup;
+                } else if (prevx > thisx) {
+                    movedown;
+                } else {
+                    die ("Entered UPPERLEFT|LOWERRIGHT from above or below.\n");
+                }
             } else {
-                die ("Entered UPPERLEFT|LOWERRIGHT from above or below.\n");
+                if (prevx < thisx) {
+                    movedown;
+                } else if (prevx > thisx) {
+                    moveup;
+                } else {
+                    die ("Entered UPPERLEFT|LOWERRIGHT from above or below.\n");
+                }
             }
             break;
         case UPPERRIGHT|LOWERLEFT:
             // ambiguous squares are traversed twice
             visited(thisx,thisy) = 0;
-            // for now, only connect white phase FIXME
-            if (prevy > thisy) {
-                moveright;
-            } else if (prevy < thisy) {
-                moveleft;
+            if (connectblack) {
+                if (prevy > thisy) {
+                    moveleft;
+                } else if (prevy < thisy) {
+                    moveright;
+                } else {
+                    die ("Entered UPPERRIGHT|LOWERLEFT from left or right.\n");
+                }
             } else {
-                die ("Entered UPPERRIGHT|LOWERLEFT from left or right.\n");
+                if (prevy > thisy) {
+                    moveright;
+                } else if (prevy < thisy) {
+                    moveleft;
+                } else {
+                    die ("Entered UPPERRIGHT|LOWERLEFT from left or right.\n");
+                }
             }
             break;
         default:
@@ -239,7 +260,7 @@ int main () {
     load_test_pixmap (&p);
     Boundary b;
     MarchingSquares m;
-    m.run (&b, p, 50);
+    m.run (&b, p, 50, true);
     dump_contours (std::cout, b);
     std::cout << "W100 " << W100 (b) << std::endl;
     std::cout << "W200 " << W200 (b) << std::endl;
