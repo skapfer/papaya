@@ -257,7 +257,9 @@ inline void MarchingSquares::log (const char *fmt, ...) {
 
 int main () {
     Pixmap p;
-    load_test_pixmap (&p);
+    //load_test_pixmap (&p);
+    load_pgm (&p, "test.pgm");
+    invert (&p);
     Boundary b;
     MarchingSquares m;
     m.run (&b, p, 50, true);

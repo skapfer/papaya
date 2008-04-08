@@ -1,6 +1,7 @@
 
 CXXFLAGS += -Ieinclude -g -ggdb
-SUPPORT = util.o marching.o minkval.o
+HEADERS = *.h
+SUPPORT = util.o marching.o minkval.o readpgm.o
 
 all: marching_test
 

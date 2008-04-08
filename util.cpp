@@ -1,3 +1,4 @@
+// vim: et:sw=4:ts=4
 
 #include "util.h"
 #include <stdio.h>
@@ -205,5 +206,12 @@ void load_test_pixmap (Pixmap *p) {
     for (int y = 0; y != ydim; ++y)
     for (int x = 0; x != xdim; ++x)
         (*p)(x,y) = (bla[xdim*y + x] != ' ') ? Pixmap::max_val () : Pixmap::min_val ();
+}
+
+void invert (Pixmap *p) {
+    long off = p->max_val () - p->min_val ();
+    for (int y = 0; y != p->size2 (); ++y)
+    for (int x = 0; x != p->size1 (); ++x)
+        (*p)(x,y) = off - (*p)(x,y);
 }
 

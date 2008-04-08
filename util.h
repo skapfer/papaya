@@ -39,6 +39,9 @@ private:
     int my_xdim, my_ydim;
 };
 
+void load_pgm (Pixmap *, const std::string &pgmfilename);
+void invert (Pixmap *);
+
 
 //
 // data structure & toolbox for boundaries
