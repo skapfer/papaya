@@ -254,15 +254,19 @@ inline void MarchingSquares::log (const char *fmt, ...) {
 
 #include <iostream>
 #include "minkval.h"
+#include "tinyconf.h"
 
 int main () {
+    Configuration conf ("test.conf");
     Pixmap p;
     //load_test_pixmap (&p);
-    load_pgm (&p, "test.pgm");
-    invert (&p);
+    load_pgm (&p, conf.string ("input", "filename"));
+    if (conf.boolean ("input", "invert"))
+        invert (&p);
     Boundary b;
     MarchingSquares m;
-    m.run (&b, p, 50, true);
+    bool connectblack = conf.boolean ("segment", "connectblack");
+    m.run (&b, p, 50, connectblack);
     dump_contours (std::cout, b);
     std::cerr << "W100 " << W100 (b) << std::endl;
     std::cerr << "W200 " << W200 (b) << std::endl;
