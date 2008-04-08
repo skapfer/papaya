@@ -52,7 +52,7 @@ vec_t W101 (const Boundary &b) {
     return ret;
 }
 
-// W110 = surface integral place -- zero by def.
+// W110 = surface integral place
 vec_t W110 (const Boundary &b) {
     vec_t ret = vec_t (0., 0.);
     Boundary::contour_iterator cit;
