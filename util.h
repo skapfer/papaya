@@ -15,6 +15,22 @@ void die (const char *fmt, ...);
 
 typedef Eigen::Vector2d vec_t;
 
+// return eigenvalues of a
+//  (a1 a2)
+//  (b1 b2)    quadratic real matrix.
+vec_t eigenvalues (double a1, double a2, double b1, double b2);
+void eigensystem (struct EigenSystem *, double a1, double a2, double b1, double b2);
+
+struct EigenSystem {
+    vec_t evec[2];
+    double eval[2];
+
+#ifndef NDEBUG
+    void dump (std::ostream &os);
+#endif
+};
+
+
 //
 // primitive Pixmap encap
 //

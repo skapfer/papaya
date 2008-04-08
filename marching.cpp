@@ -266,12 +266,15 @@ int main () {
     Boundary b;
     MarchingSquares m;
     bool connectblack = conf.boolean ("segment", "connectblack");
-    m.run (&b, p, 50, connectblack);
-    dump_contours (std::cout, b);
-    std::cerr << "W100 " << W100 (b) << std::endl;
-    std::cerr << "W200 " << W200 (b) << std::endl;
-    std::cerr << "W101 " << W101 (b) << std::endl;
-    std::cerr << "W110 " << W110 (b) << std::endl;
+    //m.run (&b, p, 50, connectblack);
+    //dump_contours (std::cout, b);
+    //std::cerr << "W100 " << W100 (b) << std::endl;
+    //std::cerr << "W200 " << W200 (b) << std::endl;
+    //std::cerr << "W101 " << W101 (b) << std::endl;
+    //std::cerr << "W110 " << W110 (b) << std::endl;
+    EigenSystem es;
+    eigensystem (&es, 9., 4., 5, 1e-9);
+    es.dump (std::cout);
     return 0;
 }
 

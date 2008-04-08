@@ -1,6 +1,7 @@
 // vim: et:sw=4:ts=4
 
 #include "util.h"
+#include <ostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -214,4 +215,47 @@ void invert (Pixmap *p) {
     for (int x = 0; x != p->size1 (); ++x)
         (*p)(x,y) = off - (*p)(x,y);
 }
+
+// get eigenvalues of a 2x2 matrix [if they are real].
+vec_t eigenvalues (double a1, double a2, double b1, double b2) {
+    double c = a1*b2 - a2*b1;
+    double b = a1 + b2;
+    b *= -1.;
+    double q = sqrt (b*b - 4.*c);
+    if (b < 0.) q *= -1.;
+    q += b;
+    q *= -.5;
+    return vec_t (q, c/q);
+}
+
+
+#ifndef NDEBUG
+void EigenSystem::dump (std::ostream &os) {
+    for (int i = 0; i != 2; ++i) {
+        os << std::setw (7) << eval[i] << "("
+           << std::setw (7) << evec[i][0] << ", "
+           << std::setw (7) << evec[i][1] << ")\n";
+    }
+}
+
+#endif
+
+void eigensystem (EigenSystem *sys, double a1, double a2, double b1, double b2) {
+    vec_t ev = eigenvalues (a1, a2, b1, b2);
+    sys->eval[0] = ev[0];
+    sys->eval[1] = ev[1];
+    for (int i = 0; i != 2; ++i) {
+        double X = sys->eval[i];
+        double d1 = a2 / (X-a1);
+        double d2 = b1 / (X-b2);
+        if (fabs (d1) < fabs (d2)) {
+            sys->evec[i][0] = d1;
+            sys->evec[i][1] = 1.;
+        } else {
+            sys->evec[i][0] = 1.;
+            sys->evec[i][1] = d2;
+        }
+    }
+}
+
 
