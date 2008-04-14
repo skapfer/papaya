@@ -1,27 +1,19 @@
 
 #include "minkval.h"
 
-SurfaceMinkowskiValuator::SurfaceMinkowskiValuator () {
+BasicMinkowskiValuator::BasicMinkowskiValuator () {
     my_ref = vec_t (0, 0);
     my_b = 0;
 }
 
-SurfaceMinkowskiValuator::~SurfaceMinkowskiValuator () {
+BasicMinkowskiValuator::~BasicMinkowskiValuator () {
 }
 
-void SurfaceMinkowskiValuator::set_reference (vec_t ref) {
+void BasicMinkowskiValuator::set_reference (vec_t ref) {
     my_ref = ref;
 }
 
-void SurfaceMinkowskiValuator::add_contourseg (Boundary *b,
-                                               edge_iterator begin,
-                                               edge_iterator end) {
-    my_b = b;
-    // do sth.
-    b = 0;
-}
-
-double SurfaceMinkowskiValuator::scalar (const string &name) {
+double BasicMinkowskiValuator::scalar (const string &name) {
     std::map <string, double>::const_iterator it;
     it = sacc.find (name);
     if (it != sacc.end ()) {
@@ -31,7 +23,7 @@ double SurfaceMinkowskiValuator::scalar (const string &name) {
     }
 }
 
-vec_t SurfaceMinkowskiValuator::vector (const string &name) {
+vec_t BasicMinkowskiValuator::vector (const string &name) {
     std::map <string, vec_t>::const_iterator it;
     it = vacc.find (name);
     if (it != vacc.end ()) {
@@ -41,7 +33,7 @@ vec_t SurfaceMinkowskiValuator::vector (const string &name) {
     }
 }
 
-mat_t SurfaceMinkowskiValuator::matrix (const string &name) {
+mat_t BasicMinkowskiValuator::matrix (const string &name) {
     std::map <string, mat_t>::const_iterator it;
     it = macc.find (name);
     if (it != macc.end ()) {
@@ -51,19 +43,27 @@ mat_t SurfaceMinkowskiValuator::matrix (const string &name) {
     }
 }
 
-vec_t SurfaceMinkowskiValuator::edge_normal (edge_iterator it) {
+inline vec_t BasicMinkowskiValuator::edge_normal (edge_iterator it) {
     assert (my_b);
     return my_b->edge_normal (it);
 }
 
-vec_t SurfaceMinkowskiValuator::edge_vertex0 (edge_iterator it) {
+inline vec_t BasicMinkowskiValuator::edge_vertex0 (edge_iterator it) {
     assert (my_b);
     return my_b->edge_vertex0 (it);
 }
 
-vec_t SurfaceMinkowskiValuator::edge_vertex1 (edge_iterator it) {
+inline vec_t BasicMinkowskiValuator::edge_vertex1 (edge_iterator it) {
     assert (my_b);
     return my_b->edge_vertex1 (it);
+}
+
+void SurfaceMinkowskiValuator::add_contourseg (Boundary *b,
+                                               edge_iterator begin,
+                                               edge_iterator end) {
+    my_b = b;
+    // do sth.
+    b = 0;
 }
 
 

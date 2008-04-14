@@ -4,7 +4,7 @@
 #include "util.h"
 #include <map>
 
-class SurfaceMinkowskiValuator {
+class BasicMinkowskiValuator {
 public:
     typedef Boundary::edge_iterator edge_iterator;
     typedef std::string string;
@@ -12,8 +12,6 @@ public:
     SurfaceMinkowskiValuator ();
     void set_reference (vec_t);
     ~SurfaceMinkowskiValuator ();
-
-    void add_contourseg (Boundary *b, edge_iterator begin, edge_iterator end);
 
     double scalar (const string &);
     vec_t  vector (const string &);
@@ -26,7 +24,7 @@ public:
     vec_t W101 (const Boundary &);
     */
 
-private:
+protected:
     vec_t edge_normal (edge_iterator);
     vec_t edge_vertex0 (edge_iterator);
     vec_t edge_vertex1 (edge_iterator);
@@ -36,5 +34,10 @@ private:
     std::map <string, double> sacc;
     std::map <string, mat_t> macc;
 };
+
+class SurfaceMinkowskiValuator : public BasicMinkowskiValuator {
+public:
+    void add_contourseg (Boundary *b, edge_iterator begin, edge_iterator end);
+}
 
 #endif /* MINKOWSKIVALUATIONS_H_INCLUDED */
