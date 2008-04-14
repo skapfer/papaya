@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "vector.h"
+#include "matrix.h"
 #include <algorithm>
 #include <vector>
 #include <ostream>
@@ -14,6 +15,7 @@
 void die (const char *fmt, ...);
 
 typedef Eigen::Vector2d vec_t;
+typedef Eigen::Matrix2d mat_t;
 
 // return eigenvalues of a
 //  (a1 a2)
