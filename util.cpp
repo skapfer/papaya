@@ -75,6 +75,7 @@ int Boundary::insert_edge (int a, int b, int c, int d) {
     E.vert0 = b;
     E.vert1 = c;
     E.contour = contour;
+    E.label = 0;
     my_edge.push_back (E);
     return ret;
 }

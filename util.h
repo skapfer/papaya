@@ -86,6 +86,7 @@ public:
         int vert0, vert1;
         // contour identifier (arbitrary edge identifier on the contour)
         int contour;
+        int label;
     };
 
     int insert_edge (int prev, int vert0, int vert1, int next = INVALID_EDGE);
@@ -136,6 +137,8 @@ public:
     // return vertices
     vec_t edge_vertex0 (edge_iterator) const;
     vec_t edge_vertex1 (edge_iterator) const;
+    // edge label
+    int edge_label (edge_iterator) const;
 
 private:
     vec_t &vertex (int i);
@@ -260,6 +263,10 @@ inline const Boundary::edge_t *Boundary::edge_iterator::operator-> () const {
 inline double Boundary::inflection_before_edge (Boundary::edge_iterator it) const {
     --it;
     return inflection_after_edge (it);
+}
+
+inline int Boundary::edge_label (Boundary::edge_iterator it) const {
+    return it->label;
 }
 
 #endif /* UTIL_H_INCLUDED */
