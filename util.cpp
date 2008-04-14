@@ -157,6 +157,14 @@ Boundary::vec_t Boundary::edge_normal (Boundary::edge_iterator it) const {
     return vec_t (tmp[1], -tmp[0]);
 }
 
+Boundary::vec_t Boundary::edge_vertex0 (Boundary::edge_iterator it) const {
+    return vertex (it->vert0);
+}
+
+Boundary::vec_t Boundary::edge_vertex1 (Boundary::edge_iterator it) const {
+    return vertex (it->vert1);
+}
+
 static inline void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
     const Boundary::vec_t &v = b.vertex (vertex);
     os << std::setprecision (18) << v.x () << " "

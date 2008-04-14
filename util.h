@@ -133,6 +133,9 @@ public:
     // return outward-pointing normal vector
     vec_t edge_normal (edge_iterator) const;
     vec_t edge_tangent (edge_iterator) const;
+    // return vertices
+    vec_t edge_vertex0 (edge_iterator) const;
+    vec_t edge_vertex1 (edge_iterator) const;
 
 private:
     vec_t &vertex (int i);
