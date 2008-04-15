@@ -20,8 +20,8 @@ typedef Eigen::Matrix2d mat_t;
 // return eigenvalues of a
 //  (a1 a2)
 //  (b1 b2)    quadratic real matrix.
-vec_t eigenvalues (double a1, double a2, double b1, double b2);
 void eigensystem (struct EigenSystem *, double a1, double a2, double b1, double b2);
+void eigensystem (struct EigenSystem *, const mat_t &);
 
 struct EigenSystem {
     vec_t evec[2];
@@ -31,6 +31,12 @@ struct EigenSystem {
     void dump (std::ostream &os);
 #endif
 };
+
+// return dyadic product  lhs (tensor) rhs in out,
+// as a 2x2 matrix.
+void dyadic_prod      (mat_t *out, const vec_t &lhs, const vec_t &rhs);
+// dyadic product of vector with itself.
+void dyadic_prod_self (mat_t *out, const vec_t &lhs);
 
 
 //
@@ -269,4 +275,21 @@ inline int Boundary::edge_label (Boundary::edge_iterator it) const {
     return it->label;
 }
 
+inline void eigensystem (EigenSystem *sys, const mat_t &mat) {
+    eigensystem (sys, mat(0,0), mat(0,1), mat(1,0), mat(1,1));
+}
+
+inline void dyadic_prod (mat_t *out, const vec_t &lhs, const vec_t &rhs) {
+    (*mat)(0,0) = lhs[0] * rhs[0];
+    (*mat)(0,1) = lhs[0] * rhs[1];
+    (*mat)(1,0) = lhs[1] * rhs[0];
+    (*mat)(1,1) = lhs[1] * rhs[1];
+}
+
+inline void dyadic_prod_self (mat_t *out, const vec_t &lhs) {
+    (*mat)(0,0) = lhs[0] * lhs[0];
+    (*mat)(0,1) = 
+    (*mat)(1,0) = lhs[0] * lhs[1];
+    (*mat)(1,1) = lhs[1] * lhs[1];
+}
 #endif /* UTIL_H_INCLUDED */

@@ -226,11 +226,14 @@ void invert (Pixmap *p) {
 }
 
 // get eigenvalues of a 2x2 matrix [if they are real].
-vec_t eigenvalues (double a1, double a2, double b1, double b2) {
+static vec_t eigenvalues (double a1, double a2, double b1, double b2) {
     double c = a1*b2 - a2*b1;
     double b = a1 + b2;
     b *= -1.;
-    double q = sqrt (b*b - 4.*c);
+    double q = b*b - 4.*c;
+    if (q < 0.)
+        die ("complex eigenvalues in eigenvalues");
+    q = sqrt (q);
     if (b < 0.) q *= -1.;
     q += b;
     q *= -.5;
@@ -246,7 +249,6 @@ void EigenSystem::dump (std::ostream &os) {
            << std::setw (7) << evec[i][1] << ")\n";
     }
 }
-
 #endif
 
 void eigensystem (EigenSystem *sys, double a1, double a2, double b1, double b2) {
