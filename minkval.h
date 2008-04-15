@@ -45,6 +45,8 @@ public:
 
     virtual void add_contour (const Boundary &, edge_iterator begin, edge_iterator end) = 0;
 
+    // reference point for calculation of Minkowski tensors
+    // with r != 0
     void ref_vertex (const vec_t &);
 
 protected:
@@ -69,6 +71,7 @@ template <typename VALUE_TYPE>
 inline GenericMinkowskiFunctional<VALUE_TYPE>::GenericMinkowskiFunctional (const std::string &name)
     : my_name (name) { }
 
+// return accumulator for label
 template <typename VALUE_TYPE>
 inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (int label) {
     if (int (my_acc.size ()) > int (label)) {
@@ -117,44 +120,5 @@ inline void SurfaceIntegral::ref_vertex (const vec_t &m) {
 inline const vec_t &SurfaceIntegral::ref_vertex () const {
     return my_ref_vertex;
 }
-
-
-#if 0
-class BasicMinkowskiValuator {
-public:
-    typedef Boundary::edge_iterator edge_iterator;
-    typedef std::string string;
-
-    BasicMinkowskiValuator ();
-    void set_reference (vec_t);
-    ~BasicMinkowskiValuator ();
-
-    double scalar (const string &);
-    vec_t  vector (const string &);
-    mat_t  matrix (const string &);
-
-    /*
-    double W100 (const Boundary &);
-    double W200 (const Boundary &);
-    vec_t W110 (const Boundary &);
-    vec_t W101 (const Boundary &);
-    */
-
-protected:
-    vec_t edge_normal (edge_iterator);
-    vec_t edge_vertex0 (edge_iterator);
-    vec_t edge_vertex1 (edge_iterator);
-    vec_t my_ref;
-    Boundary *my_b;
-    std::map <string, vec_t> vacc;
-    std::map <string, double> sacc;
-    std::map <string, mat_t> macc;
-};
-
-class SurfaceMinkowskiValuator : public BasicMinkowskiValuator {
-public:
-    void add_contourseg (Boundary *b, edge_iterator begin, edge_iterator end);
-};
-#endif // 0
 
 #endif /* MINKOWSKIVALUATIONS_H_INCLUDED */
