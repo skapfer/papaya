@@ -146,7 +146,7 @@ void calculate_all_surface_integrals (const Boundary &b) {
     w200.dump (std::cout);
     w110.dump (std::cout);
     w101.dump (std::cout);
-    w201.dump (std::cout);
     w210.dump (std::cout);
+    w201.dump (std::cout);
 }
 

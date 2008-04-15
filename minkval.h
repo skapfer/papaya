@@ -3,6 +3,8 @@
 
 #include "util.h"
 #include <map>
+#include <ostream>
+#include <iomanip>
 
 
 template <typename VALUE_TYPE>
@@ -22,6 +24,9 @@ public:
 protected:
     value_t &acc (label_t);
     void reszacc (label_t);
+    static void dump_accu (std::ostream &os, double);
+    static void dump_accu (std::ostream &os, const vec_t &);
+    static void dump_accu (std::ostream &os, const mat_t &);
 private:
     std::vector <value_t> my_acc;
     std::string my_name;
@@ -103,10 +108,28 @@ void GenericMinkowskiFunctional<VALUE_TYPE>::reszacc (label_t l) {
 template <typename VALUE_TYPE>
 void GenericMinkowskiFunctional<VALUE_TYPE>::dump (std::ostream &os) const {
     os << "# " << this->name ()
-       << "\n# label v\n";
+       << "\n#--label-----------------v\n";
     for (int i = 0; i != (int)my_acc.size (); ++i) {
-        os << i << " " << my_acc[i] << "\n";
+        os << std::setw (8) << i << " ";
+        this->dump_accu (os, my_acc[i]);
+        os << "\n";
     }
+}
+
+template <typename VALUE_TYPE>
+inline void GenericMinkowskiFunctional<VALUE_TYPE>::dump_accu (std::ostream &os, double v) {
+    os << std::setw (17) << v;
+}
+
+template <typename VALUE_TYPE>
+inline void GenericMinkowskiFunctional<VALUE_TYPE>::dump_accu (std::ostream &os, const vec_t &v) {
+    os << "(" << std::setw (16) << v[0] << " " << std::setw (16) << v[1] << ")";
+}
+
+template <typename VALUE_TYPE>
+inline void GenericMinkowskiFunctional<VALUE_TYPE>::dump_accu (std::ostream &os, const mat_t &v) {
+    os << "((" << std::setw (15) << v(0,0) << " " << std::setw (16) << v(0,1) << ") ";
+    os << "("  << std::setw (16) << v(1,0) << " " << std::setw (15) << v(1,1) << "))";
 }
 
 inline SurfaceIntegral::SurfaceIntegral () {

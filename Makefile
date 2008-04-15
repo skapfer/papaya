@@ -8,6 +8,12 @@ all: marching_test
 clean:
 	rm -f marching_test *.o
 
-marching_test: $(SUPPORT)
+# trick to recompile everything when the headers change.
+ts.headers: $(HEADERS)
+	$(MAKE) clean
+	touch $@
+
+marching_test: ts.headers $(SUPPORT)
 	$(CXX) -o $@ $(SUPPORT)
 
+.PHONY: all clean

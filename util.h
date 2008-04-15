@@ -279,14 +279,14 @@ inline void eigensystem (EigenSystem *sys, const mat_t &mat) {
     eigensystem (sys, mat(0,0), mat(0,1), mat(1,0), mat(1,1));
 }
 
-inline void dyadic_prod (mat_t *out, const vec_t &lhs, const vec_t &rhs) {
+inline void dyadic_prod (mat_t *mat, const vec_t &lhs, const vec_t &rhs) {
     (*mat)(0,0) = lhs[0] * rhs[0];
     (*mat)(0,1) = lhs[0] * rhs[1];
     (*mat)(1,0) = lhs[1] * rhs[0];
     (*mat)(1,1) = lhs[1] * rhs[1];
 }
 
-inline void dyadic_prod_self (mat_t *out, const vec_t &lhs) {
+inline void dyadic_prod_self (mat_t *mat, const vec_t &lhs) {
     (*mat)(0,0) = lhs[0] * lhs[0];
     (*mat)(0,1) = 
     (*mat)(1,0) = lhs[0] * lhs[1];
