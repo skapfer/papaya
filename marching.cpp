@@ -253,6 +253,7 @@ inline void MarchingSquares::log (const char *fmt, ...) {
 //         SurfaceMeasure, VolumeMeasure
 
 #include <iostream>
+#include <fstream>
 #include "minkval.h"
 #include "tinyconf.h"
 
@@ -268,6 +269,8 @@ int main () {
     bool connectblack = conf.boolean ("segment", "connectblack");
     m.run (&b, p, 50, connectblack);
     calculate_all_surface_integrals (b);
+    std::ofstream contfile ("contours.out");
+    dump_contours (contfile, b);
     /*
     std::cerr << "W100 " << W100 (b) << std::endl;
     std::cerr << "W200 " << W200 (b) << std::endl;

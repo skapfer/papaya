@@ -21,6 +21,10 @@ public:
 };
 
 // W200 = surface integral weighted with curvature
+// Inflection is calculated at end-of-edge, i.e. at vertex1 of the edge
+// and counted towards the current label.
+// This doesn't matter because we introduce inflection-zero vertices
+// at label boundaries.
 class W200 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
 public:
     W200 ()
@@ -72,6 +76,48 @@ public:
     }
 };
 
+// W210 = surface integral weighted with curvature and location
+// Inflection is calculated at end-of-edge, i.e. at vertex1 of the edge
+// and counted towards the current label.
+// This doesn't matter because we introduce inflection-zero vertices
+// at label boundaries.
+//     label0    label1
+// --X--------X---------X----
+//            ]
+class W210 : public VectorMinkowskiFunctional, public SurfaceIntegral {
+public:
+    W210 ()
+        : VectorMinkowskiFunctional ("W210") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        for (; pos != end; ++pos) {
+            vec_t &acc_ = acc (b.edge_label (pos));
+            vec_t vert = b.edge_vertex1 (pos);
+            vert -= ref_vertex ();
+            // weighted by edge length
+            acc_ += vert * b.inflection_after_edge (pos);
+        }
+    }
+};
+
+// W201 = surface integral weighted with curvature and normal
+// the only contributions come from vertices where the "label" changes,
+// i.e. non-closed geometries
+// these are neglected
+class W201 : public VectorMinkowskiFunctional, public SurfaceIntegral {
+public:
+    W201 ()
+        : VectorMinkowskiFunctional ("W201") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        for (; pos != end; ++pos) {
+            acc (b.edge_label (pos));
+        }
+    }
+};
+
+
+
 
 void calculate_all_surface_integrals (const Boundary &b) {
     std::vector <SurfaceIntegral *> sfints;
@@ -84,6 +130,10 @@ void calculate_all_surface_integrals (const Boundary &b) {
     sfints.push_back (&w110);
     W101 w101;
     sfints.push_back (&w101);
+    W201 w201;
+    sfints.push_back (&w201);
+    W210 w210;
+    sfints.push_back (&w210);
 
     Boundary::contour_iterator cit;
     std::vector <SurfaceIntegral *>::iterator iit;
@@ -96,5 +146,7 @@ void calculate_all_surface_integrals (const Boundary &b) {
     w200.dump (std::cout);
     w110.dump (std::cout);
     w101.dump (std::cout);
+    w201.dump (std::cout);
+    w210.dump (std::cout);
 }
 
