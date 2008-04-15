@@ -43,6 +43,12 @@ namespace {
         return string (s, i, j); // handles overlaps
     }
 
+    // discard current line of input
+    void skip_line (std::istream &is) {
+        string dummy;
+        getline (is, dummy);
+    }
+
     bool read_key (submap_type *m, std::istream &is) {
         // check for end-of-section and end-of-file
         is >> ws;
@@ -50,6 +56,9 @@ namespace {
         case EOF:
         case '[':
             return false;
+        case '#':
+            skip_line (is);
+            return read_key (m, is);
         }
         // read one line, split at the =
         string line;
@@ -70,6 +79,9 @@ namespace {
         switch (is.peek ()) {
         case EOF:
             return false;
+        case '#':
+            skip_line (is);
+            return read_section (m, is);
         case '[':
             is.get ();
             break;
