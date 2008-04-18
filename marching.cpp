@@ -249,9 +249,6 @@ inline void MarchingSquares::log (const char *fmt, ...) {
 }
 
 
-// FIXME   ScalarMeasure, VectorMeasure, MatrixMeasure
-//         SurfaceMeasure, VolumeMeasure
-
 #include <iostream>
 #include <fstream>
 #include "minkval.h"
@@ -267,10 +264,11 @@ int main () {
     Boundary b;
     MarchingSquares m;
     bool connectblack = conf.boolean ("segment", "connectblack");
-    m.run (&b, p, 50, connectblack);
-    calculate_all_surface_integrals (b);
+    //m.run (&b, p, 50, connectblack);
+    load_poly (&b, "testdata/PolyExFuerSeb.poly");
     std::ofstream contfile ("contours.out");
     dump_contours (contfile, b);
+    calculate_all_surface_integrals (b);
     /*
     std::cerr << "W100 " << W100 (b) << std::endl;
     std::cerr << "W200 " << W200 (b) << std::endl;
