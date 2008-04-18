@@ -266,6 +266,7 @@ int main () {
     bool connectblack = conf.boolean ("segment", "connectblack");
     //m.run (&b, p, 50, connectblack);
     load_poly (&b, "testdata/PolyExFuerSeb.poly");
+    b.fix_contours ();
     std::ofstream contfile ("contours.out");
     dump_contours (contfile, b);
     calculate_all_surface_integrals (b);

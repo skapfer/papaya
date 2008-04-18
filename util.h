@@ -95,8 +95,13 @@ public:
         int label;
     };
 
+    // insert a new edge with the given data.
+    // vertices may be INVALID_VERTEX if the corresponding
+    // edge is given.
+    // edges may be INVALID_EDGE to indicate open ends
+    // if the corresponding vertex is given.
     int insert_edge (int prev, int vert0, int vert1, int next = INVALID_EDGE);
-    int split_edge (); // FIXME
+    // return reference to the given edge object
     const edge_t &edge (int) const;
     int num_edges () const;
 
@@ -146,11 +151,26 @@ public:
     // edge label
     int edge_label (edge_iterator) const;
 
+    // fix common problems e.g. remove norm-zero edges
+    void fix_contours (bool silent = false);
+
 private:
     vec_t &vertex (int i);
     edge_t &edge (int);
+    edge_t &edge (edge_iterator);
     void merge_contour_asc (int ed, int newc);
     void erase_contour (int c);
+    void take_edge_out (int ed);
+    // join the specified edge and its successor
+    // by removing eit->vert1.
+    // removes either the specified edge or its successor
+    // returns an iterator referring to the joint edge
+    // existing iterators to eit or eit+1 are invalid afterwards
+    edge_iterator remove_vertex1 (edge_iterator eit);
+    // test whether the given edge is connected to itself,
+    // i.e. a degenerate single-vertex contour
+    bool is_self_referential (edge_iterator) const;
+
     edge_iterator edges_begin (int) const;
     edge_iterator edges_end (int) const;
     std::vector <vec_t> my_vert;

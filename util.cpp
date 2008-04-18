@@ -92,6 +92,62 @@ void Boundary::merge_contour_asc (int ed, int newc) {
     }
 }
 
+inline Boundary::edge_t &Boundary::edge (edge_iterator eit) {
+    assert (this == eit.my_boundary);
+    return edge(eit.my_position);
+}
+
+Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
+    assert (this == eit.my_boundary);
+    // normally, delete the next edge.
+    // if that edge is the magic edge which gives the name to this contour,
+    // delete this edge instead.
+    // if the contour consists of just one vertex (degenerate
+    // contour, fail loudly.
+    if (eit->next == eit->contour) {
+        // delete this edge object and its metadata.
+        int saved_vert0 = eit->vert0;
+        ++eit;
+        take_edge_out (eit->prev);
+        edge_t *peit = &edge(eit);
+        peit->vert0 = saved_vert0;
+    } else {
+        // delete next edge object, but this object's metadata.
+        edge_t saved = edge(eit->next);
+        take_edge_out (eit->next);
+        // copy data back.
+        edge_t *peit = &edge(eit);
+        peit->label = saved.label;
+        peit->vert1 = saved.vert1;
+        return eit;
+    }
+}
+
+// take an edge object out of the loop
+// the object is assumed to have successors on both sides.
+// this function just does the re-wiring.
+inline void Boundary::take_edge_out (int ed) {
+    edge_t &E = edge(ed);
+    edge_t &nextE = edge(E.next);
+    edge_t &prevE = edge(E.prev);
+    nextE.prev = E.prev;
+    prevE.next = E.next;
+
+#ifndef NDEBUG
+    // write nonsense to a edge that should no longer be in use
+    E.prev = E.next = INVALID_EDGE;
+    E.vert0 = E.vert1 = INVALID_VERTEX;
+    E.contour = INVALID_EDGE;
+    E.label = -1;
+#endif
+}
+
+bool Boundary::is_self_referential (edge_iterator eit) const {
+    edge_iterator eit2 = eit;
+    ++eit;
+    return (&*eit) == (&*eit2);
+}
+
 void Boundary::erase_contour (int c) {
     std::vector <int>::iterator i = std::find (my_contours.begin (), my_contours.end (), c);
     assert (i != my_contours.end ());
@@ -141,7 +197,17 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     tang1 /= tang1.norm ();
     // z component of cross prod.
     double cz = tang0[0] * tang1[1] - tang1[0] * tang0[1];
-    return asin (-cz);
+#ifndef NDEBUG
+    if (isnan (cz))
+        die ("nan in Boundary::inflection_after_edge, vector product\n");
+#endif
+    double ret = asin (-cz);
+#ifndef NDEBUG
+    if (isnan (ret)) {
+        die ("nan in Boundary::inflection_after_edge, arcsine\n");
+    }
+#endif
+    return ret;
 }
 
 Boundary::vec_t Boundary::edge_tangent (Boundary::edge_iterator it) const {
@@ -164,6 +230,38 @@ Boundary::vec_t Boundary::edge_vertex0 (Boundary::edge_iterator it) const {
 
 Boundary::vec_t Boundary::edge_vertex1 (Boundary::edge_iterator it) const {
     return vertex (it->vert1);
+}
+
+void Boundary::fix_contours (bool silent) {
+    int deg_contours = 0;
+    int deg_edges = 0;
+    Boundary::contour_iterator cit;
+    Boundary::edge_iterator eit, eit_end;
+    for (cit = contours_begin (); cit != contours_end (); ++cit) {
+        eit = edges_begin (cit);
+        eit_end = edges_end (cit);
+        // remove norm-zero edges
+        while (eit != eit_end) {
+            double len = edge_length (eit);
+            if (len < 1e-6) {
+                if (is_self_referential (eit)) {
+                    ++deg_contours;
+                    break;
+                }
+                ++deg_edges;
+                eit = remove_vertex1 (eit);
+                // remove_vertex1 could have removed our end
+                eit_end = edges_end (cit);
+            } else {
+                ++eit;
+            }
+        }
+    }
+    if (!silent) {
+        std::cerr << "fix_contours\n "
+                  << deg_contours << " deg. contours (NOT REMOVED)\n "
+                  << deg_edges << " deg. edges (removed)\n";
+    }
 }
 
 static inline void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
