@@ -161,6 +161,7 @@ private:
 void marching_squares (Boundary *, const Pixmap &);
 void dump_contours (std::ostream &, const Boundary &);
 void load_test_pixmap (Pixmap *);
+void load_poly (class Boundary *, const std::string &polyfilename);
 
 
 //
@@ -213,10 +214,8 @@ inline int Boundary::num_vertices () const {
 
 inline const Boundary::edge_t &Boundary::edge (int i) const {
 #ifndef NDEBUG
-    if (i == INVALID_EDGE) {
-        std::cerr << "called Boundary::edge (INVALID_EDGE)\n";
-        abort ();
-    }
+    if (i == INVALID_EDGE)
+        die ("called Boundary::edge (INVALID_EDGE)\n");
     return my_edge.at (i);
 #else
     return my_edge[i];
@@ -263,6 +262,10 @@ inline Boundary::edge_iterator::edge_iterator (const Boundary *b, int e, int p)
     : my_position (e), my_boundary (b), my_period (p) { }
 
 inline const Boundary::edge_t &Boundary::edge_iterator::operator* () const {
+#ifndef NDEBUG
+    if (my_position == INVALID_EDGE)
+        die ("dereferencing edge_iterator (INVALID_EDGE)");
+#endif
     return my_boundary->edge(my_position);
 }
 
