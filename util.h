@@ -213,6 +213,10 @@ inline int Boundary::num_vertices () const {
 
 inline const Boundary::edge_t &Boundary::edge (int i) const {
 #ifndef NDEBUG
+    if (i == INVALID_EDGE) {
+        std::cerr << "called Boundary::edge (INVALID_EDGE)\n";
+        abort ();
+    }
     return my_edge.at (i);
 #else
     return my_edge[i];
