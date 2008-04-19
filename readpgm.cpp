@@ -27,6 +27,8 @@ static void read_header (Pixmap *p, istream &is) {
 void load_pgm (Pixmap *p, const string &filename) {
     assert (p);
     ifstream is (filename.c_str ());
+    if (!is)
+        throw std::runtime_error ("Cannot open \"" + filename + "\"");
     is.exceptions (ios::failbit | ios::badbit);
     read_header (p, is);
     for (int j = 0; j != p->size2 (); ++j)
