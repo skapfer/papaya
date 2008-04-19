@@ -108,7 +108,8 @@ void GenericMinkowskiFunctional<VALUE_TYPE>::reszacc (label_t l) {
 template <typename VALUE_TYPE>
 void GenericMinkowskiFunctional<VALUE_TYPE>::dump (std::ostream &os) const {
     os << "# " << this->name ()
-       << "\n#--label-----------------v\n";
+       << "\n#--label-----------------v-----------------v"
+          "-----------------v-----------------v\n";
     for (int i = 0; i != (int)my_acc.size (); ++i) {
         os << std::setw (8) << i << " ";
         this->dump_accu (os, my_acc[i]);
