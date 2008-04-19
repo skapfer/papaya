@@ -1,7 +1,10 @@
+// vim: et:sw=4:ts=4
+// read some data out of POLY files
 
 #include "util.h"
 #include <fstream>
 #include <stdexcept>
+#include <limits>
 #include <stdarg.h>
 #include <stdio.h>
 typedef std::string string;
@@ -45,6 +48,10 @@ public:
         : is (polyfilename.c_str ()),
           b (b_)
     {
+        if (!is) {
+            throw std::runtime_error ("Cannot open \"" +
+                polyfilename + "\"");
+        }
         is.exceptions (std::ios::failbit | std::ios::badbit);
         vertex_map.reserve (1000);
     }
