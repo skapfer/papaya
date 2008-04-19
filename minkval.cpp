@@ -34,6 +34,14 @@ public:
 // This doesn't matter because we introduce inflection-zero vertices
 // at label boundaries.
 // @GERD Muessen wir das symmetrisieren?
+//
+// tensor is motion invariant.
+//           rank-0.
+//           hom. degree 0.
+//
+// exact formulas for primitive bodies:
+// * circle: 2 pi
+// * square: 2 pi
 class W200 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
 public:
     W200 ()
