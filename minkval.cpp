@@ -8,7 +8,9 @@ static const double TWOPI = 2*M_PI;
 
 // W100 = surface integral
 //
-// tensor is translation invariant.
+// tensor is motion invariant.
+//           rank-0.
+//           hom. degree 1.
 //
 // exact formulas for primitive bodies:
 // * circle: 2 pi R
@@ -47,6 +49,12 @@ public:
 
 // W110 = surface integral weighted with location
 //
+// tensor is motion covariant.
+//           rank-1.
+//           hom. degree 2.
+//
+// surface center of gravity times total surface.
+//
 // exact formulas for primitive bodies:
 // * circle centered at origin: 0
 // * square centered at origin: 0
@@ -69,24 +77,6 @@ public:
     }
 };
 
-// W101 = surface integral weighted with normal
-// zero by definition for closed surfaces
-class W101 : public VectorMinkowskiFunctional, public SurfaceIntegral {
-public:
-    W101 ()
-        : VectorMinkowskiFunctional ("W101") { }
-
-    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
-        for (; pos != end; ++pos) {
-            vec_t &acc_ = acc (b.edge_label (pos));
-            // normal of edge
-            vec_t nrml = b.edge_normal (pos);
-            // weighted by edge length
-            acc_ += nrml * b.edge_length (pos);
-        }
-    }
-};
-
 // W210 = surface integral weighted with curvature and location
 // Inflection is calculated at end-of-edge, i.e. at vertex1 of the edge
 // and counted towards the current label.
@@ -96,6 +86,12 @@ public:
 // --X--------X---------X----
 //            ]
 // @GERD Muessen wir das symmetrisieren?
+//
+// tensor is motion covariant.
+//           rank-1.
+//           hom. degree 1.
+//
+// surface center of gravity times total curvature
 class W210 : public VectorMinkowskiFunctional, public SurfaceIntegral {
 public:
     W210 ()
@@ -106,24 +102,7 @@ public:
             vec_t &acc_ = acc (b.edge_label (pos));
             vec_t vert = b.edge_vertex1 (pos);
             vert -= ref_vertex ();
-            // weighted by edge length
             acc_ += vert * b.inflection_after_edge (pos);
-        }
-    }
-};
-
-// W201 = surface integral weighted with curvature and normal
-// the only contributions come from vertices where the "label" changes,
-// i.e. non-closed geometries
-// these are neglected
-class W201 : public VectorMinkowskiFunctional, public SurfaceIntegral {
-public:
-    W201 ()
-        : VectorMinkowskiFunctional ("W201") { }
-
-    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
-        for (; pos != end; ++pos) {
-            acc (b.edge_label (pos));
         }
     }
 };
@@ -136,6 +115,7 @@ public:
 //
 // tensor is translation invariant.
 //           symmetric.
+//           rank-2.
 //
 // exact formulas for primitive bodies:
 // * circle: R \pi IE
@@ -218,10 +198,6 @@ void calculate_all_surface_integrals (const Boundary &b) {
     sfints.push_back (&w200);
     W110 w110;
     sfints.push_back (&w110);
-    W101 w101;
-    sfints.push_back (&w101);
-    W201 w201;
-    sfints.push_back (&w201);
     W211 w211;
     sfints.push_back (&w211);
     W210 w210;
@@ -244,9 +220,7 @@ void calculate_all_surface_integrals (const Boundary &b) {
     w100.dump (std::cout);
     w200.dump (std::cout);
     w110.dump (std::cout);
-    w101.dump (std::cout);
     w210.dump (std::cout);
-    w201.dump (std::cout);
     w211.dump (std::cout);
     w220.dump (std::cout);
 }
