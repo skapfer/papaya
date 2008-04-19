@@ -233,6 +233,8 @@ Boundary::vec_t Boundary::edge_vertex1 (Boundary::edge_iterator it) const {
 }
 
 void Boundary::fix_contours (bool silent) {
+    if (!silent)
+        std::cerr << "fix_contours";
     int deg_contours = 0;
     int deg_edges = 0;
     Boundary::contour_iterator cit;
@@ -258,7 +260,7 @@ void Boundary::fix_contours (bool silent) {
         }
     }
     if (!silent) {
-        std::cerr << "fix_contours\n "
+        std::cerr << "\n "
                   << deg_contours << " deg. contours (NOT REMOVED)\n "
                   << deg_edges << " deg. edges (removed)\n";
     }
