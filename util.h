@@ -55,6 +55,8 @@ public:
     static val_t min_val () { return 0; }
     static val_t max_val () { return UCHAR_MAX; }
 
+    // x is running from left to right
+    // y from top to bottom
     val_t &operator() (int x, int y);
     const val_t &operator() (int x, int y) const;
 

@@ -188,7 +188,10 @@ void MarchingSquares::trace_contour (int thisx, int thisy) {
             die ("Lost contact to contour. This should not have happened (type = %i).", type);
         }
         // add new vertex
-        int thisvertex = boundary->insert_vertex (vertx, verty);
+        // bitmap is top-down, but we need right-handed coordinates later
+        int thisvertex = boundary->insert_vertex (
+            vertx-1.,
+            dataset.size2() - 1. - (verty-1.));
         // add new edge
         if (prevvertex != Boundary::INVALID_VERTEX) {
             int thisedge = boundary->insert_edge (
@@ -264,9 +267,9 @@ int main () {
     Boundary b;
     MarchingSquares m;
     bool connectblack = conf.boolean ("segment", "connectblack");
-    //m.run (&b, p, 50, connectblack);
-    load_poly (&b, "testdata/PolyExFuerSeb.poly");
-    b.fix_contours ();
+    m.run (&b, p, 50, connectblack);
+    //load_poly (&b, "testdata/circle-d=1k.poly");
+    //b.fix_contours ();
     std::ofstream contfile ("contours.out");
     dump_contours (contfile, b);
     calculate_all_surface_integrals (b);

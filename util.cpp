@@ -201,7 +201,7 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     if (isnan (cz))
         die ("nan in Boundary::inflection_after_edge, vector product\n");
 #endif
-    double ret = asin (-cz);
+    double ret = asin (cz);
 #ifndef NDEBUG
     if (isnan (ret)) {
         die ("nan in Boundary::inflection_after_edge, arcsine\n");
