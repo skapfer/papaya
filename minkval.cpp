@@ -124,6 +124,7 @@ public:
 // tensor is translation invariant.
 //           symmetric.
 //           rank-2.
+//           hom. degree 1.
 //
 // exact formulas for primitive bodies:
 // * circle: R \pi IE
@@ -153,6 +154,8 @@ public:
 // 1/2 sum_i inflection_i * vertex_i (tensor) vertex_i
 //
 // tensor is symmetric.
+//           rank-2.
+//           hom. degree 2.
 //
 // exact formulas for primitive bodies:
 // * circle centered at origin:    \pi R^2 IE       << DISAGREES +20% >>
