@@ -37,6 +37,8 @@ struct EigenSystem {
 void dyadic_prod      (mat_t *out, const vec_t &lhs, const vec_t &rhs);
 // dyadic product of vector with itself.
 void dyadic_prod_self (mat_t *out, const vec_t &lhs);
+// symmetrized dyadic product
+void dyadic_prod_symmetrized (mat_t *out, const vec_t &lhs, const vec_t &rhs);
 
 
 //
@@ -321,4 +323,12 @@ inline void dyadic_prod_self (mat_t *mat, const vec_t &lhs) {
     (*mat)(1,0) = lhs[0] * lhs[1];
     (*mat)(1,1) = lhs[1] * lhs[1];
 }
+
+inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &rhs) {
+    (*mat)(0,0) = lhs[0] * rhs[0];
+    (*mat)(1,1) = lhs[1] * rhs[1];
+    (*mat)(0,1) =
+    (*mat)(1,0) = .5 * (lhs[0]*rhs[1] + lhs[1]*rhs[0]);
+}
+
 #endif /* UTIL_H_INCLUDED */
