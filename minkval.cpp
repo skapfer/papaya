@@ -4,7 +4,36 @@
 
 
 static const double TWOPI = 2*M_PI;
+static const double W0_NORMALIZATION = 1.;
+static const double W1_NORMALIZATION = 1.;
+static const double W2_NORMALIZATION = 1.;
 
+
+// W000 = volume integral
+// converted to a surface integral by GaussGreen theorem.
+//
+// tensor is motion invariant.
+//           rank-0.
+//           hom. degree 2.
+//
+// exact formulas for primitive bodies:
+// * ellipsis:  pi a b
+// * rectangle: a b
+class W000 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
+public:
+    W000 ()
+        : ScalarMinkowskiFunctional ("W000") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        for (; pos != end; ++pos) {
+            vec_t edge_grav = b.edge_vertex0 (pos);
+            edge_grav += b.edge_vertex1 (pos);
+            edge_grav *= .25 * b.edge_length (pos);
+            double sc = dot (b.edge_normal (pos), edge_grav);
+            acc (b.edge_label (pos)) += sc;
+        }
+    }
+};
 
 // W100 = surface integral
 //
@@ -45,12 +74,46 @@ public:
 class W200 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
 public:
     W200 ()
-        : ScalarMinkowskiFunctional ("W200 / 2pi") { }
+        : ScalarMinkowskiFunctional ("W200") { }
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
         for (; pos != end; ++pos) {
             double &v = acc (b.edge_label (pos));
-            v += b.inflection_after_edge (pos) / TWOPI;
+            v += b.inflection_after_edge (pos);
+        }
+    }
+};
+
+// W010 = volume integral weighted with location
+// converted to a surface integral by GaussGreen theorem.
+//
+// tensor is motion covariant.
+//           rank-1.
+//           hom. degree 3.
+//
+// volume center of gravity times total volume.
+//
+// exact formulas for primitive bodies:
+// * circle centered at origin: 0
+// * square centered at origin: 0
+class W010 : public VectorMinkowskiFunctional, public SurfaceIntegral {
+public:
+    W010 ()
+        : VectorMinkowskiFunctional ("W010") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        for (; pos != end; ++pos) {
+            const vec_t &v1 = b.edge_vertex1 (pos);
+            const vec_t &v0 = b.edge_vertex0 (pos);
+            vec_t first_factor = v1;
+            first_factor -= v0;
+            first_factor /= 6.;
+            vec_t second_factor;
+            second_factor[0] = v1[0]*v1[0] + v0[0]*v0[0] + v0[0]*v1[0];
+            second_factor[1] = v1[1]*v1[1] + v0[1]*v0[1] + v0[1]*v1[1];
+            vec_t &acc_ = acc (b.edge_label (pos));
+            acc_[0] +=  first_factor[1] * second_factor[0];
+            acc_[1] += -first_factor[0] * second_factor[1];
         }
     }
 };
@@ -181,6 +244,53 @@ public:
     }
 };
 
+
+// W120 = surface integral weighted with location (tensor) location
+//
+// contribution per edge is:
+// 1/3 sum_i vertex_i (tensor) vertex_i + vertex_i+1 (tensor) vertex_(i+1)
+//           + 1/2 vertex_i (tensor) vertex_i+1 + 1/2 vertex_i+1 (tensor) vertex_i
+//
+// tensor is symmetric.
+//           rank-2.
+//           hom. degree 3.
+//
+// exact formulas for primitive bodies:
+// * circle centered at origin:    \pi R^3 IE     
+// * square in positive quadrant: 
+//   square centered at origin:  
+//   IE being the 2x2 unit matrix.
+class W120 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
+public:
+    W120 ()
+        : MatrixMinkowskiFunctional ("W120") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        const double prefactor = W1_NORMALIZATION / 3.;
+        for (; pos != end; ++pos) {
+            mat_t &acc_ = acc (b.edge_label (pos));
+            mat_t incr;
+            double l_prefactor = prefactor * b.edge_length (pos);
+            // vertex 1
+            vec_t loc1 = b.edge_vertex1 (pos);
+            loc1 -= ref_vertex ();
+            dyadic_prod_self (&incr, loc1);
+            incr *= l_prefactor;
+            acc_ += incr;
+            // vertex 0
+            vec_t loc0 = b.edge_vertex0 (pos);
+            loc0 -= ref_vertex ();
+            dyadic_prod_self (&incr, loc0);
+            incr *= l_prefactor;
+            acc_ += incr;
+            // mixed term
+            dyadic_prod_symmetrized (&incr, loc0, loc1);
+            incr *= l_prefactor;
+            acc_ += incr;
+        }
+    }
+};
+
 // centre of mass of vertices, i.e. average over all vertices
 // (for testing)
 static vec_t centre_of_mass (const Boundary &b) {
@@ -203,10 +313,14 @@ void calculate_all_surface_integrals (const Boundary &b) {
     std::vector <SurfaceIntegral *>::iterator iit;
     Boundary::contour_iterator cit;
 
+    W000 w000;
+    sfints.push_back (&w000);
     W100 w100;
     sfints.push_back (&w100);
     W200 w200;
     sfints.push_back (&w200);
+    W010 w010;
+    sfints.push_back (&w010);
     W110 w110;
     sfints.push_back (&w110);
     W211 w211;
@@ -215,10 +329,13 @@ void calculate_all_surface_integrals (const Boundary &b) {
     sfints.push_back (&w210);
     W220 w220;
     sfints.push_back (&w220);
+    W120 w120;
+    sfints.push_back (&w120);
 
     {
         // set ref. vertex to center-of-mass
         vec_t refvert = centre_of_mass (b);
+        std::cout << "ref. vertex: " << refvert << "\n";
         for (iit = sfints.begin (); iit != sfints.end (); ++iit)
             (*iit)->ref_vertex (refvert);
     }
@@ -228,11 +345,20 @@ void calculate_all_surface_integrals (const Boundary &b) {
             (*iit)->add_contour (b, b.edges_begin (cit), b.edges_end (cit));
     }
 
+    std::cout << "]]]]] SCALARS ]]]]]]]]]]]]]]]]]]]]]]\n";
+    w000.dump (std::cout);
     w100.dump (std::cout);
     w200.dump (std::cout);
+    std::cout << "]]]]] VECTORS ]]]]]]]]]]]]]]]]]]]]]]\n";
+    w010.dump (std::cout);
     w110.dump (std::cout);
     w210.dump (std::cout);
+    std::cout << "]]]]] TENSORS ]]]]]]]]]]]]]]]]]]]]]]\n";
+    std::cout << "Hom. degree 1\n";
     w211.dump (std::cout);
+    std::cout << "Hom. degree 2\n";
     w220.dump (std::cout);
+    std::cout << "Hom. degree 3\n";
+    w120.dump (std::cout);
 }
 
