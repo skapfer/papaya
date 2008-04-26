@@ -291,6 +291,48 @@ public:
     }
 };
 
+// W020 = volume integral weighted with location (tensor) location
+// converted to a surface integral by GaussGreen theorem.
+//
+// contribution per edge is:
+//
+// tensor is symmetric.
+//           rank-2.
+//           hom. degree 4.
+//
+// exact formulas for primitive bodies:
+// * circle centered at origin:       .25 * R^4 * pi * IE
+// * square in positive quadrant: 
+//   square centered at origin:  
+//   IE being the 2x2 unit matrix.
+class W020 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
+public:
+    W020 ()
+        : MatrixMinkowskiFunctional ("W020") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        const double prefactor = W0_NORMALIZATION;
+        for (; pos != end; ++pos) {
+            const vec_t &v1 = b.edge_vertex1 (pos);
+            const vec_t &v0 = b.edge_vertex0 (pos);
+            mat_t &acc_ = acc (b.edge_label (pos));
+            // xx element
+            double prefactor = W0_NORMALIZATION / 12. * (v1[1] - v0[1]);
+            acc_(0,0) += prefactor * (v0[0] + v1[0]) * (v0[0]*v0[0] + v1[0]*v1[0]);
+            // xy element
+            double t = v0[0]*v0[0] * (3.*v0[1] + v1[1]);
+            t += v1[0]*v1[0] * (3.*v1[1] + v0[1]);
+            t *= .5;
+            t += (v0[0] + v1[0]) * (v0[1] + v1[1]);
+            acc_(0,1) += prefactor * t;
+            acc_(1,0) = acc_(0,1);
+            // yy element
+            prefactor = W0_NORMALIZATION / 12. * (v0[0] - v1[0]);
+            acc_(1,1) += prefactor * (v0[1] + v1[1]) * (v0[1]*v0[1] + v1[1]*v1[1]);
+        }
+    }
+};
+
 // centre of mass of vertices, i.e. average over all vertices
 // (for testing)
 static vec_t centre_of_mass (const Boundary &b) {
@@ -331,6 +373,8 @@ void calculate_all_surface_integrals (const Boundary &b) {
     sfints.push_back (&w220);
     W120 w120;
     sfints.push_back (&w120);
+    W020 w020;
+    sfints.push_back (&w020);
 
     {
         // set ref. vertex to center-of-mass
@@ -360,5 +404,7 @@ void calculate_all_surface_integrals (const Boundary &b) {
     w220.dump (std::cout);
     std::cout << "Hom. degree 3\n";
     w120.dump (std::cout);
+    std::cout << "Hom. degree 4\n";
+    w020.dump (std::cout);
 }
 
