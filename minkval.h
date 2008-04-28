@@ -21,6 +21,8 @@ public:
 
     void dump (std::ostream &) const;
 
+    const value_t &value (label_t) const;
+
 protected:
     value_t &acc (label_t);
     void reszacc (label_t);
@@ -85,6 +87,11 @@ inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (int label) {
         reszacc (label);
         return this->acc (label);
     }
+}
+
+template <typename VALUE_TYPE>
+inline const VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::value (int label) const {
+    return const_cast <GenericMinkowskiFunctional<VALUE_TYPE> *> (this)->acc (label);
 }
 
 template <typename VALUE_TYPE>

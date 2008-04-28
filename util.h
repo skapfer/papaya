@@ -154,6 +154,7 @@ public:
     vec_t edge_vertex1 (edge_iterator) const;
     // edge label
     int edge_label (edge_iterator) const;
+    void edge_label (edge_iterator, int);
 
     // fix common problems e.g. remove norm-zero edges
     void fix_contours (bool silent = false);
@@ -187,6 +188,8 @@ void dump_contours (std::ostream &, const Boundary &);
 void load_test_pixmap (Pixmap *);
 void load_poly (class Boundary *, const std::string &polyfilename);
 
+// labelling
+void label_by_contour_index (Boundary *);
 
 //
 // inline implementation
@@ -304,6 +307,10 @@ inline double Boundary::inflection_before_edge (Boundary::edge_iterator it) cons
 
 inline int Boundary::edge_label (Boundary::edge_iterator it) const {
     return it->label;
+}
+
+inline void Boundary::edge_label (Boundary::edge_iterator it, int newlabel) {
+    edge(it).label = newlabel;
 }
 
 inline void eigensystem (EigenSystem *sys, const mat_t &mat) {

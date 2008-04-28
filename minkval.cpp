@@ -350,7 +350,7 @@ static vec_t centre_of_mass (const Boundary &b) {
 }
 
 // driver function for testing the functionals
-void calculate_all_surface_integrals (const Boundary &b) {
+inline void calculate_all_surface_integrals (const Boundary &b) {
     std::vector <SurfaceIntegral *> sfints;
     std::vector <SurfaceIntegral *>::iterator iit;
     Boundary::contour_iterator cit;
