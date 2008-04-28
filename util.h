@@ -132,6 +132,9 @@ public:
 
         friend bool operator == (const edge_iterator &, const edge_iterator &);
         friend bool operator != (const edge_iterator &, const edge_iterator &);
+
+        // printable info about this edge_iterator
+        std::string to_string () const;
     private:
         friend class Boundary;
         edge_iterator (const Boundary *, int, int);

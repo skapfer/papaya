@@ -180,6 +180,18 @@ bool operator== (const Boundary::edge_iterator &lhs, const Boundary::edge_iterat
     return !(lhs != rhs);
 }
 
+std::string Boundary::edge_iterator::to_string () const {
+    char buf[200] = { 0 };
+    int cont = INVALID_CONTOUR;
+    if (my_position != INVALID_EDGE) {
+        cont = my_boundary->edge(my_position).contour;
+    }
+    snprintf (buf, 199, "Boundary::edge_iterator (b = %p, contour = %i, edge = %i, period = %i)",
+        (void *)my_boundary,
+        cont, my_position, my_period);
+    return buf;
+}
+
 double Boundary::edge_length (Boundary::edge_iterator it) const {
     vec_t dist = vertex(it->vert0);
     dist -= vertex(it->vert1);
@@ -198,8 +210,16 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     // z component of cross prod.
     double cz = tang0[0] * tang1[1] - tang1[0] * tang0[1];
 #ifndef NDEBUG
-    if (isnan (cz))
-        die ("nan in Boundary::inflection_after_edge, vector product\n");
+    if (isnan (cz)) {
+        std::string msg;
+        if (! (tang0.norm () > 1e-6))
+            msg += "norm0 is close to zero or NaN\n";
+        if (! (tang1.norm () < 1e-6))
+            msg += "norm1 is close to zero or NaN\n";
+        msg += "nan in Boundary::inflection_after_edge (%s), vector product\n";
+        std::string itstr = it.to_string ();
+        die (msg.c_str (), itstr.c_str ());
+    }
 #endif
     double ret = asin (cz);
 #ifndef NDEBUG
@@ -331,8 +351,13 @@ static vec_t eigenvalues (double a1, double a2, double b1, double b2) {
     double b = a1 + b2;
     b *= -1.;
     double q = b*b - 4.*c;
-    if (q < 0.)
-        die ("complex eigenvalues in eigenvalues");
+    if (q < 0.) {
+        // ignore small complex contributions.
+        if (q > -1e-12)
+            q = 0.;
+        else
+            die ("complex eigenvalues in eigenvalues (q = %g)", q);
+    }
     q = sqrt (q);
     if (b < 0.) q *= -1.;
     q += b;
