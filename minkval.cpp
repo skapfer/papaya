@@ -15,6 +15,7 @@ static const double W2_NORMALIZATION = 1.;
 // tensor is motion invariant.
 //           rank-0.
 //           hom. degree 2.
+//           linear dependancy with W111.
 //
 // exact formulas for primitive bodies:
 // * ellipsis:  pi a b
@@ -30,6 +31,7 @@ public:
             edge_grav += b.edge_vertex1 (pos);
             edge_grav *= .25 * b.edge_length (pos);
             double sc = dot (b.edge_normal (pos), edge_grav);
+            sc *= W0_NORMALIZATION;
             acc (b.edge_label (pos)) += sc;
         }
     }
@@ -40,10 +42,12 @@ public:
 // tensor is motion invariant.
 //           rank-0.
 //           hom. degree 1.
+//           together with W211, determines W102.
 //
 // exact formulas for primitive bodies:
 // * circle: 2 pi R
 // * square: 4 a 
+//   rectangle: Lx Ly
 class W100 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
 public:
     W100 ()
@@ -52,7 +56,7 @@ public:
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
         for (; pos != end; ++pos) {
             double &v = acc (b.edge_label (pos));
-            v += b.edge_length (pos);
+            v += b.edge_length (pos) * W1_NORMALIZATION;
         }
     }
 };
@@ -67,6 +71,7 @@ public:
 // tensor is motion invariant.
 //           rank-0.
 //           hom. degree 0.
+//           linear dependancy with W202.
 //
 // exact formulas for primitive bodies:
 // * circle: 2 pi
@@ -79,7 +84,7 @@ public:
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
         for (; pos != end; ++pos) {
             double &v = acc (b.edge_label (pos));
-            v += b.inflection_after_edge (pos);
+            v += b.inflection_after_edge (pos) * W2_NORMALIZATION;
         }
     }
 };
@@ -107,7 +112,7 @@ public:
             const vec_t &v0 = b.edge_vertex0 (pos);
             vec_t first_factor = v1;
             first_factor -= v0;
-            first_factor /= 6.;
+            first_factor *= W0_NORMALIZATION / 6.;
             vec_t second_factor;
             second_factor[0] = v1[0]*v1[0] + v0[0]*v0[0] + v0[0]*v1[0];
             second_factor[1] = v1[1]*v1[1] + v0[1]*v0[1] + v0[1]*v1[1];
@@ -135,6 +140,7 @@ public:
         : VectorMinkowskiFunctional ("W110") { }
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        const double prefactor = W1_NORMALIZATION;
         for (; pos != end; ++pos) {
             vec_t &acc_ = acc (b.edge_label (pos));
             // center of gravity for edge
@@ -143,7 +149,7 @@ public:
             avgvert /= 2;
             avgvert -= ref_vertex ();
             // weighted by edge length
-            acc_ += avgvert * b.edge_length (pos);
+            acc_ += (prefactor * b.edge_length (pos)) * avgvert;
         }
     }
 };
@@ -169,11 +175,12 @@ public:
         : VectorMinkowskiFunctional ("W210") { }
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        const double prefactor = W2_NORMALIZATION;
         for (; pos != end; ++pos) {
             vec_t &acc_ = acc (b.edge_label (pos));
             vec_t vert = b.edge_vertex1 (pos);
             vert -= ref_vertex ();
-            acc_ += vert * b.inflection_after_edge (pos);
+            acc_ += (prefactor * b.inflection_after_edge (pos)) * vert;
         }
     }
 };
@@ -188,6 +195,7 @@ public:
 //           symmetric.
 //           rank-2.
 //           hom. degree 1.
+//           together with W100, determines W102.
 //
 // exact formulas for primitive bodies:
 // * circle: R \pi IE
@@ -204,7 +212,7 @@ public:
             vec_t edgevec = b.edge_vertex1 (pos);
             edgevec -= b.edge_vertex0 (pos);
             dyadic_prod_self (&incr, edgevec);
-            incr /= edgevec.norm ();
+            incr *= W2_NORMALIZATION / edgevec.norm ();
             acc (b.edge_label (pos)) += incr;
         }
     }
@@ -224,6 +232,7 @@ public:
 // * circle centered at origin:    \pi R^2 IE       << DISAGREES +20% >>
 // * square in positive quadrant:  \pi a^2 IE  
 //   square centered at origin:    \pi/2 a^2 IE                   -1%
+//   rectangle centered at origin  \pi/2 diag (Lx^2, Ly^2)
 //   IE being the 2x2 unit matrix.
 class W220 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
 public:
@@ -231,12 +240,13 @@ public:
         : MatrixMinkowskiFunctional ("W220") { }
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        const double prefactor = .5 * W2_NORMALIZATION;
         while (pos != end) {
             mat_t incr;
             vec_t loc = b.edge_vertex1 (pos);
             loc -= ref_vertex ();
             dyadic_prod_self (&incr, loc);
-            incr *= .5 * b.inflection_after_edge (pos);
+            incr *= prefactor * b.inflection_after_edge (pos);
             acc (b.edge_label (pos)) += incr;
             ++pos;
             acc (b.edge_label (pos)) += incr;
@@ -311,7 +321,6 @@ public:
         : MatrixMinkowskiFunctional ("W020") { }
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
-        const double prefactor = W0_NORMALIZATION;
         for (; pos != end; ++pos) {
             const vec_t &v1 = b.edge_vertex1 (pos);
             const vec_t &v0 = b.edge_vertex0 (pos);
