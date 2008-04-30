@@ -113,11 +113,17 @@ public:
     typedef std::vector <int>::const_iterator contour_iterator;
     contour_iterator contours_begin () const;
     contour_iterator contours_end () const;
+    int num_contours () const;
+
     // iterator for traversing a contour
-    // note that no "end" provided since contours
-    // are assumed to be cycles
-    // note that in case of an open (incomplete) contour, edges_begin ()
-    // won't necessarily point at the first edge.
+    // edges_begin may or may not point to the first vertex of
+    // the contour.
+    // in any case, it points to some vertex.
+    // edges_end is reachable from edges_begin if and only if
+    // the contour is closed.
+    // contours are traversed in natural order, i.e.
+    // counterclockwise for exterior boundaries and 
+    // clockwise for cavities.
     class edge_iterator;
     edge_iterator    edges_begin (contour_iterator) const;
     edge_iterator    edges_end   (contour_iterator) const;
@@ -134,7 +140,9 @@ public:
         friend bool operator != (const edge_iterator &, const edge_iterator &);
 
         // printable info about this edge_iterator
+        // (for debugging)
         std::string to_string () const;
+
     private:
         friend class Boundary;
         edge_iterator (const Boundary *, int, int);
@@ -152,11 +160,11 @@ public:
     // return outward-pointing normal vector
     vec_t edge_normal (edge_iterator) const;
     vec_t edge_tangent (edge_iterator) const;
-    // return vertices
+    // return vertex coordinates
     vec_t edge_vertex0 (edge_iterator) const;
     vec_t edge_vertex1 (edge_iterator) const;
-    // edge label
-    int edge_label (edge_iterator) const;
+    // get and set edge label
+    int  edge_label (edge_iterator) const;
     void edge_label (edge_iterator, int);
 
     // fix common problems e.g. remove norm-zero edges
@@ -267,6 +275,10 @@ inline Boundary::contour_iterator Boundary::contours_begin () const {
 
 inline Boundary::contour_iterator Boundary::contours_end () const {
     return my_contours.end ();
+}
+
+inline int Boundary::num_contours () const {
+    return (int)my_contours.size ();
 }
 
 inline Boundary::edge_iterator Boundary::edges_begin (Boundary::contour_iterator it) const {
