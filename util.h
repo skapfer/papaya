@@ -32,6 +32,11 @@ struct EigenSystem {
 #endif
 };
 
+// rotate vector 90 degrees
+vec_t rot90_ccw (const vec_t &);
+vec_t rot90_cw (const vec_t &);
+
+
 // return dyadic product  lhs (tensor) rhs in out,
 // as a 2x2 matrix.
 void dyadic_prod      (mat_t *out, const vec_t &lhs, const vec_t &rhs);
@@ -110,10 +115,12 @@ public:
     int num_edges () const;
 
     // iterate over contours
+    // *iterator yields the contour identifier.
     typedef std::vector <int>::const_iterator contour_iterator;
     contour_iterator contours_begin () const;
     contour_iterator contours_end () const;
     int num_contours () const;
+    int max_contour_id () const;
 
     // iterator for traversing a contour
     // edges_begin may or may not point to the first vertex of
@@ -167,7 +174,8 @@ public:
     int  edge_label (edge_iterator) const;
     void edge_label (edge_iterator, int);
 
-    // fix common problems e.g. remove norm-zero edges
+    // fix common problems in imported data
+    // * remove norm-zero edges
     void fix_contours (bool silent = false);
 
 private:
@@ -281,6 +289,10 @@ inline int Boundary::num_contours () const {
     return (int)my_contours.size ();
 }
 
+inline int Boundary::max_contour_id () const {
+    return num_edges ();
+}
+
 inline Boundary::edge_iterator Boundary::edges_begin (Boundary::contour_iterator it) const {
     return edges_begin (*it);
 }
@@ -330,6 +342,14 @@ inline void Boundary::edge_label (Boundary::edge_iterator it, int newlabel) {
 
 inline void eigensystem (EigenSystem *sys, const mat_t &mat) {
     eigensystem (sys, mat(0,0), mat(0,1), mat(1,0), mat(1,1));
+}
+
+inline vec_t rot90_ccw (const vec_t &v) {
+    return vec_t (-v[1], v[0]);
+}
+
+inline vec_t rot90_cw (const vec_t &v) {
+    return vec_t (v[1], -v[0]);
 }
 
 inline void dyadic_prod (mat_t *mat, const vec_t &lhs, const vec_t &rhs) {
