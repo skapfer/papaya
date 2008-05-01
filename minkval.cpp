@@ -20,7 +20,7 @@ static const double W2_NORMALIZATION = 1.;
 // exact formulas for primitive bodies:
 // * ellipsis:  pi a b
 // * rectangle: a b
-class W000 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
+class W000 : public ScalarMinkowskiFunctional {
 public:
     W000 ()
         : ScalarMinkowskiFunctional ("W000") { }
@@ -48,7 +48,7 @@ public:
 // * circle: 2 pi R
 // * square: 4 a 
 //   rectangle: Lx Ly
-class W100 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
+class W100 : public ScalarMinkowskiFunctional {
 public:
     W100 ()
         : ScalarMinkowskiFunctional ("W100") { }
@@ -76,7 +76,7 @@ public:
 // exact formulas for primitive bodies:
 // * circle: 2 pi
 // * square: 2 pi
-class W200 : public ScalarMinkowskiFunctional, public SurfaceIntegral {
+class W200 : public ScalarMinkowskiFunctional {
 public:
     W200 ()
         : ScalarMinkowskiFunctional ("W200") { }
@@ -101,7 +101,7 @@ public:
 // exact formulas for primitive bodies:
 // * circle centered at origin: 0
 // * square centered at origin: 0
-class W010 : public VectorMinkowskiFunctional, public SurfaceIntegral {
+class W010 : public VectorMinkowskiFunctional {
 public:
     W010 ()
         : VectorMinkowskiFunctional ("W010") { }
@@ -134,7 +134,7 @@ public:
 // exact formulas for primitive bodies:
 // * circle centered at origin: 0
 // * square centered at origin: 0
-class W110 : public VectorMinkowskiFunctional, public SurfaceIntegral {
+class W110 : public VectorMinkowskiFunctional {
 public:
     W110 ()
         : VectorMinkowskiFunctional ("W110") { }
@@ -169,7 +169,7 @@ public:
 //           hom. degree 1.
 //
 // surface center of gravity times total curvature
-class W210 : public VectorMinkowskiFunctional, public SurfaceIntegral {
+class W210 : public VectorMinkowskiFunctional {
 public:
     W210 ()
         : VectorMinkowskiFunctional ("W210") { }
@@ -201,7 +201,7 @@ public:
 // * circle: R \pi IE
 // * square: 2 a IE
 //   IE being the 2x2 unit matrix.
-class W211 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
+class W211 : public MatrixMinkowskiFunctional {
 public:
     W211 ()
         : MatrixMinkowskiFunctional ("W211") { }
@@ -234,7 +234,7 @@ public:
 //   square centered at origin:    \pi/2 a^2 IE                   -1%
 //   rectangle centered at origin  \pi/2 diag (Lx^2, Ly^2)
 //   IE being the 2x2 unit matrix.
-class W220 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
+class W220 : public MatrixMinkowskiFunctional {
 public:
     W220 ()
         : MatrixMinkowskiFunctional ("W220") { }
@@ -270,7 +270,7 @@ public:
 // * square in positive quadrant: 
 //   square centered at origin:  
 //   IE being the 2x2 unit matrix.
-class W120 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
+class W120 : public MatrixMinkowskiFunctional {
 public:
     W120 ()
         : MatrixMinkowskiFunctional ("W120") { }
@@ -315,7 +315,7 @@ public:
 // * square in positive quadrant: 
 //   square centered at origin:  
 //   IE being the 2x2 unit matrix.
-class W020 : public MatrixMinkowskiFunctional, public SurfaceIntegral {
+class W020 : public MatrixMinkowskiFunctional {
 public:
     W020 ()
         : MatrixMinkowskiFunctional ("W020") { }
@@ -417,3 +417,13 @@ void calculate_all_surface_integrals (const Boundary &b) {
     w020.dump (std::cout);
 }
 
+ScalarMinkowskiFunctional *create_w000 () { return new W000; }
+ScalarMinkowskiFunctional *create_w100 () { return new W100; }
+ScalarMinkowskiFunctional *create_w200 () { return new W200; }
+VectorMinkowskiFunctional *create_w010 () { return new W010; }
+VectorMinkowskiFunctional *create_w110 () { return new W110; }
+VectorMinkowskiFunctional *create_w210 () { return new W210; }
+MatrixMinkowskiFunctional *create_w020 () { return new W020; }
+MatrixMinkowskiFunctional *create_w120 () { return new W120; }
+MatrixMinkowskiFunctional *create_w220 () { return new W220; }
+MatrixMinkowskiFunctional *create_w211 () { return new W211; }

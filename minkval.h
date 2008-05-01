@@ -7,8 +7,26 @@
 #include <iomanip>
 
 
+class SurfaceIntegral {
+public:
+    typedef Boundary::edge_iterator edge_iterator;
+
+    SurfaceIntegral ();
+
+    virtual void add_contour (const Boundary &, edge_iterator begin, edge_iterator end) = 0;
+
+    // reference point for calculation of Minkowski tensors
+    // with r != 0
+    void ref_vertex (const vec_t &);
+
+protected:
+    const vec_t &ref_vertex () const;
+private:
+    vec_t my_ref_vertex;
+};
+
 template <typename VALUE_TYPE>
-class GenericMinkowskiFunctional {
+class GenericMinkowskiFunctional : public SurfaceIntegral {
 public:
     typedef VALUE_TYPE value_t;
     typedef int label_t;
@@ -44,32 +62,20 @@ typedef GenericMinkowskiFunctional <double> ScalarMinkowskiFunctional;
 typedef GenericMinkowskiFunctional <vec_t>  VectorMinkowskiFunctional;
 typedef GenericMinkowskiFunctional <mat_t>  MatrixMinkowskiFunctional;
 
-class SurfaceIntegral {
-public:
-    typedef Boundary::edge_iterator edge_iterator;
-
-    SurfaceIntegral ();
-
-    virtual void add_contour (const Boundary &, edge_iterator begin, edge_iterator end) = 0;
-
-    // reference point for calculation of Minkowski tensors
-    // with r != 0
-    void ref_vertex (const vec_t &);
-
-protected:
-    const vec_t &ref_vertex () const;
-private:
-    vec_t my_ref_vertex;
-};
-
-class VolumeIntegral {
-public:
-    typedef Boundary::edge_iterator edge_iterator;
-    // FIXME
-};
-
 
 void calculate_all_surface_integrals (const Boundary &b);
+
+ScalarMinkowskiFunctional *create_w000 ();
+ScalarMinkowskiFunctional *create_w100 ();
+ScalarMinkowskiFunctional *create_w200 ();
+VectorMinkowskiFunctional *create_w010 ();
+VectorMinkowskiFunctional *create_w110 ();
+VectorMinkowskiFunctional *create_w210 ();
+MatrixMinkowskiFunctional *create_w020 ();
+MatrixMinkowskiFunctional *create_w120 ();
+MatrixMinkowskiFunctional *create_w220 ();
+MatrixMinkowskiFunctional *create_w211 ();
+
 
 //
 // inline implementation
