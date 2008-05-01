@@ -31,7 +31,9 @@ namespace {
             acc += b->inflection_after_edge (eit);
         }
         // total inflection should be +/-2pi.
-        assert (fabs (fabs (acc) - 2*M_PI) < 1e-10);
+        if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
+            die ("total_inflection_for_contour:\n%.20e\n%.20e", acc, 2*M_PI);
+        }
         return acc;
     }
 
@@ -286,3 +288,38 @@ void label_by_component (Boundary *b) {
     }
 }
 
+#ifndef NDEBUG
+
+#include <fstream>
+
+static void dump_data (std::ostream &os, const Boundary &a,
+                       Boundary::contour_iterator cit) {
+    Boundary::edge_iterator eit, eit_end;
+    eit = a.edges_begin (cit);
+    eit_end = a.edges_end (cit);
+    ++eit_end;
+    for (; eit != eit_end; ++eit) {
+        dump_vertex (os, eit->vert0, a);
+    }
+}
+
+void dump_components (const std::string &filename, Boundary &b) {
+    label_by_component (&b);
+    std::ofstream ofdat ((filename + ".out").c_str (), std::ios::out);
+    std::ofstream ofscr ((filename + ".gp").c_str (),  std::ios::out);
+    ofscr << "plot \\\n";
+    Boundary::contour_iterator cit = b.contours_begin ();
+    int index = 0;
+    dump_data (ofdat, b, cit);
+    ofdat << "\n\n";  // index sep. (for gnuplot)
+    ofscr << "\t\"" << filename << ".out\" index "
+          << index++ << " w lp lt " << b.edges_begin (cit)->label << "\\\n";
+    for (++cit; cit != b.contours_end (); ++cit) {
+        dump_data (ofdat, b, cit);
+        ofdat << "\n\n";  // index sep. (for gnuplot)
+        ofscr << "\t,\\\n";
+        ofscr << "\t\"" << filename << ".out\" index "
+              << index++ << " w lp lt " << b.edges_begin (cit)->label << "\\\n";
+    }
+}
+#endif // NDEBUG

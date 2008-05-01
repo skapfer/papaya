@@ -286,7 +286,7 @@ void Boundary::fix_contours (bool silent) {
     }
 }
 
-static inline void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
+void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
     const Boundary::vec_t &v = b.vertex (vertex);
     os << std::setprecision (18) << v.x () << " "
        << std::setprecision (18) << v.y () << "\n";

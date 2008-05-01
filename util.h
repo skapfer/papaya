@@ -211,6 +211,8 @@ void load_poly (class Boundary *, const std::string &polyfilename);
 // labelling
 void label_by_contour_index (Boundary *);
 void label_by_component (Boundary *b);
+void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
+void dump_components (const std::string &, Boundary &);
 
 //
 // inline implementation
