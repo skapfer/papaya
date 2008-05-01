@@ -209,6 +209,7 @@ void load_poly (class Boundary *, const std::string &polyfilename);
 
 // labelling
 void label_by_contour_index (Boundary *);
+void label_by_component (Boundary *b);
 
 //
 // inline implementation
