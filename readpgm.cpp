@@ -15,7 +15,8 @@ static void read_header (Pixmap *p, istream &is) {
     if (magic != "P2")
         format_error ("magic incorrect");
     is >> ws;
-    getline (is, magic); // ignore filename
+    if (is.peek () == '#')
+        getline (is, magic); // ignore filename
     int w, h, dummy;
     is >> w >> h >> dummy >> ws;
     // allocate pixmap
