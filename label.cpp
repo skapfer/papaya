@@ -307,19 +307,22 @@ void dump_components (const std::string &filename, Boundary &b) {
     label_by_component (&b);
     std::ofstream ofdat ((filename + ".out").c_str (), std::ios::out);
     std::ofstream ofscr ((filename + ".gp").c_str (),  std::ios::out);
+    ofscr << "unset key\n";
     ofscr << "plot \\\n";
     Boundary::contour_iterator cit = b.contours_begin ();
     int index = 0;
     dump_data (ofdat, b, cit);
     ofdat << "\n\n";  // index sep. (for gnuplot)
+    int label = b.edges_begin (cit)->label;
     ofscr << "\t\"" << filename << ".out\" index "
-          << index++ << " w lp lt " << b.edges_begin (cit)->label << "\\\n";
+          << index++ << " w lp lt " << label << " pt " << label << "\\\n";
     for (++cit; cit != b.contours_end (); ++cit) {
         dump_data (ofdat, b, cit);
         ofdat << "\n\n";  // index sep. (for gnuplot)
+        int label = b.edges_begin (cit)->label;
         ofscr << "\t,\\\n";
         ofscr << "\t\"" << filename << ".out\" index "
-              << index++ << " w lp lt " << b.edges_begin (cit)->label << "\\\n";
+              << index++ << " w lp lt " << label << " pt " << label << "\\\n";
     }
 }
 #endif // NDEBUG
