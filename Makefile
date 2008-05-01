@@ -5,7 +5,7 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o
 BINARIES = aspectstudy marching_test
 
-all: aspectstudy
+all: aspectstudy testdriver
 
 clean:
 	rm -f $(BINARIES) *.o
@@ -15,8 +15,8 @@ ts.headers: $(HEADERS)
 	$(MAKE) clean
 	touch $@
 
-marching_test: ts.headers $(SUPPORT)
-	$(CXX) -o $@ $(SUPPORT)
+testdriver: ts.headers $(SUPPORT) driver.o
+	$(CXX) -o $@ $(SUPPORT) driver.o
 
 aspectstudy: ts.headers $(SUPPORT) aspectstudy.o
 	$(CXX) -o $@ $(SUPPORT) aspectstudy.o
