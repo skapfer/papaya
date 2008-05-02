@@ -315,14 +315,14 @@ void dump_components (const std::string &filename, Boundary &b) {
     ofdat << "\n\n";  // index sep. (for gnuplot)
     int label = b.edges_begin (cit)->label;
     ofscr << "\t\"" << filename << ".out\" index "
-          << index++ << " w lp lt " << label << " pt " << label << "\\\n";
+          << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
     for (++cit; cit != b.contours_end (); ++cit) {
         dump_data (ofdat, b, cit);
         ofdat << "\n\n";  // index sep. (for gnuplot)
         int label = b.edges_begin (cit)->label;
         ofscr << "\t,\\\n";
         ofscr << "\t\"" << filename << ".out\" index "
-              << index++ << " w lp lt " << label << " pt " << label << "\\\n";
+              << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
     }
 }
 #endif // NDEBUG
