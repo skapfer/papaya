@@ -3,6 +3,7 @@
 
 #include "intersect.h"
 
+
 namespace {
     enum {
         MODE_RAY,
@@ -58,9 +59,8 @@ namespace {
         // update vertex-of-intersection since we have calculated
         // all the necessary things anyway
         vec_t &ivtx = info->ivtx;
-        ivtx = b ()->edge_vertex0 (edge_iter ());
-        ivtx = lambda * (b ()->edge_vertex1 (edge_iter ()) 
-                         - b ()->edge_vertex0 (edge_iter ()));
+        ivtx  = (1-lambda) * b ()->edge_vertex0 (edge_iter ());
+        ivtx += lambda     * b ()->edge_vertex1 (edge_iter ());
         info->inc = mu;
         info->iedge = eit;
         return true;
@@ -84,19 +84,21 @@ void intersect_ray_boundary_impl (intersect_buffer_t *dst,
         intersect_info_t info;
         if (does_edge_intersect (&info, b, eit, ray_0, ray_dir)) {
             switch (mode) {
+            /*
             case MODE_RAY_NEAREST:
                 if (info.inc >= 0.) {
                     if (dst->size () && (*dst)[0].inc > info.inc)
-                        dst->pop_back ();
+                        dst->pop_back (); // FIXME broken
                     dst->push_back (info);
-                    break;
                 }
+                break;
+            */
             case MODE_RAY:
                 if (info.inc >= 0.) {
             case MODE_LINE:
                     dst->push_back (info);
-                    break;
                 }
+                break;
             default:
                 assert (0);
             }
@@ -117,4 +119,12 @@ bool intersect_ray_boundary (intersect_info_t *dst,
     } else {
         return false;
     }
+}
+
+int intersect_ray_boundary  (intersect_buffer_t *dst,
+                             const vec_t &ray_0, const vec_t &ray_dir,
+                             Boundary *b) {
+    assert (dst);
+    intersect_ray_boundary_impl (dst, ray_0, ray_dir, b, MODE_RAY);
+    return (int)dst->size ();
 }
