@@ -61,7 +61,6 @@ void label_by_component (Boundary *b) {
             assert (ccwflag == 0 || ccwflag == 1);
             if (!ccwflag) {
                 // is clockwise
-                fprintf (stderr, "contour %i is clockwise.\n", *cit);
                 vec_t ray_begin = b->edge_vertex0 (b->edges_begin (cit));
                 vec_t ray_direction = b->edge_normal (b->edges_begin (cit));
                 intersect_buffer_t info;
@@ -101,11 +100,9 @@ void label_by_component (Boundary *b) {
                             std::min_element (it, it_up,
                                     intersect_info_t::by_normal_coordinate);
                         if (found_) {
-                            fprintf (stderr, "previous intersect exists\n");
                             if (found_->inc > it_candidate->inc)
                                 found_ = &*it_candidate;
                         } else {
-                            fprintf (stderr, "found intersect\n");
                             found_ = &*it_candidate;
                         }
                     }
