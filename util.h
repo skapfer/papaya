@@ -153,8 +153,8 @@ public:
     private:
         friend class Boundary;
         edge_iterator (const Boundary *, int, int);
-        const Boundary *my_boundary;
         int my_position;
+        const Boundary *my_boundary;
         int my_period;
     };
 

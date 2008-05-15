@@ -1,5 +1,5 @@
 
-CXXFLAGS += -Ieinclude -g -ggdb
+CXXFLAGS += -Ieinclude -g -ggdb -Wall
 HEADERS = *.h
 SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \

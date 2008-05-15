@@ -12,6 +12,7 @@ public:
     typedef Boundary::edge_iterator edge_iterator;
 
     SurfaceIntegral ();
+    virtual ~SurfaceIntegral () { }
 
     virtual void add_contour (const Boundary &, edge_iterator begin, edge_iterator end) = 0;
 
