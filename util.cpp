@@ -292,10 +292,38 @@ void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
        << std::setprecision (18) << v.y () << "\n";
 }
 
+double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterator cit) {
+    Boundary::edge_iterator eit = b->edges_begin (cit),
+        eit_end = b->edges_end (cit);
+    double acc = 0.;
+    for (; eit != eit_end; ++eit) {
+        acc += b->inflection_after_edge (eit);
+    }
+    // total inflection should be +/-2pi.
+    if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
+        die ("total_inflection_for_contour:\n%.20e\n%.20e", acc, 2*M_PI);
+    }
+    return acc;
+}
+
 void dump_contours (std::ostream &os, const Boundary &a) {
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit, eit_end;
     for (cit = a.contours_begin (); cit != a.contours_end (); ++cit) {
+        if (total_inflection_for_contour (&a, cit) < 0)
+            continue;
+        eit = a.edges_begin (cit);
+        eit_end = a.edges_end (cit);
+        ++eit_end;
+        for (; eit != eit_end; ++eit) {
+            dump_vertex (os, eit->vert0, a);
+        }
+        os << "\n"; // contour sep. (for gnuplot)
+    }
+    os << "\n"; // index sep. (for gnuplot)
+    for (cit = a.contours_begin (); cit != a.contours_end (); ++cit) {
+        if (total_inflection_for_contour (&a, cit) > 0)
+            continue;
         eit = a.edges_begin (cit);
         eit_end = a.edges_end (cit);
         ++eit_end;
