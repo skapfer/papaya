@@ -28,14 +28,14 @@ namespace {
         assert (!isnan (cc1));
         assert (!isnan (ccR));
         double lambda;
-        if (cc0 <= ccR and ccR <= cc1) {
+        if (cc0 <= ccR and ccR < cc1) {
             double l1 = ccR - cc0;
             double l2 = cc1 - cc0;
             if (l2 <= l1)        // keep underflows in check
                 lambda = 1.;     // (exact value is irrelevant)
             else
                 lambda = l1/l2;
-        } else if (cc1 <= ccR and ccR <= cc0) {
+        } else if (cc1 < ccR and ccR <= cc0) {
             double l1 = cc0 - ccR;
             double l2 = cc0 - cc1;
             if (l2 <= l1)
@@ -83,12 +83,14 @@ void intersect_ray_boundary_impl (intersect_buffer_t *dst,
     for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
         intersect_info_t info;
         if (does_edge_intersect (&info, b, eit, ray_0, ray_dir)) {
+            fprintf (stderr, "BLA: hit #%u in contour %i edge %i\n", (unsigned)dst->size (),
+                     *cit, -1);
             switch (mode) {
-            /*
+            /* FIXME broken
             case MODE_RAY_NEAREST:
                 if (info.inc >= 0.) {
                     if (dst->size () && (*dst)[0].inc > info.inc)
-                        dst->pop_back (); // FIXME broken
+                        dst->pop_back ();
                     dst->push_back (info);
                 }
                 break;
