@@ -83,8 +83,6 @@ void intersect_ray_boundary_impl (intersect_buffer_t *dst,
     for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
         intersect_info_t info;
         if (does_edge_intersect (&info, b, eit, ray_0, ray_dir)) {
-            fprintf (stderr, "BLA: hit #%u in contour %i edge %i\n", (unsigned)dst->size (),
-                     *cit, -1);
             switch (mode) {
             /* FIXME broken
             case MODE_RAY_NEAREST:
