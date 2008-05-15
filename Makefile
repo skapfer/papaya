@@ -2,7 +2,9 @@
 CXXFLAGS += -Ieinclude -g -ggdb
 HEADERS = *.h
 SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
-    label.o
+    label.o \
+    intersect.o \
+
 BINARIES = aspectstudy marching_test
 
 all: aspectstudy testdriver
