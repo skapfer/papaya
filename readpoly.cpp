@@ -9,7 +9,7 @@
 #include <stdio.h>
 typedef std::string string;
 
-static void format_error (const string &message, ...) {
+static no_return void format_error (const string &message, ...) {
     char buffer[200];
     va_list va;
     va_start (va, message);

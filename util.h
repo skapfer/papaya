@@ -12,7 +12,15 @@
 #include <vector>
 #include <ostream>
 
-void die (const char *fmt, ...);
+#ifdef __GNUC__
+#define no_return __attribute__ ((noreturn))
+#else
+#define no_return
+#endif
+
+void no_return never_reached ();
+
+void no_return die (const char *fmt, ...);
 
 typedef Eigen::Vector2d vec_t;
 typedef Eigen::Matrix2d mat_t;
@@ -217,6 +225,10 @@ void dump_components (const std::string &, Boundary &);
 //
 // inline implementation
 //
+inline void never_reached () {
+    die ("This point should not be reachable");
+}
+
 inline int Pixmap::size1 () const {
     return my_xdim;
 }

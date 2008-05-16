@@ -104,6 +104,8 @@ Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
     // delete this edge instead.
     // if the contour consists of just one vertex (degenerate
     // contour, fail loudly.
+    if (is_self_referential (eit))
+        die ("Deleting vertex of degenerate contour");
     if (eit->next == eit->contour) {
         // delete this edge object and its metadata.
         int saved_vert0 = eit->vert0;
@@ -111,6 +113,7 @@ Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
         take_edge_out (eit->prev);
         edge_t *peit = &edge(eit);
         peit->vert0 = saved_vert0;
+        return eit;
     } else {
         // delete next edge object, but this object's metadata.
         edge_t saved = edge(eit->next);
