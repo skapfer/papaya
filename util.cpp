@@ -7,10 +7,13 @@
 #include <stdarg.h>
 #include <iomanip>
 
+static const double VERTEX_MERGE_TOLERANCE = 1e-6;
+
 void die (const char *fmt, ...) {
     va_list al;
     va_start (al, fmt);
     vfprintf (stderr, fmt, al);
+    fputs ("\n", stderr);
     abort ();
 }
 
@@ -95,6 +98,36 @@ void Boundary::merge_contour_asc (int ed, int newc) {
 inline Boundary::edge_t &Boundary::edge (edge_iterator eit) {
     assert (this == eit.my_boundary);
     return edge(eit.my_position);
+}
+
+// for fuzzy vector comparison
+static double normed_diff (const vec_t &a, const vec_t &b) {
+    vec_t d = a;
+    d -= b;
+    return d.norm ();
+}
+
+// perform sanity checking on a Boundary.
+// this is not public code for now.
+static void assert_boundary (const Boundary &b) {
+#ifndef NDEBUG
+    Boundary::contour_iterator cit;
+    for (cit = b.contours_begin (); cit != b.contours_end (); ++cit) {
+        Boundary::edge_iterator eit     = b.edges_begin (cit),
+                                eit_end = b.edges_end (cit);
+        while (eit != eit_end) {
+            Boundary::edge_iterator next_eit = eit;
+            ++next_eit;
+            if (! (normed_diff (b.edge_vertex1 (eit),
+                                b.edge_vertex0 (next_eit))
+                   < VERTEX_MERGE_TOLERANCE)) {
+                die ("assert_boundary: contour is not continuous.");
+            }
+
+            eit = next_eit;
+        }
+    }
+#endif // NDEBUG
 }
 
 Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
@@ -240,6 +273,8 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
         die ("Boundary::inflection_after_edge: NaN in atan2");
     }
 #endif // NDEBUG
+    assert (ret <= M_PI);
+    assert (ret >= -M_PI);
     return ret;
 }
 
@@ -266,12 +301,12 @@ Boundary::vec_t Boundary::edge_vertex1 (Boundary::edge_iterator it) const {
 }
 
 void Boundary::fix_contours (bool silent) {
+    assert_boundary (*this);
     if (!silent)
         std::cerr << "fix_contours";
     int deg_edges = 0;
     int deg_spikes = 0;
     std::vector <int> deg_con_indices;
-    const double MERGE_TOLERANCE = 1e-6;
     Boundary::contour_iterator cit = contours_begin ();
     Boundary::contour_iterator cit_end = contours_end ();
     Boundary::edge_iterator eit, eit_end;
@@ -287,7 +322,7 @@ void Boundary::fix_contours (bool silent) {
             vec_t d = edge_vertex1 (eit_next);
             d -= edge_vertex0 (eit);
 
-            if (d.norm () < MERGE_TOLERANCE) {
+            if (d.norm () < VERTEX_MERGE_TOLERANCE) {
                 if (is_self_referential (eit)) {
                     // further processing is dangerous
                     goto deg_contour;
@@ -308,7 +343,7 @@ void Boundary::fix_contours (bool silent) {
         // remove norm-zero edges
         while (eit != eit_end) {
             double len = edge_length (eit);
-            if (len < MERGE_TOLERANCE) {
+            if (len < VERTEX_MERGE_TOLERANCE) {
                 if (is_self_referential (eit)) {
                     // further processing is dangerous
                     goto deg_contour;
@@ -344,11 +379,12 @@ void Boundary::fix_contours (bool silent) {
     }
     // final "status report"
     if (!silent) {
-        std::cerr << "\n "
-                  << deg_contours << " deg. contours (removed)\n"
-                  << deg_spikes << " deg. spikes (removed)\n"
-                  << deg_edges << " deg. edges (removed)\n";
+        std::cerr << "\n"
+                  << std::setw (4) << deg_contours << " deg. contours (removed)\n"
+                  << std::setw (4) << deg_spikes << " deg. spikes (removed)\n"
+                  << std::setw (4) << deg_edges << " deg. edges (removed)\n";
     }
+    assert_boundary (*this);
 }
 
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
@@ -365,6 +401,7 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
         acc += b->inflection_after_edge (eit);
     }
     // total inflection should be +/-2pi.
+    fprintf (stderr, "%i: %f\n", *cit, acc/2/M_PI);
     if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
         int ctr = 0;
         for (eit = b->edges_begin (cit); eit != eit_end; ++eit) {
@@ -509,5 +546,3 @@ void eigensystem (EigenSystem *sys, double a1, double a2, double b1, double b2) 
         }
     }
 }
-
-
