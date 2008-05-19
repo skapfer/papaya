@@ -401,7 +401,7 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
         acc += b->inflection_after_edge (eit);
     }
     // total inflection should be +/-2pi.
-    fprintf (stderr, "%i: %f\n", *cit, acc/2/M_PI);
+    //fprintf (stderr, "%i: %f\n", *cit, acc/2/M_PI);
     if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
         int ctr = 0;
         for (eit = b->edges_begin (cit); eit != eit_end; ++eit) {
