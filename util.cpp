@@ -225,6 +225,10 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     }
 #endif
     double ret = asin (cz);
+    double cosphi = dot (tang0, tang1);
+    if (cosphi < 0.) {
+        ret = M_PI - ret;
+    }
 #ifndef NDEBUG
     if (isnan (ret)) {
         die ("nan in Boundary::inflection_after_edge, arcsine\n");
@@ -304,7 +308,13 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
     }
     // total inflection should be +/-2pi.
     if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
-        die ("total_inflection_for_contour:\n%.20e\n%.20e", acc, 2*M_PI);
+        int ctr = 0;
+        for (eit = b->edges_begin (cit); eit != eit_end; ++eit) {
+            fprintf (stderr, "infl at edge %.4i = %f\n", ctr++,
+                b->inflection_after_edge (eit));
+        }
+        die ("total_inflection_for_contour (countour_id = %i):\n%.20e\n%.20e",
+            *cit, acc, 2*M_PI);
     }
     return acc;
 }
