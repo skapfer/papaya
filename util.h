@@ -212,7 +212,8 @@ private:
 
 void marching_squares (Boundary *, const Pixmap &,
                        Pixmap::val_t threshold, bool connectblack);
-void dump_contours (std::ostream &, const Boundary &);
+void dump_contours (std::ostream &, const Boundary &, int flags = 0);
+void dump_contours (const std::string & filename, const Boundary &, int flags = 0);
 void load_test_pixmap (Pixmap *);
 void load_poly (class Boundary *, const std::string &polyfilename);
 

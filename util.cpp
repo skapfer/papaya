@@ -1,7 +1,7 @@
 // vim: et:sw=4:ts=4
 
 #include "util.h"
-#include <ostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -211,9 +211,9 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     tang1 -= vertex(it->vert0);
     tang1 /= tang1.norm ();
     // z component of cross prod.
-    double cz = tang0[0] * tang1[1] - tang1[0] * tang0[1];
+    double sinphi = tang0[0] * tang1[1] - tang1[0] * tang0[1];
 #ifndef NDEBUG
-    if (isnan (cz)) {
+    if (isnan (sinphi)) {
         std::string msg;
         if (! (tang0.norm () > 1e-6))
             msg += "norm0 is close to zero or NaN\n";
@@ -224,16 +224,13 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
         die (msg.c_str (), itstr.c_str ());
     }
 #endif
-    double ret = asin (cz);
     double cosphi = dot (tang0, tang1);
-    if (cosphi < 0.) {
-        ret = M_PI - ret;
-    }
+    double ret = atan2 (sinphi, cosphi);
 #ifndef NDEBUG
     if (isnan (ret)) {
-        die ("nan in Boundary::inflection_after_edge, arcsine\n");
+        die ("Boundary::inflection_after_edge: NaN in atan2");
     }
-#endif
+#endif // NDEBUG
     return ret;
 }
 
@@ -310,8 +307,12 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
     if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
         int ctr = 0;
         for (eit = b->edges_begin (cit); eit != eit_end; ++eit) {
-            fprintf (stderr, "infl at edge %.4i = %f\n", ctr++,
-                b->inflection_after_edge (eit));
+            vec_t v0 = b->edge_vertex0 (eit);
+            vec_t v1 = b->edge_vertex1 (eit);
+            fprintf (stderr, "infl at edge %.4i = %f\n"
+                "(%f,%f) (%f,%f)\n", ctr++,
+                b->inflection_after_edge (eit),
+                v0[0], v0[1], v1[0], v1[1]);
         }
         die ("total_inflection_for_contour (countour_id = %i):\n%.20e\n%.20e",
             *cit, acc, 2*M_PI);
@@ -319,12 +320,21 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
     return acc;
 }
 
-void dump_contours (std::ostream &os, const Boundary &a) {
+void dump_contours (const std::string &filename, const Boundary &a, int flags) {
+    std::ofstream os (filename.c_str ());
+    dump_contours (os, a);
+}
+
+enum { BY_DIRECTION = 1 };
+
+void dump_contours (std::ostream &os, const Boundary &a, int flags) {
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit, eit_end;
     for (cit = a.contours_begin (); cit != a.contours_end (); ++cit) {
-        if (total_inflection_for_contour (&a, cit) < 0)
-            continue;
+        if (flags & BY_DIRECTION) {
+            if (total_inflection_for_contour (&a, cit) < 0)
+                continue;
+        }
         eit = a.edges_begin (cit);
         eit_end = a.edges_end (cit);
         ++eit_end;
@@ -334,9 +344,13 @@ void dump_contours (std::ostream &os, const Boundary &a) {
         os << "\n"; // contour sep. (for gnuplot)
     }
     os << "\n"; // index sep. (for gnuplot)
+    if (! (flags & BY_DIRECTION))
+        return;
     for (cit = a.contours_begin (); cit != a.contours_end (); ++cit) {
-        if (total_inflection_for_contour (&a, cit) > 0)
-            continue;
+        if (flags & BY_DIRECTION) {
+            if (total_inflection_for_contour (&a, cit) > 0)
+                continue;
+        }
         eit = a.edges_begin (cit);
         eit_end = a.edges_end (cit);
         ++eit_end;
