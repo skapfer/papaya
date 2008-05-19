@@ -272,9 +272,11 @@ void Boundary::fix_contours (bool silent) {
     int deg_spikes = 0;
     std::vector <int> deg_con_indices;
     const double MERGE_TOLERANCE = 1e-6;
-    Boundary::contour_iterator cit;
+    Boundary::contour_iterator cit = contours_begin ();
+    Boundary::contour_iterator cit_end = contours_end ();
     Boundary::edge_iterator eit, eit_end;
-    for (cit = contours_begin (); cit != contours_end (); ++cit) {
+    while (cit != cit_end) {
+        bool fixed_something = false;
         eit = edges_begin (cit);
         eit_end = edges_end (cit);
         // remove spikes with exterior angle = pi
@@ -297,6 +299,7 @@ void Boundary::fix_contours (bool silent) {
                 --eit;
                 // remove_vertex1 could have removed our end
                 eit_end = edges_end (cit);
+                fixed_something = true;
             } else {
                 eit = eit_next;
             }
@@ -314,17 +317,21 @@ void Boundary::fix_contours (bool silent) {
                 eit = remove_vertex1 (eit);
                 // remove_vertex1 could have removed our end
                 eit_end = edges_end (cit);
+                fixed_something = true;
             } else {
                 ++eit;
             }
         }
 
+        if (!fixed_something)
+            ++cit;
         continue;
 
     deg_contour:
         // current contour has been reduced to or was a single-vertex
         // contour.  we mark it for later removal.
         deg_con_indices.push_back (cit - contours_begin ());
+        ++cit;
     }
     int deg_contours = (int)deg_con_indices.size ();
     // remove degenerate contours
