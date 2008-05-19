@@ -99,6 +99,7 @@ inline Boundary::edge_t &Boundary::edge (edge_iterator eit) {
 
 Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
     assert (this == eit.my_boundary);
+    assert (!is_self_referential (eit));
     // normally, delete the next edge.
     // if that edge is the magic edge which gives the name to this contour,
     // delete this edge instead.
@@ -261,15 +262,41 @@ void Boundary::fix_contours (bool silent) {
         std::cerr << "fix_contours";
     int deg_contours = 0;
     int deg_edges = 0;
+    int deg_spikes = 0;
+    const double MERGE_TOLERANCE = 1e-6;
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit, eit_end;
     for (cit = contours_begin (); cit != contours_end (); ++cit) {
         eit = edges_begin (cit);
         eit_end = edges_end (cit);
+        // remove spikes with exterior angle = pi
+        while (eit != eit_end) {
+            edge_iterator eit_next = eit;
+            ++eit_next;
+
+            vec_t d = edge_vertex1 (eit_next);
+            d -= edge_vertex0 (eit);
+
+            if (d.norm () < MERGE_TOLERANCE) {
+                if (is_self_referential (eit)) {
+                    break;
+                }
+                // remove spike.  the norm-zero edge created by this
+                // operation is removed later
+                eit = remove_vertex1 (eit);
+                ++deg_spikes;
+                --eit;
+                // remove_vertex1 could have removed our end
+                eit_end = edges_end (cit);
+            } else {
+                eit = eit_next;
+            }
+        }
+        eit = edges_begin (cit);
         // remove norm-zero edges
         while (eit != eit_end) {
             double len = edge_length (eit);
-            if (len < 1e-6) {
+            if (len < MERGE_TOLERANCE) {
                 if (is_self_referential (eit)) {
                     ++deg_contours;
                     break;
@@ -286,6 +313,7 @@ void Boundary::fix_contours (bool silent) {
     if (!silent) {
         std::cerr << "\n "
                   << deg_contours << " deg. contours (NOT REMOVED)\n "
+                  << deg_spikes << " deg. spikes (removed)\n"
                   << deg_edges << " deg. edges (removed)\n";
     }
 }

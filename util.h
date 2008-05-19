@@ -168,7 +168,7 @@ public:
 
     double edge_length (edge_iterator it) const;
     // returns inflection angle between it and it+1,
-    // in radians, in range [-pi/2, pi/2]
+    // in radians, in range [-pi, pi]
     // positive means convex edge
     double inflection_after_edge (edge_iterator it) const;
     double inflection_before_edge (edge_iterator it) const;
@@ -183,7 +183,11 @@ public:
     void edge_label (edge_iterator, int);
 
     // fix common problems in imported data
+    // expects that all contours in this boundary are complete (
+    // i.e. closed)
+    // fix_contours does
     // * remove norm-zero edges
+    // * remove spikes with exterior angle = pi
     void fix_contours (bool silent = false);
 
 private:
