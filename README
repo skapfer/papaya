@@ -17,3 +17,32 @@ For your convenience, the relevant headers are included in this package.
 and is available under the GNU General Public License.
 
 
+==========================
+REQUIREMENTS ON INPUT DATA
+==========================
+
+Input data can be provided either in pixelized form, i.e. as a 
+digital image with square pixels or as a series of polygons.
+Currently, the code processes images in .pgm format and reads
+polygons out of .poly files.  Further readers can be written
+by the user.
+
+The data to be analyzed should be free of singular entities like
+ contours consisting of a single vertex
+ contours having edges with length zero
+ contours having inflections of pi or minus pi
+
+Data generated from pixelized images via marching squares algorithm does
+not have such problems.  There is code to "fix" existing data which
+has features like the above by deleting the offending vertices (see
+function fix_contours).
+
+
+=================================
+DOCUMENTATION OF POLY FILE FORMAT
+=================================
+
+FIXME
+
+
+
