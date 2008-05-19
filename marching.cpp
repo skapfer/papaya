@@ -1,7 +1,6 @@
 // implement marching squares algorithm
-// for FIXME
+// for converting a pixelized digital image into a set of contours
 // see http://en.wikipedia.org/wiki/Marching_squares
-//
 
 
 #include "util.h"
