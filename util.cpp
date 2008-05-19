@@ -58,7 +58,7 @@ int Boundary::insert_edge (int a, int b, int c, int d) {
         if (contour != INVALID_CONTOUR) {
             // merge contours edge(ret).contour and edge(d).contour
             if (contour != edge(d).contour) {
-                erase_contour (edge(d).contour);
+                erase_contour_by_id (edge(d).contour);
                 merge_contour_asc (d, contour);
             }
         } else {
@@ -152,9 +152,17 @@ bool Boundary::is_self_referential (edge_iterator eit) const {
     return (&*eit) == (&*eit2);
 }
 
-void Boundary::erase_contour (int c) {
+void Boundary::erase_contour_by_id (int c) {
     std::vector <int>::iterator i = std::find (my_contours.begin (), my_contours.end (), c);
     assert (i != my_contours.end ());
+    std::swap (*i, my_contours.back ());
+    my_contours.erase (my_contours.end () - 1);
+}
+
+void Boundary::erase_contour_by_index (int cindex) {
+    assert (cindex >= 0);
+    assert (cindex < (int)my_contours.size ());
+    std::vector <int>::iterator i = my_contours.begin () + cindex;
     std::swap (*i, my_contours.back ());
     my_contours.erase (my_contours.end () - 1);
 }
@@ -260,9 +268,9 @@ Boundary::vec_t Boundary::edge_vertex1 (Boundary::edge_iterator it) const {
 void Boundary::fix_contours (bool silent) {
     if (!silent)
         std::cerr << "fix_contours";
-    int deg_contours = 0;
     int deg_edges = 0;
     int deg_spikes = 0;
+    std::vector <int> deg_con_indices;
     const double MERGE_TOLERANCE = 1e-6;
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit, eit_end;
@@ -279,7 +287,8 @@ void Boundary::fix_contours (bool silent) {
 
             if (d.norm () < MERGE_TOLERANCE) {
                 if (is_self_referential (eit)) {
-                    break;
+                    // further processing is dangerous
+                    goto deg_contour;
                 }
                 // remove spike.  the norm-zero edge created by this
                 // operation is removed later
@@ -298,8 +307,8 @@ void Boundary::fix_contours (bool silent) {
             double len = edge_length (eit);
             if (len < MERGE_TOLERANCE) {
                 if (is_self_referential (eit)) {
-                    ++deg_contours;
-                    break;
+                    // further processing is dangerous
+                    goto deg_contour;
                 }
                 ++deg_edges;
                 eit = remove_vertex1 (eit);
@@ -309,10 +318,27 @@ void Boundary::fix_contours (bool silent) {
                 ++eit;
             }
         }
+
+        continue;
+
+    deg_contour:
+        // current contour has been reduced to or was a single-vertex
+        // contour.  we mark it for later removal.
+        deg_con_indices.push_back (cit - contours_begin ());
     }
+    int deg_contours = (int)deg_con_indices.size ();
+    // remove degenerate contours
+    {
+        std::vector <int>::reverse_iterator it;
+        it = deg_con_indices.rbegin ();
+        for (; it != deg_con_indices.rend (); ++it) {
+            erase_contour_by_index (*it);
+        }
+    }
+    // final "status report"
     if (!silent) {
         std::cerr << "\n "
-                  << deg_contours << " deg. contours (NOT REMOVED)\n "
+                  << deg_contours << " deg. contours (removed)\n"
                   << deg_spikes << " deg. spikes (removed)\n"
                   << deg_edges << " deg. edges (removed)\n";
     }

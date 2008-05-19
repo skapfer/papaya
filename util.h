@@ -195,7 +195,8 @@ private:
     edge_t &edge (int);
     edge_t &edge (edge_iterator);
     void merge_contour_asc (int ed, int newc);
-    void erase_contour (int c);
+    void erase_contour_by_id (int cid);
+    void erase_contour_by_index (int cindex);
     void take_edge_out (int ed);
     // join the specified edge and its successor
     // by removing eit->vert1.
