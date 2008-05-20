@@ -24,7 +24,7 @@ int main () {
         bool runfix   = conf.boolean ("polyinput", "fix_contours");
         bool forceccw = conf.boolean ("polyinput", "force_counterclockwise");
         if (runfix)
-            b.fix_contours (conf.boolean ("polyinput", "silent_fix_contours"));
+            fix_contours (&b, conf.boolean ("polyinput", "silent_fix_contours"));
         if (forceccw)
             force_counterclockwise_contours (&b);
     } else if (ends_with (filename, ".pgm")) {

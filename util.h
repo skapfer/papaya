@@ -182,14 +182,6 @@ public:
     int  edge_label (edge_iterator) const;
     void edge_label (edge_iterator, int);
 
-    // fix common problems in imported data
-    // expects that all contours in this boundary are complete (
-    // i.e. closed)
-    // fix_contours does
-    // * remove norm-zero edges
-    // * remove spikes with exterior angle = pi
-    void fix_contours (bool silent = false);
-
     // reverse the direction of a contour
     // expects that the contour is complete (i.e. closed)
     void reverse_contour (contour_iterator);
@@ -217,6 +209,8 @@ private:
     std::vector <vec_t> my_vert;
     std::vector <edge_t> my_edge;
     std::vector <int> my_contours;
+    friend void fix_contours (Boundary *, bool silent);
+    void fix_contours (bool silent);
 };
 
 void marching_squares (Boundary *, const Pixmap &,
@@ -233,7 +227,15 @@ void label_by_component (Boundary *);
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
 void dump_components (const std::string &, Boundary &);
 
+// fix common problems in imported data
+// expects that all contours in this boundary are complete (
+// i.e. closed)
+// fix_contours does
+// * remove norm-zero edges
+// * remove spikes with exterior angle = pi
+void fix_contours (Boundary *, bool silent = false);
 void force_counterclockwise_contours (Boundary *);
+void check_contours (const Boundary &);
 
 //
 // inline implementation
@@ -367,6 +369,10 @@ inline int Boundary::edge_label (Boundary::edge_iterator it) const {
 
 inline void Boundary::edge_label (Boundary::edge_iterator it, int newlabel) {
     edge(it).label = newlabel;
+}
+
+inline void fix_contours (Boundary *b, bool silent) {
+    b->fix_contours (silent);
 }
 
 inline void eigensystem (EigenSystem *sys, const mat_t &mat) {
