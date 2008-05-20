@@ -377,35 +377,10 @@ void Boundary::fix_contours (bool silent) {
             erase_contour_by_index (*it);
         }
     }
-    // BEGIN HACK
-    // kill strange contours which have total curvature zero.
-    deg_con_indices.clear ();
-    double total_inflection_for_contour_unchecked (
-        const Boundary *b, Boundary::contour_iterator cit);
-    cit = contours_begin ();
-    cit_end = contours_end ();
-    int bla = 0;
-    while (cit != cit_end) {
-        double x = total_inflection_for_contour_unchecked (this, cit);
-        if (fabs (x) < M_PI) {
-            deg_con_indices.push_back (cit - contours_begin ());
-            ++bla;
-        }
-        ++cit;
-    }
-    {
-        std::vector <int>::reverse_iterator it;
-        it = deg_con_indices.rbegin ();
-        for (; it != deg_con_indices.rend (); ++it) {
-            erase_contour_by_index (*it);
-        }
-    }
-    // END HACK
 
     // final "status report"
     if (!silent) {
         std::cerr << "\n"
-                  << std::setw (4) << bla << " strange contours (removed)\n"
                   << std::setw (4) << deg_contours << " deg. contours (removed)\n"
                   << std::setw (4) << deg_spikes << " deg. spikes (removed)\n"
                   << std::setw (4) << deg_edges << " deg. edges (removed)\n";
