@@ -384,10 +384,13 @@ void Boundary::fix_contours (bool silent) {
         const Boundary *b, Boundary::contour_iterator cit);
     cit = contours_begin ();
     cit_end = contours_end ();
+    int bla = 0;
     while (cit != cit_end) {
         double x = total_inflection_for_contour_unchecked (this, cit);
-        if (fabs (x) < M_PI)
+        if (fabs (x) < M_PI) {
             deg_con_indices.push_back (cit - contours_begin ());
+            ++bla;
+        }
         ++cit;
     }
     {
@@ -402,6 +405,7 @@ void Boundary::fix_contours (bool silent) {
     // final "status report"
     if (!silent) {
         std::cerr << "\n"
+                  << std::setw (4) << bla << " strange contours (removed)\n"
                   << std::setw (4) << deg_contours << " deg. contours (removed)\n"
                   << std::setw (4) << deg_spikes << " deg. spikes (removed)\n"
                   << std::setw (4) << deg_edges << " deg. edges (removed)\n";
