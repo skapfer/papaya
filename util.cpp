@@ -377,6 +377,28 @@ void Boundary::fix_contours (bool silent) {
             erase_contour_by_index (*it);
         }
     }
+    // BEGIN HACK
+    // kill strange contours which have total curvature zero.
+    deg_con_indices.clear ();
+    double total_inflection_for_contour_unchecked (
+        const Boundary *b, Boundary::contour_iterator cit);
+    cit = contours_begin ();
+    cit_end = contours_end ();
+    while (cit != cit_end) {
+        double x = total_inflection_for_contour_unchecked (this, cit);
+        if (fabs (x) < M_PI)
+            deg_con_indices.push_back (cit - contours_begin ());
+        ++cit;
+    }
+    {
+        std::vector <int>::reverse_iterator it;
+        it = deg_con_indices.rbegin ();
+        for (; it != deg_con_indices.rend (); ++it) {
+            erase_contour_by_index (*it);
+        }
+    }
+    // END HACK
+
     // final "status report"
     if (!silent) {
         std::cerr << "\n"
@@ -412,16 +434,24 @@ void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
        << std::setprecision (18) << v.y () << "\n";
 }
 
-double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterator cit) {
+static double total_inflection_for_contour_unchecked (
+        const Boundary *b, Boundary::contour_iterator cit) {
     Boundary::edge_iterator eit = b->edges_begin (cit),
         eit_end = b->edges_end (cit);
     double acc = 0.;
     for (; eit != eit_end; ++eit) {
         acc += b->inflection_after_edge (eit);
     }
-    // total inflection should be +/-2pi.
     //fprintf (stderr, "%i: %f\n", *cit, acc/2/M_PI);
+    return acc;
+}
+
+double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterator cit) {
+    double acc = total_inflection_for_contour_unchecked (b, cit);
+    // total inflection should be +/-2pi.
     if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
+        Boundary::edge_iterator eit = b->edges_begin (cit),
+            eit_end = b->edges_end (cit);
         int ctr = 0;
         for (eit = b->edges_begin (cit); eit != eit_end; ++eit) {
             vec_t v0 = b->edge_vertex0 (eit);
