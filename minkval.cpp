@@ -147,7 +147,7 @@ public:
             vec_t avgvert = b.edge_vertex1 (pos);
             avgvert += b.edge_vertex0 (pos);
             avgvert /= 2;
-            avgvert -= ref_vertex ();
+            avgvert -= ref_vertex (b.edge_label (pos));
             // weighted by edge length
             acc_ += (prefactor * b.edge_length (pos)) * avgvert;
         }
@@ -179,7 +179,7 @@ public:
         for (; pos != end; ++pos) {
             vec_t &acc_ = acc (b.edge_label (pos));
             vec_t vert = b.edge_vertex1 (pos);
-            vert -= ref_vertex ();
+            vert -= ref_vertex (b.edge_label (pos));
             acc_ += (prefactor * b.inflection_after_edge (pos)) * vert;
         }
     }
@@ -244,12 +244,15 @@ public:
         while (pos != end) {
             mat_t incr;
             vec_t loc = b.edge_vertex1 (pos);
-            loc -= ref_vertex ();
+            loc -= ref_vertex (b.edge_label (pos));
             dyadic_prod_self (&incr, loc);
             incr *= prefactor * b.inflection_after_edge (pos);
             acc (b.edge_label (pos)) += incr;
+            loc = b.edge_vertex0 (pos);
+            loc -= ref_vertex (b.edge_label (pos));
+            dyadic_prod_self (&incr, loc);
+            incr *= prefactor * b.inflection_before_edge (pos);
             ++pos;
-            acc (b.edge_label (pos)) += incr;
         }
     }
 };
@@ -283,13 +286,13 @@ public:
             double l_prefactor = prefactor * b.edge_length (pos);
             // vertex 1
             vec_t loc1 = b.edge_vertex1 (pos);
-            loc1 -= ref_vertex ();
+            loc1 -= ref_vertex (b.edge_label (pos));
             dyadic_prod_self (&incr, loc1);
             incr *= l_prefactor;
             acc_ += incr;
             // vertex 0
             vec_t loc0 = b.edge_vertex0 (pos);
-            loc0 -= ref_vertex ();
+            loc0 -= ref_vertex (b.edge_label (pos));
             dyadic_prod_self (&incr, loc0);
             incr *= l_prefactor;
             acc_ += incr;
@@ -360,8 +363,8 @@ static vec_t centre_of_mass (const Boundary &b) {
 
 // driver function for testing the functionals
 void calculate_all_surface_integrals (const Boundary &b) {
-    std::vector <SurfaceIntegral *> sfints;
-    std::vector <SurfaceIntegral *>::iterator iit;
+    std::vector <AbstractMinkowskiFunctional *> sfints;
+    std::vector <AbstractMinkowskiFunctional *>::iterator iit;
     Boundary::contour_iterator cit;
 
     W000 w000;
@@ -390,7 +393,7 @@ void calculate_all_surface_integrals (const Boundary &b) {
         vec_t refvert = centre_of_mass (b);
         std::cout << "ref. vertex: " << refvert << "\n";
         for (iit = sfints.begin (); iit != sfints.end (); ++iit)
-            (*iit)->ref_vertex (refvert);
+            (*iit)->global_ref_vertex (refvert);
     }
 
     for (cit = b.contours_begin (); cit != b.contours_end (); ++cit) {

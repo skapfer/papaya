@@ -7,31 +7,35 @@
 #include <iomanip>
 
 
-class SurfaceIntegral {
+class AbstractMinkowskiFunctional {
 public:
     typedef Boundary::edge_iterator edge_iterator;
+    typedef int label_t;
+    // can be increased; this value is this low to catch runaway processes.
+    enum { MAX_LABELS = 20000 };
 
-    SurfaceIntegral ();
-    virtual ~SurfaceIntegral () { }
+    AbstractMinkowskiFunctional ();
+    virtual ~AbstractMinkowskiFunctional () { }
 
     virtual void add_contour (const Boundary &, edge_iterator begin, edge_iterator end) = 0;
 
     // reference point for calculation of Minkowski tensors
     // with r != 0
-    void ref_vertex (const vec_t &);
+    void ref_vertex (label_t, const vec_t &);
+    void global_ref_vertex (const vec_t &);
 
 protected:
-    const vec_t &ref_vertex () const;
+    const vec_t &ref_vertex (label_t) const;
 private:
-    vec_t my_ref_vertex;
+    vec_t global_ref_vertex_;
+    void reszref (label_t) const;
+    mutable std::vector <vec_t> my_ref_vertex_;
 };
 
 template <typename VALUE_TYPE>
-class GenericMinkowskiFunctional : public SurfaceIntegral {
+class GenericMinkowskiFunctional : public AbstractMinkowskiFunctional {
 public:
     typedef VALUE_TYPE value_t;
-    typedef int label_t;
-    enum { MAX_LABELS = 20000 };
 
 public:
     GenericMinkowskiFunctional (const std::string &name);
@@ -81,6 +85,43 @@ MatrixMinkowskiFunctional *create_w211 ();
 //
 // inline implementation
 //
+
+inline AbstractMinkowskiFunctional::AbstractMinkowskiFunctional () {
+    global_ref_vertex_ = vec_t (0., 0.);
+}
+
+// allocate new labels (i.e. reference vertices for more labels)
+inline void AbstractMinkowskiFunctional::reszref (label_t l) const {
+    if (l < MAX_LABELS) {
+        unsigned new_size = std::max (my_ref_vertex_.size (), l+1u);
+        my_ref_vertex_.resize (new_size, vec_t (0., 0.));
+    } else {
+        die ("AbstractMinkowskiFunctional: too many labels");
+    }
+}
+
+inline void AbstractMinkowskiFunctional::ref_vertex (
+        AbstractMinkowskiFunctional::label_t l, const vec_t &m) {
+    reszref (l);
+    my_ref_vertex_.at (l) = m;
+}
+
+inline void AbstractMinkowskiFunctional::global_ref_vertex (
+        const vec_t &ref) {
+    my_ref_vertex_.clear ();
+    global_ref_vertex_ = ref;
+}
+
+inline const vec_t &AbstractMinkowskiFunctional::ref_vertex (
+        AbstractMinkowskiFunctional::label_t l) const {
+    if (my_ref_vertex_.size ()) {
+        reszref (l);
+        return my_ref_vertex_.at (l);
+    } else {
+        return global_ref_vertex_;
+    }
+}
+
 template <typename VALUE_TYPE>
 inline GenericMinkowskiFunctional<VALUE_TYPE>::GenericMinkowskiFunctional (const std::string &name)
     : my_name (name) { }
@@ -88,12 +129,8 @@ inline GenericMinkowskiFunctional<VALUE_TYPE>::GenericMinkowskiFunctional (const
 // return accumulator for label
 template <typename VALUE_TYPE>
 inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (int label) {
-    if (int (my_acc.size ()) > int (label)) {
-        return my_acc[int (label)];
-    } else {
-        reszacc (label);
-        return this->acc (label);
-    }
+    reszacc (label);
+    return my_acc[label];
 }
 
 template <typename VALUE_TYPE>
@@ -110,9 +147,10 @@ inline const std::string &GenericMinkowskiFunctional <VALUE_TYPE>::name () const
 template <typename VALUE_TYPE>
 void GenericMinkowskiFunctional<VALUE_TYPE>::reszacc (label_t l) {
     if (l < MAX_LABELS) {
-        int currsize = (int)my_acc.size ();
-        my_acc.resize (int (l) + 1);
-        memset (&*(my_acc.begin () + currsize), 0, sizeof (value_t) * (int (l) + 1 - currsize));
+        unsigned new_size = std::max (my_acc.size (), l+1u);
+        value_t zero;
+        memset (&zero, 0, sizeof (zero));
+        my_acc.resize (new_size, zero);
     } else {
         die ("GenericMinkowskiFunctional: too many labels");
     }
@@ -145,18 +183,6 @@ template <typename VALUE_TYPE>
 inline void GenericMinkowskiFunctional<VALUE_TYPE>::dump_accu (std::ostream &os, const mat_t &v) {
     os << "((" << std::setw (15) << v(0,0) << " " << std::setw (16) << v(0,1) << ") ";
     os << "("  << std::setw (16) << v(1,0) << " " << std::setw (15) << v(1,1) << "))";
-}
-
-inline SurfaceIntegral::SurfaceIntegral () {
-    my_ref_vertex = vec_t (0., 0.);
-}
-
-inline void SurfaceIntegral::ref_vertex (const vec_t &m) {
-    my_ref_vertex = m;
-}
-
-inline const vec_t &SurfaceIntegral::ref_vertex () const {
-    return my_ref_vertex;
 }
 
 #endif /* MINKOWSKIVALUATIONS_H_INCLUDED */
