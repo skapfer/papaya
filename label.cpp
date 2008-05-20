@@ -12,6 +12,14 @@ static void relabel_contour (Boundary *b, Boundary::contour_iterator cit, int la
     }
 }
 
+// reset all the labels to zero.
+void label_none (Boundary *b) {
+    Boundary::contour_iterator cit;
+    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
+        relabel_contour (b, cit, 0);
+    }
+}
+
 // labels by contour index, i.e. running number [0...num_contours-1]
 // this is _not_ the contour id in the edge_t::contour field
 // FIXME this is ugly, merge these two concepts

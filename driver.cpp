@@ -6,19 +6,45 @@
 #include "minkval.h"
 #include "tinyconf.h"
 
+static bool ends_with (const std::string &s1, const std::string &s2) {
+    if (s1.size () < s2.size ())
+        return false;
+    return std::string (s1, s1.size () - s2.size (), s2.size ()) == s2;
+}
+
 int main () {
     Configuration conf ("test.conf");
     Pixmap p;
-    //load_test_pixmap (&p);
-    //load_pgm (&p, conf.string ("input", "filename"));
-    if (conf.boolean ("input", "invert"))
-        invert (&p);
+
+    std::string filename = conf.string ("input", "filename");
     Boundary b;
-    int  threshold    = conf.integer ("segment", "threshold");
-    bool connectblack = conf.boolean ("segment", "connectblack");
-    //marching_squares (&b, p, threshold, connectblack);
-    load_poly (&b, conf.string ("input", "filename"));
-    b.fix_contours ();
+
+    if (ends_with (filename, ".poly")) {
+        load_poly (&b, filename);
+        bool runfix   = conf.boolean ("polyinput", "fix_contours");
+        bool forceccw = conf.boolean ("polyinput", "force_counterclockwise");
+        if (runfix)
+            b.fix_contours ();
+        if (forceccw)
+            force_counterclockwise_contours (&b);
+    } else if (ends_with (filename, ".pgm")) {
+        load_pgm (&p, filename);
+        if (conf.boolean ("segment", "invert"))
+            invert (&p);
+        int  threshold    = conf.integer ("segment", "threshold");
+        bool connectblack = conf.boolean ("segment", "connectblack");
+        marching_squares (&b, p, threshold, connectblack);
+    }
+
+    std::string labcrit = conf.string ("output", "labels");
+    if (labcrit == "none")
+        label_none (&b);
+    else if (labcrit == "by_contour")
+        label_by_contour_index (&b);
+    else if (labcrit == "by_component")
+        label_by_component (&b);
+
+
     std::string contfile ("contours.out");
     dump_contours (contfile, b, 1);
     dump_components ("components", b);

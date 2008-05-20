@@ -190,6 +190,10 @@ public:
     // * remove spikes with exterior angle = pi
     void fix_contours (bool silent = false);
 
+    // reverse the direction of a contour
+    // expects that the contour is complete (i.e. closed)
+    void reverse_contour (contour_iterator);
+
 private:
     vec_t &vertex (int i);
     edge_t &edge (int);
@@ -223,10 +227,13 @@ void load_test_pixmap (Pixmap *);
 void load_poly (class Boundary *, const std::string &polyfilename);
 
 // labelling
+void label_none (Boundary *);
 void label_by_contour_index (Boundary *);
-void label_by_component (Boundary *b);
+void label_by_component (Boundary *);
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
 void dump_components (const std::string &, Boundary &);
+
+void force_counterclockwise_contours (Boundary *);
 
 //
 // inline implementation

@@ -387,6 +387,25 @@ void Boundary::fix_contours (bool silent) {
     assert_boundary (*this);
 }
 
+void force_counterclockwise_contours (Boundary *b) {
+    Boundary::contour_iterator cit;
+    double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterator);
+    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
+        if (total_inflection_for_contour (*b, cit) < 0)
+            b->reverse_contour (cit);
+    }
+}
+
+void Boundary::reverse_contour (Boundary::contour_iterator cit) {
+    edge_iterator eit     = edges_begin (cit);
+    edge_iterator eit_end = edges_end (cit);
+    for (; eit != eit_end; ++eit) {
+        edge_t &E = edge (eit);
+        std::swap (E.prev, E.next);
+        std::swap (E.vert0, E.vert1);
+    }
+}
+
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
     const Boundary::vec_t &v = b.vertex (vertex);
     os << std::setprecision (18) << v.x () << " "
@@ -416,6 +435,10 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
             *cit, acc, 2*M_PI);
     }
     return acc;
+}
+
+double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterator cit) {
+    return total_inflection_for_contour (&b, cit);
 }
 
 void dump_contours (const std::string &filename, const Boundary &a, int flags) {
