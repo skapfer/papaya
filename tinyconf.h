@@ -20,6 +20,7 @@ public:
     string_t string (const string_t &section, const string_t &key) const;
     bool    boolean (const string_t &section, const string_t &key) const;
     int     integer (const string_t &section, const string_t &key) const;
+    double floating (const string_t &section, const string_t &key) const;
 
 #ifndef NDEBUG
     void dump (std::ostream &) const;

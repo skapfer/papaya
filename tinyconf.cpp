@@ -158,6 +158,16 @@ int Configuration::integer (const string_t &section, const string_t &key) const 
         return x;
 }
 
+double Configuration::floating (const string_t &section, const string_t &key) const {
+    string_t v = value (section, key);
+    errno = 0;
+    double x = strtod (v.c_str (), NULL);
+    if (errno != 0)
+        throw std::runtime_error ("Invalid floating-point number \"" + v + "\"");
+    else
+        return x;
+}
+
 #ifndef NDEBUG
 void Configuration::dump (ostream &os) const {
     os << "Configuration " << (void *)this << "\n";

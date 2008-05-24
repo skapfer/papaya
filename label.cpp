@@ -147,7 +147,7 @@ static void introduce_divider (Boundary *b, const vec_t &line_0, const vec_t &li
     }
 }
 
-int label_by_location (Boundary *b, const rect_t &bbox, int divx, int divy) {
+int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy) {
     // split lines reaching across domains
     double xstrip = bbox.right - bbox.left;
     assert (xstrip > 0.);
@@ -185,37 +185,37 @@ int label_by_location (Boundary *b, const rect_t &bbox, int divx, int divy) {
 
 #include <fstream>
 
-static void dump_data (std::ostream &os, const Boundary &a,
-                       Boundary::contour_iterator cit) {
-    Boundary::edge_iterator eit, eit_end;
-    eit = a.edges_begin (cit);
-    eit_end = a.edges_end (cit);
-    ++eit_end;
-    for (; eit != eit_end; ++eit) {
-        dump_vertex (os, eit->vert0, a);
-    }
-}
-
-void dump_components (const std::string &filename, Boundary &b) {
-    label_by_component (&b);
+void dump_labels (const std::string &filename, const Boundary &b) {
     std::ofstream ofdat ((filename + ".out").c_str (), std::ios::out);
     std::ofstream ofscr ((filename + ".gp").c_str (),  std::ios::out);
     ofscr << "unset key\n";
     ofscr << "plot \\\n";
     Boundary::contour_iterator cit = b.contours_begin ();
     int index = 0;
-    dump_data (ofdat, b, cit);
-    ofdat << "\n\n";  // index sep. (for gnuplot)
-    int label = b.edges_begin (cit)->label;
-    ofscr << "\t\"" << filename << ".out\" index "
-          << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
-    for (++cit; cit != b.contours_end (); ++cit) {
-        dump_data (ofdat, b, cit);
-        ofdat << "\n\n";  // index sep. (for gnuplot)
+    for (; cit != b.contours_end (); ++cit) {
+        Boundary::edge_iterator eit, eit_end;
+        eit = b.edges_begin (cit);
+        eit_end = b.edges_end (cit);
+        ++eit_end;
         int label = b.edges_begin (cit)->label;
-        ofscr << "\t,\\\n";
+
+        while (eit != eit_end) {
+            if (label != eit->label) {
+                dump_vertex (ofdat, eit->vert0, b);
+                ofdat << "\n\n";  // index sep. (for gnuplot)
+                ofscr << "\t\"" << filename << ".out\" index "
+                      << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
+                ofscr << "\t,\\\n";
+                label = eit->label;
+            }
+            dump_vertex (ofdat, eit->vert0, b);
+            ++eit;
+        }
+        ofdat << "\n\n";  // index sep. (for gnuplot)
         ofscr << "\t\"" << filename << ".out\" index "
               << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
+        ofscr << "\t,\\\n";
     }
+    ofscr << "\t(1./0)\n";
 }
 #endif // NDEBUG

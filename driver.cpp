@@ -43,11 +43,22 @@ int main () {
         label_by_contour_index (&b);
     else if (labcrit == "by_component")
         label_by_component (&b);
+    else if (labcrit == "by_domain") {
+        rect_t r;
+        r.top    = conf.floating ("domains", "clip_top");
+        r.right  = conf.floating ("domains", "clip_right");
+        r.bottom = conf.floating ("domains", "clip_bottom");
+        r.left   = conf.floating ("domains", "clip_left");
+        int xdomains = conf.integer ("domains", "xdomains");
+        int ydomains = conf.integer ("domains", "ydomains");
+        label_by_domain (&b, r, xdomains, ydomains);
+    }
 
 
     std::string contfile ("contours.out");
     dump_contours (contfile, b, 1);
-    dump_components ("components", b);
+    dump_labels ("labels", b);
     calculate_all_surface_integrals (b);
+
     return 0;
 }
