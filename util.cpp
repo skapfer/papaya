@@ -179,6 +179,19 @@ inline void Boundary::take_edge_out (int ed) {
 #endif
 }
 
+void Boundary::split_edge (edge_iterator eit, const vec_t &newv) {
+    int nedge_id = my_edge.size ();
+    int nvert_id = insert_vertex (newv);
+    edge_t E = *eit;
+    E.vert0 = nvert_id;
+    if (E.next != INVALID_EDGE) {
+        edge (E.next).prev = nedge_id;
+    }
+    my_edge.push_back (E);
+    edge (eit).vert1 = nvert_id;
+    edge (eit).next = nedge_id;
+}
+
 bool Boundary::is_self_referential (edge_iterator eit) const {
     edge_iterator eit2 = eit;
     ++eit;

@@ -13,22 +13,24 @@ static void relabel_contour (Boundary *b, Boundary::contour_iterator cit, int la
 }
 
 // reset all the labels to zero.
-void label_none (Boundary *b) {
+int label_none (Boundary *b) {
     Boundary::contour_iterator cit;
     for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
         relabel_contour (b, cit, 0);
     }
+    return 1;
 }
 
 // labels by contour index, i.e. running number [0...num_contours-1]
 // this is _not_ the contour id in the edge_t::contour field
 // FIXME this is ugly, merge these two concepts
-void label_by_contour_index (Boundary *b) {
+int label_by_contour_index (Boundary *b) {
     Boundary::contour_iterator cit;
     int l = 0;
     for (cit = b->contours_begin (); cit != b->contours_end (); ++cit, ++l) {
         relabel_contour (b, cit, l);
     }
+    return b->num_contours ();
 }
 
 namespace {
@@ -37,7 +39,7 @@ namespace {
     }
 }
 
-void label_by_component (Boundary *b) {
+int label_by_component (Boundary *b) {
     double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterator cit);
 
     // find clockwise contours which correspond to
@@ -45,6 +47,7 @@ void label_by_component (Boundary *b) {
     // first counterclockwise contour that is found via an
     // outward search.
     std::vector <int> ccw (b->max_contour_id (), -1);
+    int ret;
     {
         // step 1
         // init the ccw array to indicate whether a contour is
@@ -60,6 +63,7 @@ void label_by_component (Boundary *b) {
                 relabel_contour (b, cit, label++);
             ccw.at (*cit) = is_ccw;
         }
+        ret = label;
     }
     {
         // step 2
@@ -131,6 +135,50 @@ void label_by_component (Boundary *b) {
         next_contour:;
         }
     }
+    return ret;
+}
+
+static void introduce_divider (Boundary *b, const vec_t &line_0, const vec_t &line_dir) {
+    intersect_buffer_t buff;
+    intersect_line_boundary (&buff, line_0, line_dir, b);
+    intersect_buffer_t::iterator it;
+    for (it = buff.begin (); it != buff.end (); ++it) {
+        b->split_edge (it->iedge, it->ivtx);
+    }
+}
+
+int label_by_location (Boundary *b, const rect_t &bbox, int divx, int divy) {
+    // split lines reaching across domains
+    double xstrip = bbox.right - bbox.left;
+    assert (xstrip > 0.);
+    xstrip /= divx;
+    for (int i = 0; i <= divx; ++i)
+        introduce_divider (b, vec_t (bbox.left + xstrip*i, 0.), vec_t (0., 1.));
+    double ystrip = bbox.top - bbox.bottom;
+    assert (ystrip > 0.);
+    ystrip /= divy;
+    for (int i = 0; i <= divy; ++i)
+        introduce_divider (b, vec_t (0., bbox.bottom + ystrip*i), vec_t (1., 0.));
+    // remove nonsense we just introduced
+    fix_contours (b);
+    // label everything
+    Boundary::contour_iterator cit;
+    Boundary::edge_iterator eit;
+    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit)
+    for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
+        vec_t p = b->edge_vertex0 (eit);
+        p += b->edge_vertex1 (eit);
+        p /= 2.;
+        if (intersect_vertex_rect (p, bbox)) {
+            p -= vec_t (bbox.left, bbox.bottom);
+            p.x () /= xstrip;
+            p.y () /= ystrip;
+            b->edge_label (eit, int (p.x ()) + int (p.y ()) * divy);
+        } else {
+            b->edge_label (eit, Boundary::NO_LABEL);
+        }
+    }
+    return divx*divy;
 }
 
 #ifndef NDEBUG

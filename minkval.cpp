@@ -345,6 +345,11 @@ public:
     }
 };
 
+
+template <> mat_t MatrixMinkowskiFunctional::dummy_acc  = mat_t ();
+template <> vec_t  VectorMinkowskiFunctional::dummy_acc = vec_t ();
+template <> double ScalarMinkowskiFunctional::dummy_acc = double ();
+
 // centre of mass of vertices, i.e. average over all vertices
 // (for testing)
 static vec_t centre_of_mass (const Boundary &b) {

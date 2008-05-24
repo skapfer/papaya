@@ -25,6 +25,11 @@ void no_return die (const char *fmt, ...);
 typedef Eigen::Vector2d vec_t;
 typedef Eigen::Matrix2d mat_t;
 
+struct rect_t {
+    double left, right;
+    double top, bottom;
+};
+
 // return eigenvalues of a
 //  (a1 a2)
 //  (b1 b2)    quadratic real matrix.
@@ -92,7 +97,8 @@ public:
     Boundary ();
     void clear ();
 
-    enum { INVALID_EDGE = -1, INVALID_VERTEX = -2, INVALID_CONTOUR = -3 };
+    enum { INVALID_EDGE = -1, INVALID_VERTEX = -2, INVALID_CONTOUR = -3,
+           NO_LABEL = -4 };
 
     typedef ::vec_t vec_t;
     int insert_vertex (const vec_t &);
@@ -186,6 +192,12 @@ public:
     // expects that the contour is complete (i.e. closed)
     void reverse_contour (contour_iterator);
 
+    // split the specified edge into two and insert
+    // the specified vertex in between.
+    // iterators to existing edges remain valid
+    // the new edge is created _after_ the specified edge.
+    void split_edge (edge_iterator, const vec_t &);
+
 private:
     vec_t &vertex (int i);
     edge_t &edge (int);
@@ -221,9 +233,10 @@ void load_test_pixmap (Pixmap *);
 void load_poly (class Boundary *, const std::string &polyfilename);
 
 // labelling
-void label_none (Boundary *);
-void label_by_contour_index (Boundary *);
-void label_by_component (Boundary *);
+int  label_none (Boundary *);
+int  label_by_contour_index (Boundary *);
+int  label_by_component (Boundary *);
+int  label_by_location (Boundary *b, const rect_t &bbox, int divx, int divy);
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
 void dump_components (const std::string &, Boundary &);
 

@@ -53,6 +53,7 @@ protected:
     static void dump_accu (std::ostream &os, const vec_t &);
     static void dump_accu (std::ostream &os, const mat_t &);
 private:
+    static value_t dummy_acc;
     std::vector <value_t> my_acc;
     std::string my_name;
 };
@@ -129,12 +130,15 @@ inline GenericMinkowskiFunctional<VALUE_TYPE>::GenericMinkowskiFunctional (const
 // return accumulator for label
 template <typename VALUE_TYPE>
 inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (int label) {
+    if (label == Boundary::NO_LABEL)
+        return dummy_acc;
     reszacc (label);
     return my_acc[label];
 }
 
 template <typename VALUE_TYPE>
 inline const VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::value (int label) const {
+    assert (label >= 0);
     return const_cast <GenericMinkowskiFunctional<VALUE_TYPE> *> (this)->acc (label);
 }
 

@@ -128,3 +128,20 @@ int intersect_ray_boundary  (intersect_buffer_t *dst,
     intersect_ray_boundary_impl (dst, ray_0, ray_dir, b, MODE_RAY);
     return (int)dst->size ();
 }
+
+int intersect_line_boundary (intersect_buffer_t *dst,
+                             const vec_t &line_0, const vec_t &line_dir,
+                             Boundary *b)  {
+    assert (dst);
+    intersect_ray_boundary_impl (dst, line_0, line_dir, b, MODE_LINE);
+    return (int)dst->size ();
+}
+
+bool intersect_vertex_rect (const vec_t &v, const rect_t &r) {
+    if (r.left < v.x () && r.right > v.x ()) {
+        if (r.top > v.y () && r.bottom < v.y ()) {
+            return true;
+        }
+    }
+    return false;
+}

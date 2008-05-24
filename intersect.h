@@ -30,6 +30,8 @@ int intersect_line_boundary (intersect_buffer_t *,
                              const vec_t &r0, const vec_t &dir,
                              Boundary *);
 
+bool intersect_vertex_rect (const vec_t &v, const rect_t &r);
+
 //
 // inline implementation
 //
