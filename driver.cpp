@@ -15,6 +15,18 @@ static bool ends_with (const std::string &s1, const std::string &s2) {
     return std::string (s1, s1.size () - s2.size (), s2.size ()) == s2;
 }
 
+static std::string basename (const std::string &str) {
+    int i, j = -1;
+    for (i = 0; i != (int)str.size (); ++i) {
+        if (str[i] == '/')
+            j = i;
+    }
+    if (j == (int)str.size ())
+        return str;
+    else
+        return std::string (str, j+1, str.npos);
+}
+
 static void calculate_functional (AbstractMinkowskiFunctional *p,
                                   const Boundary &b) {
     Boundary::contour_iterator cit;
@@ -79,8 +91,8 @@ static void set_refvert_domain_center (func_iterator begin, func_iterator end,
     }
 }
 
-int main () {
-    Configuration conf ("test.conf");
+int main (int argc, const char **argv) {
+    Configuration conf (basename (argv[0]) + ".conf");
 
     std::string filename = conf.string ("input", "filename");
     Boundary b;
