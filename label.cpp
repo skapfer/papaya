@@ -181,8 +181,6 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy) {
     return divx*divy;
 }
 
-#ifndef NDEBUG
-
 #include <fstream>
 
 void dump_labels (const std::string &filename, const Boundary &b) {
@@ -218,4 +216,3 @@ void dump_labels (const std::string &filename, const Boundary &b) {
     }
     ofscr << "\t(1./0)\n";
 }
-#endif // NDEBUG

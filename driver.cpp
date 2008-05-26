@@ -12,6 +12,10 @@ static bool ends_with (const std::string &s1, const std::string &s2) {
     return std::string (s1, s1.size () - s2.size (), s2.size ()) == s2;
 }
 
+void dump_matrix_data (const std::string &filename, MatrixMinkowskiFunctional *mf) {
+    //int nlabels = mf->;
+}
+
 int main () {
     Configuration conf ("test.conf");
     Pixmap p;
@@ -37,12 +41,13 @@ int main () {
     }
 
     std::string labcrit = conf.string ("output", "labels");
+    int num_labels;
     if (labcrit == "none")
-        label_none (&b);
+        num_labels = label_none (&b);
     else if (labcrit == "by_contour")
-        label_by_contour_index (&b);
+        num_labels = label_by_contour_index (&b);
     else if (labcrit == "by_component")
-        label_by_component (&b);
+        num_labels = label_by_component (&b);
     else if (labcrit == "by_domain") {
         rect_t r;
         r.top    = conf.floating ("domains", "clip_top");
@@ -51,7 +56,8 @@ int main () {
         r.left   = conf.floating ("domains", "clip_left");
         int xdomains = conf.integer ("domains", "xdomains");
         int ydomains = conf.integer ("domains", "ydomains");
-        label_by_domain (&b, r, xdomains, ydomains);
+        num_labels =
+            label_by_domain (&b, r, xdomains, ydomains);
     }
 
 
@@ -59,6 +65,7 @@ int main () {
     dump_contours (contfile, b, 1);
     dump_labels ("labels", b);
     calculate_all_surface_integrals (b);
+
 
     return 0;
 }
