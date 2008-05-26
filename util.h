@@ -35,6 +35,7 @@ struct rect_t {
 //  (b1 b2)    quadratic real matrix.
 void eigensystem (struct EigenSystem *, double a1, double a2, double b1, double b2);
 void eigensystem (struct EigenSystem *, const mat_t &);
+void swap_eigenvalues (struct EigenSystem *);
 
 struct EigenSystem {
     vec_t evec[2];
@@ -390,6 +391,11 @@ inline void fix_contours (Boundary *b, bool silent) {
 
 inline void eigensystem (EigenSystem *sys, const mat_t &mat) {
     eigensystem (sys, mat(0,0), mat(0,1), mat(1,0), mat(1,1));
+}
+
+inline void swap_eigenvalues (EigenSystem *sys) {
+    std::swap (sys->eval[0], sys->eval[1]);
+    std::swap (sys->evec[0], sys->evec[1]);
 }
 
 inline vec_t rot90_ccw (const vec_t &v) {
