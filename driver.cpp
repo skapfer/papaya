@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <getopt_pp_standalone.h>
 #include "util.h"
 #include "minkval.h"
 #include "tinyconf.h"
+using namespace GetOpt;
 
 typedef AbstractMinkowskiFunctional **func_iterator;
 
@@ -91,10 +93,30 @@ static void set_refvert_domain_center (func_iterator begin, func_iterator end,
     }
 }
 
-int main (int argc, const char **argv) {
-    Configuration conf (basename (argv[0]) + ".conf");
+// the gigantic main function of the program.
+int main (int argc, char **argv) {
+    GetOpt_pp ops (argc, argv);
+
+    // preparing the config file, and the command line.
+    std::string configfile = basename (argv[0]) + ".conf";
+    if (ops >> OptionPresent ('c', "--config")) {
+        ops >> Option ('c', "--config", configfile);
+    }
+    std::cerr << "Using config file " << configfile << "\n";
+    Configuration conf (configfile);
 
     std::string filename = conf.string ("input", "filename");
+    if (ops >> OptionPresent ('i', "--input")) {
+        // override the input specified in config file
+        ops >> Option ('i', "--input", filename);
+    }
+
+    std::string output_prefix = "out/";
+    if (ops >> OptionPresent ('o', "--output")) {
+        // override the output specified in config file
+        ops >> Option ('o', "--output", output_prefix);
+    }
+
     Boundary b;
 
     if (ends_with (filename, ".poly")) {
@@ -127,7 +149,7 @@ int main (int argc, const char **argv) {
     MatrixMinkowskiFunctional *w211 = create_w211 ();
 
     AbstractMinkowskiFunctional *all_funcs[]
-        = { w020, w120, w220, w211, w010, w110, w210 };
+        = { w000, w100, w200, w020, w120, w220, w211, w010, w110, w210 };
     func_iterator all_funcs_begin = all_funcs;
     func_iterator all_funcs_end   = all_funcs
                                     + sizeof (all_funcs)/sizeof (*all_funcs);
@@ -190,12 +212,38 @@ int main (int argc, const char **argv) {
         }
     }
 
-    std::string output_prefix = "out/";
     int precision = conf.integer ("output", "precision");
 
     std::string contfile (output_prefix + "contours.out");
     dump_contours (contfile, b, 1);
     dump_labels (output_prefix + "labels", b);
+
+    {
+        // output scalars
+        ScalarMinkowskiFunctional *all_sca_begin[] = { w000, w100, w200 };
+        ScalarMinkowskiFunctional **all_sca_end = all_sca_begin + 3;
+        ScalarMinkowskiFunctional **it;
+        std::string filename = output_prefix + "scalar" + ".out";
+        std::ofstream of (filename.c_str ());
+        of << std::setw (20) << "#   1          label";
+        int col = 2;
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w000";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w100";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w200";
+        of << "\n";
+
+        for (int l = 0; l != num_labels; ++l) {
+            of << " " << std::setw (19) << l;
+            for (it = all_sca_begin; it != all_sca_end; ++it) {
+                ScalarMinkowskiFunctional *p = *it;
+                of << " " << std::setw (19) << std::setprecision (precision) << p->value (l);
+            }
+            of << "\n";
+        }
+    }
 
     {
         // output tensors
