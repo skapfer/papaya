@@ -16,6 +16,15 @@ For your convenience, the relevant headers are included in this package.
 
 and is available under the GNU General Public License.
 
+The program uses an external library called "GetOpt_pp" for parsing the command
+line.
+For your convenience, the relevant headers are included in this package.
+"GetOpt_pp" can be obtained from
+
+    http://code.google.com/p/getoptpp/
+
+and is available under the GNU General Public License, version 3.
+
 
 ==========================
 REQUIREMENTS ON INPUT DATA
