@@ -238,6 +238,7 @@ int  label_none (Boundary *);
 int  label_by_contour_index (Boundary *);
 int  label_by_component (Boundary *);
 int  label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy);
+vec_t label_domain_center (int label, const rect_t &bbox, int divx, int divy);
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
 void dump_labels (const std::string &filename_base, const Boundary &b);
 

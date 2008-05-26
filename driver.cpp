@@ -34,6 +34,51 @@ static void set_refvert_com (func_iterator begin, func_iterator end,
     }
 }
 
+static void set_refvert_cos (func_iterator begin, func_iterator end,
+                             const Boundary &b, int num_labels) {
+    VectorMinkowskiFunctional *w110 = create_w110 ();
+    calculate_functional (w110, b);
+    for (; begin != end; ++begin) {
+        for (int l = 0; l != num_labels; ++l) {
+            vec_t refvert = w110->value (l);
+            (*begin)->ref_vertex (l, refvert);
+        }
+    }
+}
+
+static void set_refvert_coc (func_iterator begin, func_iterator end,
+                             const Boundary &b, int num_labels) {
+    VectorMinkowskiFunctional *w210 = create_w210 ();
+    calculate_functional (w210, b);
+    for (; begin != end; ++begin) {
+        for (int l = 0; l != num_labels; ++l) {
+            vec_t refvert = w210->value (l);
+            (*begin)->ref_vertex (l, refvert);
+        }
+    }
+}
+
+static void set_refvert_origin (func_iterator begin, func_iterator end,
+                                int num_labels) {
+    vec_t refvert = vec_t (0., 0.);
+    for (; begin != end; ++begin) {
+        for (int l = 0; l != num_labels; ++l) {
+            (*begin)->ref_vertex (l, refvert);
+        }
+    }
+}
+
+static void set_refvert_domain_center (func_iterator begin, func_iterator end,
+                                       const rect_t &r,
+                                       int xdomains, int ydomains) {
+    for (; begin != end; ++begin) {
+        for (int l = 0; l != xdomains*ydomains; ++l) {
+            (*begin)->ref_vertex (l, label_domain_center (
+                l, r, xdomains, ydomains));
+        }
+    }
+}
+
 int main () {
     Configuration conf ("test.conf");
 
@@ -84,11 +129,27 @@ int main () {
         num_labels = label_by_contour_index (&b);
         if (point_of_ref == "contour_com")
             set_refvert_com (all_funcs_begin, all_funcs_end, b, num_labels);
+        else if (point_of_ref == "contour_cos")
+            set_refvert_cos (all_funcs_begin, all_funcs_end, b, num_labels);
+        else if (point_of_ref == "contour_coc")
+            set_refvert_coc (all_funcs_begin, all_funcs_end, b, num_labels);
+        else if (point_of_ref == "origin")
+            set_refvert_origin (all_funcs_begin, all_funcs_end, num_labels);
         else
             die ("option \"point_of_reference\" in section [output] has illegal value");
-    } else if (labcrit == "by_component")
+    } else if (labcrit == "by_component") {
         num_labels = label_by_component (&b);
-    else if (labcrit == "by_domain") {
+        if (point_of_ref == "component_com")
+            set_refvert_com (all_funcs_begin, all_funcs_end, b, num_labels);
+        else if (point_of_ref == "component_cos")
+            set_refvert_cos (all_funcs_begin, all_funcs_end, b, num_labels);
+        else if (point_of_ref == "component_coc")
+            set_refvert_coc (all_funcs_begin, all_funcs_end, b, num_labels);
+        else if (point_of_ref == "origin")
+            set_refvert_origin (all_funcs_begin, all_funcs_end, num_labels);
+        else
+            die ("option \"point_of_reference\" in section [output] has illegal value");
+    } else if (labcrit == "by_domain") {
         rect_t r;
         r.top    = conf.floating ("domains", "clip_top");
         r.right  = conf.floating ("domains", "clip_right");
@@ -98,6 +159,12 @@ int main () {
         int ydomains = conf.integer ("domains", "ydomains");
         num_labels =
             label_by_domain (&b, r, xdomains, ydomains);
+        if (point_of_ref == "origin")
+            set_refvert_origin (all_funcs_begin, all_funcs_end, num_labels);
+        else if (point_of_ref == "domain_center")
+            set_refvert_domain_center (all_funcs_begin, all_funcs_end, r, xdomains, ydomains);
+        else 
+            die ("option \"point_of_reference\" in section [output] has illegal value");
     } else {
         die ("option \"labels\" in section [output] has illegal value");
     }
@@ -110,8 +177,6 @@ int main () {
             calculate_functional (*it, b);
         }
     }
-
-    std::cerr << "testdriver: " << num_labels << " labels\n";
 
     std::string output_prefix = "out/";
     int precision = conf.integer ("output", "precision");

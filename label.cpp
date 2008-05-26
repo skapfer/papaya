@@ -181,6 +181,17 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy) {
     return divx*divy;
 }
 
+vec_t label_domain_center (int label, const rect_t &bbox, int divx, int divy) {
+    double xstrip = bbox.right - bbox.left;
+    xstrip /= divx;
+    double ystrip = bbox.top - bbox.bottom;
+    ystrip /= divy;
+    int x = label % divy;
+    int y = label / divy;
+    return vec_t (bbox.left   + (x+.5) * xstrip,
+                  bbox.bottom + (y+.5) * ystrip);
+}
+
 #include <fstream>
 
 void dump_labels (const std::string &filename, const Boundary &b) {
