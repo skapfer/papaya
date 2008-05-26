@@ -137,6 +137,9 @@ int main (int argc, char **argv) {
         marching_squares (&b, p, threshold, connectblack);
     }
 
+    std::string contfile (output_prefix + "contours.out");
+    dump_contours (contfile, b, 1);
+
     ScalarMinkowskiFunctional *w000 = create_w000 ();
     ScalarMinkowskiFunctional *w100 = create_w100 ();
     ScalarMinkowskiFunctional *w200 = create_w200 ();
@@ -203,6 +206,8 @@ int main (int argc, char **argv) {
         die ("option \"labels\" in section [output] has illegal value");
     }
 
+    dump_labels (output_prefix + "labels", b);
+
     {
         // calculate all functionals
         func_iterator it;
@@ -213,10 +218,6 @@ int main (int argc, char **argv) {
     }
 
     int precision = conf.integer ("output", "precision");
-
-    std::string contfile (output_prefix + "contours.out");
-    dump_contours (contfile, b, 1);
-    dump_labels (output_prefix + "labels", b);
 
     {
         // output scalars
@@ -240,6 +241,40 @@ int main (int argc, char **argv) {
             for (it = all_sca_begin; it != all_sca_end; ++it) {
                 ScalarMinkowskiFunctional *p = *it;
                 of << " " << std::setw (19) << std::setprecision (precision) << p->value (l);
+            }
+            of << "\n";
+        }
+    }
+
+    {
+        // output vectors
+        VectorMinkowskiFunctional *all_sca_begin[] = { w010, w110, w210 };
+        VectorMinkowskiFunctional **all_sca_end = all_sca_begin + 3;
+        VectorMinkowskiFunctional **it;
+        std::string filename = output_prefix + "vector" + ".out";
+        std::ofstream of (filename.c_str ());
+        of << std::setw (20) << "#   1          label";
+        int col = 2;
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w010.x";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w010.y";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w110.x";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w110.y";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w210.x";
+        of << std::setw ( 4) << col++;
+        of << std::setw (16) << "w210.y";
+        of << "\n";
+
+        for (int l = 0; l != num_labels; ++l) {
+            of << " " << std::setw (19) << l;
+            for (it = all_sca_begin; it != all_sca_end; ++it) {
+                vec_t val = (*it)->value (l);
+                of << " " << std::setw (19) << std::setprecision (precision) << val.x ()
+                   << " " << std::setw (19) << std::setprecision (precision) << val.y ();
             }
             of << "\n";
         }
