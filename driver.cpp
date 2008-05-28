@@ -132,8 +132,9 @@ int main (int argc, char **argv) {
         load_pgm (&p, filename);
         if (conf.boolean ("segment", "invert"))
             invert (&p);
-        int  threshold    = conf.integer ("segment", "threshold");
+        double threshold  = conf.floating ("segment", "threshold");
         bool connectblack = conf.boolean ("segment", "connectblack");
+        std::cerr << threshold << " is thresh\n";
         marching_squares (&b, p, threshold, connectblack);
     }
 

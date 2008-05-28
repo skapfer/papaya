@@ -505,39 +505,8 @@ void dump_contours (std::ostream &os, const Boundary &a, int flags) {
     os << "\n"; // index sep. (for gnuplot)
 }
 
-void load_test_pixmap (Pixmap *p) {
-    const char *bla =
-       /*01234567890123456789012345678901234567890123456789012345678901234567890123456789*/
-        "                                                                                "
-        "             XXXXXXXXXXXX                                                       "
-        "               XXXXXXXXXXXXXXX                                                  "
-        "               XXXX     XXXXXXXX                    XXXXXXXXXXXXXXXX            "
-        "              XXXXXXXXXXXXXX                        XXX          XXX            "
-        "                  XXXXXXX       XXXXX               XXX          XXX            "
-        "                         XXXXXXXXXXXXXXXX           XXXXXXXXXXXXXXXX            "
-        "                           XXXX XXXX XXX                                        "
-        "                          XXXX XXXXXX X                                         "
-        "                              XXXXXXXX                                          "
-        "                                                                                "
-        "                                   XXX                                          "
-        "                               XXXXXXXXXX                                       "
-        "                                XXXXXXX                                         "
-        "                                                                                "
-       /*01234567890123456789012345678901234567890123456789012345678901234567890123456789*/
-        "                                                                                "
-        "                                                                                ";
-    int xdim = 80;
-    int ydim = strlen (bla);
-    assert (! (ydim % xdim));
-    ydim /= xdim;
-    p->resize (xdim, ydim);
-    for (int y = 0; y != ydim; ++y)
-    for (int x = 0; x != xdim; ++x)
-        (*p)(x,y) = (bla[xdim*y + x] != ' ') ? Pixmap::max_val () : Pixmap::min_val ();
-}
-
 void invert (Pixmap *p) {
-    long off = p->max_val () - p->min_val ();
+    Pixmap::val_t off = p->max_val () - p->min_val ();
     for (int y = 0; y != p->size2 (); ++y)
     for (int x = 0; x != p->size1 (); ++x)
         (*p)(x,y) = off - (*p)(x,y);

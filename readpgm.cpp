@@ -1,4 +1,5 @@
 // read a pgm graphics file into a Pixmap object.
+// reads 16-bit and 8-bit PGM.
 
 #include "util.h"
 #include <fstream>
@@ -9,7 +10,7 @@ static void format_error (const string &msg) {
     throw std::runtime_error (msg);
 }
 
-static void read_header (Pixmap *p, istream &is) {
+static long read_header (Pixmap *p, istream &is) {
     string magic;
     is >> magic;
     if (magic != "P2")
@@ -17,12 +18,14 @@ static void read_header (Pixmap *p, istream &is) {
     is >> ws;
     if (is.peek () == '#')
         getline (is, magic); // ignore filename
-    int w, h, dummy;
-    is >> w >> h >> dummy >> ws;
+    int w, h;
+    long max_value;
+    is >> w >> h >> max_value >> ws;
     // allocate pixmap
     if (w <= 0 || h <= 0)
         format_error ("header damaged");
     p->resize (w, h);
+    return max_value;
 }
 
 void load_pgm (Pixmap *p, const string &filename) {
@@ -31,12 +34,12 @@ void load_pgm (Pixmap *p, const string &filename) {
     if (!is)
         throw std::runtime_error ("Cannot open \"" + filename + "\"");
     is.exceptions (ios::failbit | ios::badbit);
-    read_header (p, is);
+    double nrml = 1. / read_header (p, is);
     for (int j = 0; j != p->size2 (); ++j)
     for (int i = 0; i != p->size1 (); ++i) {
-        int tmp;
+        long tmp;
         is >> tmp;
-        (*p)(i,j) = tmp;
+        (*p)(i,j) = Pixmap::val_t (tmp * nrml);
     }
 
     // file should be empty now
@@ -48,5 +51,3 @@ void load_pgm (Pixmap *p, const string &filename) {
     else
         return; // yup, it's empty
 }
-
-

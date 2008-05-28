@@ -5,7 +5,7 @@
 
 #include <string>
 #include <assert.h>
-#include <limits.h>
+#include <limits>
 #include "vector.h"
 #include "matrix.h"
 #include <algorithm>
@@ -72,9 +72,9 @@ public:
     int size2 () const;
     void init_zero ();
 
-    typedef unsigned char val_t;
-    static val_t min_val () { return 0; }
-    static val_t max_val () { return UCHAR_MAX; }
+    typedef float val_t;
+    static val_t min_val () { return std::numeric_limits <val_t>::min (); }
+    static val_t max_val () { return std::numeric_limits <val_t>::max (); }
 
     // x is running from left to right
     // y from top to bottom
@@ -230,7 +230,6 @@ void marching_squares (Boundary *, const Pixmap &,
                        Pixmap::val_t threshold, bool connectblack);
 void dump_contours (std::ostream &, const Boundary &, int flags = 0);
 void dump_contours (const std::string & filename, const Boundary &, int flags = 0);
-void load_test_pixmap (Pixmap *);
 void load_poly (class Boundary *, const std::string &polyfilename);
 
 // labelling
