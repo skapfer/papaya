@@ -148,7 +148,7 @@ static void introduce_divider (Boundary *b, const vec_t &line_0, const vec_t &li
 }
 
 int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy) {
-    // split lines reaching across domains
+    // split edges crossing domain boundaries 
     double xstrip = bbox.right - bbox.left;
     assert (xstrip > 0.);
     xstrip /= divx;
