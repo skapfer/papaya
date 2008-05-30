@@ -9,6 +9,7 @@
 
 static const double VERTEX_MERGE_TOLERANCE = 1e-6;
 
+
 void die (const char *fmt, ...) {
     va_list al;
     va_start (al, fmt);
@@ -132,7 +133,7 @@ static void assert_boundary (const Boundary &b) {
 
 Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
     assert (this == eit.my_boundary);
-    assert (!is_self_referential (eit));
+    assert (eit->next != INVALID_EDGE);
     // normally, delete the next edge.
     // if that edge is the magic edge which gives the name to this contour,
     // delete this edge instead.
@@ -142,11 +143,13 @@ Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
         die ("Deleting vertex of degenerate contour");
     if (eit->next == eit->contour) {
         // delete this edge object and its metadata.
+        // this code path is probably totally untested.
         int saved_vert0 = eit->vert0;
         ++eit;
         take_edge_out (eit->prev);
         edge_t *peit = &edge(eit);
         peit->vert0 = saved_vert0;
+        assert_valid_link_structure ();
         return eit;
     } else {
         // delete next edge object, but this object's metadata.
@@ -156,6 +159,7 @@ Boundary::edge_iterator Boundary::remove_vertex1 (edge_iterator eit) {
         edge_t *peit = &edge(eit);
         peit->label = saved.label;
         peit->vert1 = saved.vert1;
+        assert_valid_link_structure ();
         return eit;
     }
 }
@@ -184,18 +188,60 @@ void Boundary::split_edge (edge_iterator eit, const vec_t &newv) {
     int nvert_id = insert_vertex (newv);
     edge_t E = *eit;
     E.vert0 = nvert_id;
+    E.prev  = eit.my_position;
     if (E.next != INVALID_EDGE) {
         edge (E.next).prev = nedge_id;
     }
     my_edge.push_back (E);
     edge (eit).vert1 = nvert_id;
     edge (eit).next = nedge_id;
+    // check that everything is alright
+    assert_valid_link_structure ();
 }
 
 bool Boundary::is_self_referential (edge_iterator eit) const {
     edge_iterator eit2 = eit;
     ++eit;
     return (&*eit) == (&*eit2);
+}
+
+// check whether prev/next fields in the structure are set up
+// correctly and whether each edge has two correct vertices.
+void Boundary::assert_valid_link_structure () const {
+#ifndef NDEBUG
+    contour_iterator cit = contours_begin ();
+    for (; cit != contours_end (); ++cit) {
+        assert_valid_link_structure (*cit);
+    }
+#endif
+}
+
+void Boundary::assert_valid_link_structure (int edge_id) const {
+#ifndef NDEBUG
+    assert (edge_id != INVALID_EDGE);
+    int terminal_edge = edge_id;
+    for (;;) {
+        // check prev/next pointers
+        int prev_edge = edge_id;
+        edge_id = edge (edge_id).next;
+        if (edge_id == INVALID_EDGE)
+            break;
+        assert (edge (edge_id).prev == prev_edge);
+        if (edge_id == terminal_edge)
+            break;
+    }
+    // the other direction (contour could be still open)
+    edge_id = terminal_edge;
+    for (;;) {
+        int prev_edge = edge_id;
+        edge_id = edge (edge_id).prev;
+        if (edge_id == INVALID_EDGE)
+            break;
+        assert (edge (edge_id).next == prev_edge);
+        if (edge_id == terminal_edge)
+            break;
+    }
+#endif
 }
 
 void Boundary::erase_contour_by_id (int c) {
@@ -462,6 +508,25 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
 double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterator cit) {
     return total_inflection_for_contour (&b, cit);
 }
+
+#ifndef NDEBUG
+void assert_complete_boundary (const Boundary &b) {
+    Boundary::contour_iterator cit = b.contours_begin ();
+    for (; cit != b.contours_end (); ++cit) {
+        assert_complete_contour (b, cit);
+    }
+}
+
+void assert_complete_contour (const Boundary &b,
+                              Boundary::contour_iterator cit) {
+    // if the contour is closed, we should be able to get from
+    // begin to end.
+    Boundary::edge_iterator eit;
+    for (; eit != b.edges_end (cit); ++eit) {
+        assert (b.edge_has_successor (eit));
+    }
+}
+#endif // NDEBUG
 
 void dump_contours (const std::string &filename, const Boundary &a, int flags) {
     std::ofstream os (filename.c_str ());

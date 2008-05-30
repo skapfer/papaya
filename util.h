@@ -189,6 +189,8 @@ public:
     int  edge_label (edge_iterator) const;
     void edge_label (edge_iterator, int);
 
+    bool edge_has_successor (edge_iterator) const;
+
     // reverse the direction of a contour
     // expects that the contour is complete (i.e. closed)
     void reverse_contour (contour_iterator);
@@ -216,6 +218,8 @@ private:
     // test whether the given edge is connected to itself,
     // i.e. a degenerate single-vertex contour
     bool is_self_referential (edge_iterator) const;
+    void assert_valid_link_structure () const;
+    void assert_valid_link_structure (int) const;
 
     edge_iterator edges_begin (int) const;
     edge_iterator edges_end (int) const;
@@ -251,6 +255,30 @@ void fix_contours (Boundary *, bool silent = false);
 void force_counterclockwise_contours (Boundary *);
 void check_contours (const Boundary &);
 
+
+
+// verify that b is a sensible boundary.
+// a boundary is called sensible iff
+// * all the edges have finite length
+// * contours either are not closed or --if closed--
+//   do not intersect themselves in weird ways
+//   (especially figure-eight configurations)
+// * inflections at vertices are less than pi
+//   in magnitude.  this is a technical requirement
+//   since the case angle = +/- pi is impossible
+//   to treat correctly without looking at the
+//   contour as a whole.
+// this function does nothing in ndebug mode.
+void assert_sensible_boundary (const Boundary &);
+
+// verify that b is a complete boundary.
+// a boundary is called complete iff all its contours are closed.
+// this function does nothing in ndebug mode.
+// in debug mode, it checks the link structure of the
+// edges for consistency.
+void assert_complete_boundary  (const Boundary &);
+void assert_complete_contour (const Boundary &, Boundary::contour_iterator);
+
 //
 // inline implementation
 //
@@ -284,6 +312,7 @@ inline const Pixmap::val_t &Pixmap::operator() (int x, int y) const {
 
 inline const vec_t &Boundary::vertex (int i) const {
 #ifndef NDEBUG
+    assert (i != INVALID_VERTEX);
     return my_vert.at (i);
 #else
     return my_vert[i];
@@ -305,8 +334,7 @@ inline int Boundary::num_vertices () const {
 
 inline const Boundary::edge_t &Boundary::edge (int i) const {
 #ifndef NDEBUG
-    if (i == INVALID_EDGE)
-        die ("called Boundary::edge (INVALID_EDGE)\n");
+    assert (i != INVALID_EDGE);
     return my_edge.at (i);
 #else
     return my_edge[i];
@@ -385,6 +413,10 @@ inline void Boundary::edge_label (Boundary::edge_iterator it, int newlabel) {
     edge(it).label = newlabel;
 }
 
+inline bool Boundary::edge_has_successor (Boundary::edge_iterator it) const {
+    return it->next != INVALID_EDGE;
+}
+
 inline void fix_contours (Boundary *b, bool silent) {
     b->fix_contours (silent);
 }
@@ -426,5 +458,14 @@ inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &
     (*mat)(0,1) =
     (*mat)(1,0) = .5 * (lhs[0]*rhs[1] + lhs[1]*rhs[0]);
 }
+
+#ifdef NDEBUG
+// expand to empty inlines in NDEBUG mode
+inline void assert_complete_boundary  (const Boundary &) {
+}
+
+inline void assert_complete_contour (const Boundary &, Boundary::contour_iterator) {
+}
+#endif /* NDEBUG */
 
 #endif /* UTIL_H_INCLUDED */
