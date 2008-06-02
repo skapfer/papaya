@@ -103,6 +103,7 @@ inline void AbstractMinkowskiFunctional::reszref (label_t l) const {
 
 inline void AbstractMinkowskiFunctional::ref_vertex (
         AbstractMinkowskiFunctional::label_t l, const vec_t &m) {
+    assert (l != Boundary::NO_LABEL);
     reszref (l);
     my_ref_vertex_.at (l) = m;
 }
@@ -116,8 +117,12 @@ inline void AbstractMinkowskiFunctional::global_ref_vertex (
 inline const vec_t &AbstractMinkowskiFunctional::ref_vertex (
         AbstractMinkowskiFunctional::label_t l) const {
     if (my_ref_vertex_.size ()) {
-        reszref (l);
-        return my_ref_vertex_.at (l);
+        if (l == Boundary::NO_LABEL) {
+            return global_ref_vertex_;
+        } else {
+            reszref (l);
+            return my_ref_vertex_.at (l);
+        }
     } else {
         return global_ref_vertex_;
     }
