@@ -104,6 +104,8 @@ void Configuration::init (const std::string &conffilename) {
     auto_ptr <map_type> m (new map_type);
     // read configuration
     ifstream is (conffilename.c_str ());
+    if (!is)
+        syntax_error ("Unable to open file \"%s\"", conffilename.c_str ());
     while (read_section (m.get (), is));
 
     // conf. read completely, no more exceptions possible.
