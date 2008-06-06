@@ -39,37 +39,52 @@ static void calculate_functional (AbstractMinkowskiFunctional *p,
 static void set_refvert_com (func_iterator begin, func_iterator end,
                              const Boundary &b, int num_labels) {
     VectorMinkowskiFunctional *w010 = create_w010 ();
+    ScalarMinkowskiFunctional *w000 = create_w000 ();
+    w010->global_ref_vertex (vec_t (0., 0.));
     calculate_functional (w010, b);
+    calculate_functional (w000, b);
     for (; begin != end; ++begin) {
         for (int l = 0; l != num_labels; ++l) {
-            vec_t refvert = w010->value (l);
+            vec_t refvert = w010->value (l) / w000->value (l);
             (*begin)->ref_vertex (l, refvert);
         }
     }
+    delete w010;
+    delete w000;
 }
 
 static void set_refvert_cos (func_iterator begin, func_iterator end,
                              const Boundary &b, int num_labels) {
     VectorMinkowskiFunctional *w110 = create_w110 ();
+    ScalarMinkowskiFunctional *w100 = create_w100 ();
+    w110->global_ref_vertex (vec_t (0., 0.));
     calculate_functional (w110, b);
+    calculate_functional (w100, b);
     for (; begin != end; ++begin) {
         for (int l = 0; l != num_labels; ++l) {
-            vec_t refvert = w110->value (l);
+            vec_t refvert = w110->value (l) / w100->value (l);
             (*begin)->ref_vertex (l, refvert);
         }
     }
+    delete w110;
+    delete w100;
 }
 
 static void set_refvert_coc (func_iterator begin, func_iterator end,
                              const Boundary &b, int num_labels) {
     VectorMinkowskiFunctional *w210 = create_w210 ();
+    ScalarMinkowskiFunctional *w200 = create_w200 ();
+    w210->global_ref_vertex (vec_t (0., 0.));
     calculate_functional (w210, b);
+    calculate_functional (w200, b);
     for (; begin != end; ++begin) {
         for (int l = 0; l != num_labels; ++l) {
-            vec_t refvert = w210->value (l);
+            vec_t refvert = w210->value (l) / w200->value (l);
             (*begin)->ref_vertex (l, refvert);
         }
     }
+    delete w210;
+    delete w200;
 }
 
 static void set_refvert_origin (func_iterator begin, func_iterator end,
@@ -111,11 +126,15 @@ int main (int argc, char **argv) {
         ops >> Option ('i', "--input", filename);
     }
 
+    std::cerr << "Using input file " << filename << "\n";
+
     std::string output_prefix = "out/";
     if (ops >> OptionPresent ('o', "--output")) {
         // override the output specified in config file
         ops >> Option ('o', "--output", output_prefix);
     }
+
+    std::cerr << "Using output prefix " << output_prefix << "\n";
 
     Boundary b;
 
