@@ -1,0 +1,31 @@
+#!/bin/bash
+# test script
+
+# binaries
+testdriver=../testdriver
+diff=gdiff
+type gdiff >/dev/null 2>/dev/null || diff=diff
+
+ensuredir () {
+    [ -d "$1" ] || mkdir "$1";
+}
+
+complain_if_mismatch () {
+    $diff -rq "${1}" "${1%.out}.res" || {
+        echo "Test $1 failed"
+        return 1
+    }
+}
+
+
+ensuredir multiellipse.out
+ensuredir multiellipse2.out
+$testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/
+$testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/
+ensuredir multiellipse2.com.out
+$testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/
+complain_if_mismatch multiellipse.out
+complain_if_mismatch multiellipse2.out
+complain_if_mismatch multiellipse2.com.out
+
+
