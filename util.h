@@ -190,6 +190,7 @@ public:
     void edge_label (edge_iterator, int);
 
     bool edge_has_successor (edge_iterator) const;
+    bool edge_has_predecessor (edge_iterator) const;
 
     // reverse the direction of a contour
     // expects that the contour is complete (i.e. closed)
@@ -253,9 +254,6 @@ void dump_labels (const std::string &filename_base, const Boundary &b);
 // * remove spikes with exterior angle = pi
 void fix_contours (Boundary *, bool silent = false);
 void force_counterclockwise_contours (Boundary *);
-void check_contours (const Boundary &);
-
-
 
 // verify that b is a sensible boundary.
 // a boundary is called sensible iff
@@ -415,6 +413,10 @@ inline void Boundary::edge_label (Boundary::edge_iterator it, int newlabel) {
 
 inline bool Boundary::edge_has_successor (Boundary::edge_iterator it) const {
     return it->next != INVALID_EDGE;
+}
+
+inline bool Boundary::edge_has_predecessor (Boundary::edge_iterator it) const {
+    return it->prev != INVALID_EDGE;
 }
 
 inline void fix_contours (Boundary *b, bool silent) {

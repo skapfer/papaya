@@ -510,22 +510,78 @@ double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterat
 }
 
 #ifndef NDEBUG
-void assert_complete_boundary (const Boundary &b) {
-    Boundary::contour_iterator cit = b.contours_begin ();
-    for (; cit != b.contours_end (); ++cit) {
-        assert_complete_contour (b, cit);
+
+template <typename BOUNDARY, typename VISITOR>
+static void visit_possibly_unclosed_contour (BOUNDARY &b, 
+                                             Boundary::contour_iterator cit,
+                                             VISITOR &vis) {
+    Boundary::edge_iterator eit_begin = b.edges_begin (cit);
+    Boundary::edge_iterator eit = b.edges_end (cit);
+    // if the contour is not closed, we have to find its start edge
+    for (;;) {
+        if (eit == eit_begin) {
+            // contour is closed, we looped once around
+            eit = b.edges_begin (cit);
+            for (; eit != b.edges_end (cit); ++eit) {
+                vis (b, eit);
+            }
+            return;
+        }
+        if (b.edge_has_predecessor (eit)) {
+            --eit;
+        } else {
+            // contour is not closed, we got to the beginning
+            for (;;) {
+                vis (b, eit);
+                if (b.edge_has_successor (eit))
+                    ++eit;
+                else
+                    return;
+            }
+        }
     }
+}
+
+template <typename BOUNDARY, typename VISITOR>
+static void visit_possibly_incomplete_boundary (BOUNDARY &b,
+                                                VISITOR &vis) {
+    typename BOUNDARY::contour_iterator cit = b.contours_begin ();
+    for (; cit != b.contours_end (); ++cit) {
+        visit_possibly_unclosed_contour (b, cit, vis);
+    }
+}
+
+static void assert_sensible_visitor (const Boundary &b, 
+                                     Boundary::edge_iterator eit) {
+    assert (b.edge_length (eit) > VERTEX_MERGE_TOLERANCE);
+    // FIXME other checks.
+}
+
+void assert_sensible_contour (const Boundary &b,
+                              Boundary::contour_iterator cit) {
+    visit_possibly_unclosed_contour (b, cit, assert_sensible_visitor);
+}
+
+void assert_sensible_boundary (const Boundary &b) {
+    visit_possibly_incomplete_boundary (b, assert_sensible_visitor);
+}
+
+static void assert_complete_visitor (const Boundary &b,
+                                     Boundary::edge_iterator eit) {
+    assert (b.edge_has_successor (eit));
+}
+
+void assert_complete_boundary (const Boundary &b) {
+    visit_possibly_incomplete_boundary (b, assert_complete_visitor);
 }
 
 void assert_complete_contour (const Boundary &b,
                               Boundary::contour_iterator cit) {
     // if the contour is closed, we should be able to get from
     // begin to end.
-    Boundary::edge_iterator eit;
-    for (; eit != b.edges_end (cit); ++eit) {
-        assert (b.edge_has_successor (eit));
-    }
+    visit_possibly_unclosed_contour (b, cit, assert_complete_visitor);
 }
+
 #endif // NDEBUG
 
 void dump_contours (const std::string &filename, const Boundary &a, int flags) {
