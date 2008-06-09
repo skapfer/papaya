@@ -33,8 +33,8 @@ struct rect_t {
 // return eigenvalues of a
 //  (a1 a2)
 //  (b1 b2)    quadratic real matrix.
-void eigensystem (struct EigenSystem *, double a1, double a2, double b1, double b2);
-void eigensystem (struct EigenSystem *, const mat_t &);
+void eigensystem_symm (struct EigenSystem *, double a1, double off, double b2);
+void eigensystem_symm (struct EigenSystem *, const mat_t &);
 void swap_eigenvalues (struct EigenSystem *);
 
 struct EigenSystem {
@@ -423,8 +423,9 @@ inline void fix_contours (Boundary *b, bool silent) {
     b->fix_contours (silent);
 }
 
-inline void eigensystem (EigenSystem *sys, const mat_t &mat) {
-    eigensystem (sys, mat(0,0), mat(0,1), mat(1,0), mat(1,1));
+inline void eigensystem_symm (EigenSystem *sys, const mat_t &mat) {
+    // FIXME assert that matrix is symmetric
+    eigensystem_symm (sys, mat(0,0), mat(0,1), mat(1,1));
 }
 
 inline void swap_eigenvalues (EigenSystem *sys) {

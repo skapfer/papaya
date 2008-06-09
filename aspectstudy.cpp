@@ -40,19 +40,19 @@ int main (int argc, const char **argv) {
     for (cit = b.contours_begin (); cit != b.contours_end (); ++cit, ++j) {
         rat = (j+1) * rat_step;
         os << std::setw (20) << std::setprecision (12) << rat;
-        eigensystem (&es, w211.value (j));
+        eigensystem_symm (&es, w211.value (j));
         rat = es.eval[0] / es.eval[1];
         if (rat > 1) rat = 1. / rat;
         os << std::setw (20) << std::setprecision (12) << rat;
-        eigensystem (&es, w220.value (j));
+        eigensystem_symm (&es, w220.value (j));
         rat = es.eval[0] / es.eval[1];
         if (rat > 1) rat = 1. / rat;
         os << std::setw (20) << std::setprecision (12) << rat;
-        eigensystem (&es, w120.value (j));
+        eigensystem_symm (&es, w120.value (j));
         rat = es.eval[0] / es.eval[1];
         if (rat > 1) rat = 1. / rat;
         os << std::setw (20) << std::setprecision (12) << rat;
-        eigensystem (&es, w020.value (j));
+        eigensystem_symm (&es, w020.value (j));
         rat = es.eval[0] / es.eval[1];
         if (rat > 1) rat = 1. / rat;
         os << std::setw (20) << std::setprecision (12) << rat;

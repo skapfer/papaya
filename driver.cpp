@@ -330,9 +330,13 @@ int main (int argc, char **argv) {
             of << std::setw ( 4) << col++;
             of << std::setw (16) << "eval1/eval2";
             of << std::setw ( 4) << col++;
-            of << std::setw (16) << "evec1";
+            of << std::setw (16) << "evec1x";
             of << std::setw ( 4) << col++;
-            of << std::setw (16) << "evec2";
+            of << std::setw (16) << "evec1y";
+            of << std::setw ( 4) << col++;
+            of << std::setw (16) << "evec2x";
+            of << std::setw ( 4) << col++;
+            of << std::setw (16) << "evec2y";
             of << "\n";
             for (int l = 0; l != num_labels; ++l) {
                 of << " " << std::setw (19) << l;
@@ -342,7 +346,7 @@ int main (int argc, char **argv) {
                 of << " " << std::setw (19) << std::setprecision (precision) << val(1,0);
                 of << " " << std::setw (19) << std::setprecision (precision) << val(1,1);
                 EigenSystem esys;
-                eigensystem (&esys, val);
+                eigensystem_symm (&esys, val);
                 if (fabs (esys.eval[0]) < fabs (esys.eval[1])) {
                     swap_eigenvalues (&esys);
                 }

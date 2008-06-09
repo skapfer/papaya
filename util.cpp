@@ -633,26 +633,39 @@ void invert (Pixmap *p) {
         (*p)(x,y) = off - (*p)(x,y);
 }
 
-// get eigenvalues of a 2x2 matrix [if they are real].
-static vec_t eigenvalues (double a1, double a2, double b1, double b2) {
-    double c = a1*b2 - a2*b1;
+void eigensystem_symm (EigenSystem *sys, double a1, double off, double b2) {
+    double evp = a1*b2 - off*off;
     double b = a1 + b2;
-    b *= -1.;
-    double q = b*b - 4.*c;
-    if (q < 0.) {
-        // ignore small complex contributions.
-        if (q > -1e-12)
-            q = 0.;
-        else
-            die ("complex eigenvalues in eigenvalues (q = %g)", q);
+    double q = b*b - 4.*evp;
+    // should be non-negative for symmetric matrices.
+    assert (q >= -1e-12);
+    if (q < 0.)
+        q = 1e-42;
+    else 
+        q = sqrt (q) + 1e-42;
+    double evr;
+    if (b < 0.)
+        evr = b - q;
+    else
+        evr = b + q;
+    evr *= .5;
+    sys->eval[0] = evr;
+    sys->eval[1] = evp/evr;
+    if (b > 0.)
+        std::swap (sys->eval[0], sys->eval[1]);
+    vec_t v;
+    v[0] = a1 - b2;
+    if (v[0] < 0.)
+        v[0] -= q;
+    else {
+        v[0] += q;
+        std::swap (sys->eval[0], sys->eval[1]);
     }
-    q = sqrt (q);
-    if (b < 0.) q *= -1.;
-    q += b;
-    q *= -.5;
-    return vec_t (q, c/q);
+    v[1] = 2.*off;
+    v.normalize ();
+    sys->evec[0] = v;
+    sys->evec[1] = rot90_ccw (v);
 }
-
 
 #ifndef NDEBUG
 void EigenSystem::dump (std::ostream &os) {
@@ -664,20 +677,4 @@ void EigenSystem::dump (std::ostream &os) {
 }
 #endif
 
-void eigensystem (EigenSystem *sys, double a1, double a2, double b1, double b2) {
-    vec_t ev = eigenvalues (a1, a2, b1, b2);
-    sys->eval[0] = ev[0];
-    sys->eval[1] = ev[1];
-    for (int i = 0; i != 2; ++i) {
-        double X = sys->eval[i];
-        double d1 = a2 / (X-a1);
-        double d2 = b1 / (X-b2);
-        if (fabs (d1) < fabs (d2)) {
-            sys->evec[i][0] = d1;
-            sys->evec[i][1] = 1.;
-        } else {
-            sys->evec[i][0] = 1.;
-            sys->evec[i][1] = d2;
-        }
-    }
-}
+

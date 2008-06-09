@@ -5,9 +5,9 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
-BINARIES = aspectstudy marching_test
+BINARIES = aspectstudy testdriver testdata/eigensystem
 
-all: aspectstudy testdriver
+all: $(BINARIES)
 
 clean:
 	rm -f $(BINARIES) *.o
@@ -22,5 +22,8 @@ testdriver: ts.headers $(SUPPORT) driver.o
 
 aspectstudy: ts.headers $(SUPPORT) aspectstudy.o
 	$(CXX) -o $@ $(SUPPORT) aspectstudy.o
+
+testdata/eigensystem: ts.headers $(SUPPORT) testdata/eigensystem.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $(SUPPORT) testdata/eigensystem.cpp
 
 .PHONY: all clean
