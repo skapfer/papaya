@@ -4,6 +4,7 @@
 
 
 static const double TWOPI = 2*M_PI;
+// Breidenbach normalization
 static const double W0_NORMALIZATION = 1.;
 static const double W1_NORMALIZATION = 1.;
 static const double W2_NORMALIZATION = 1.;
@@ -108,15 +109,16 @@ public:
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
         for (; pos != end; ++pos) {
-            const vec_t &v1 = b.edge_vertex1 (pos);
-            const vec_t &v0 = b.edge_vertex0 (pos);
+            int l = b.edge_label (pos);
+            const vec_t &v1 = b.edge_vertex1 (pos) - ref_vertex (l);
+            const vec_t &v0 = b.edge_vertex0 (pos) - ref_vertex (l);
             vec_t first_factor = v1;
             first_factor -= v0;
             first_factor *= W0_NORMALIZATION / 6.;
             vec_t second_factor;
             second_factor[0] = v1[0]*v1[0] + v0[0]*v0[0] + v0[0]*v1[0];
             second_factor[1] = v1[1]*v1[1] + v0[1]*v0[1] + v0[1]*v1[1];
-            vec_t &acc_ = acc (b.edge_label (pos));
+            vec_t &acc_ = acc (l);
             acc_[0] +=  first_factor[1] * second_factor[0];
             acc_[1] += -first_factor[0] * second_factor[1];
         }
@@ -252,6 +254,7 @@ public:
             loc -= ref_vertex (b.edge_label (pos));
             dyadic_prod_self (&incr, loc);
             incr *= prefactor * b.inflection_before_edge (pos);
+            acc (b.edge_label (pos)) += incr;
             ++pos;
         }
     }
@@ -325,9 +328,10 @@ public:
 
     virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
         for (; pos != end; ++pos) {
-            const vec_t &v1 = b.edge_vertex1 (pos);
-            const vec_t &v0 = b.edge_vertex0 (pos);
-            mat_t &acc_ = acc (b.edge_label (pos));
+            int l = b.edge_label (pos);
+            const vec_t &v1 = b.edge_vertex1 (pos) - ref_vertex (l);
+            const vec_t &v0 = b.edge_vertex0 (pos) - ref_vertex (l);
+            mat_t &acc_ = acc (l);
             // xx element
             double prefactor = W0_NORMALIZATION / 12. * (v1[1] - v0[1]);
             acc_(0,0) += prefactor * (v0[0] + v1[0]) * (v0[0]*v0[0] + v1[0]*v1[0]);

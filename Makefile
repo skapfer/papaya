@@ -5,7 +5,7 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
-BINARIES = aspectstudy testdriver testdata/eigensystem
+BINARIES = aspectstudy papaya testdata/eigensystem testdata/tsvdiff
 
 all: $(BINARIES)
 
@@ -17,8 +17,11 @@ ts.headers: $(HEADERS)
 	$(MAKE) clean
 	touch $@
 
-testdriver: ts.headers $(SUPPORT) driver.o
+papaya: ts.headers $(SUPPORT) driver.o
 	$(CXX) -o $@ $(SUPPORT) driver.o
+
+testdata/tsvdiff: ts.headers util.o tsvdiff.o
+	$(CXX) -o $@ util.o tsvdiff.o
 
 aspectstudy: ts.headers $(SUPPORT) aspectstudy.o
 	$(CXX) -o $@ $(SUPPORT) aspectstudy.o

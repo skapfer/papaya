@@ -4,6 +4,7 @@
 # binaries
 testdriver=../testdriver
 diff=gdiff
+octave=`which octave`
 type gdiff >/dev/null 2>/dev/null || diff=diff
 
 ensuredir () {
@@ -11,12 +12,15 @@ ensuredir () {
 }
 
 complain_if_mismatch () {
-    $diff -rq "${1}" "${1%.out}.res" || {
-        echo "Test $1 failed"
-        return 1
-    }
+    local ref="${1%.out}.ref"
+    local filelist="contours.out labels.out scalar.out tensor_W020.out tensor_W120.out tensor_W211.out tensor_W220.out vector.out"
+    for F in $filelist; do 
+        ./tsvdiff "$1/$F" "$ref/$F" || {
+            echo "Test $1 failed"
+            return 1
+        }
+    done
 }
-
 
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
@@ -28,4 +32,7 @@ complain_if_mismatch multiellipse.out
 complain_if_mismatch multiellipse2.out
 complain_if_mismatch multiellipse2.com.out
 
+ensuredir multirectangle.out
+$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
+#complain_if_mismatch multirectangle.out
 

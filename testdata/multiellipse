@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+# vim: et:sw=4:ts=4
+# generate a series of ellipses in POLY format.
+# usage: multiellipse output.poly radius numberofpoints numberofaspects
+
+import sys
+import math
+
+fp = open (sys.argv[1], 'w')
+radius = float (sys.argv[2])
+center_x = 1.
+center_y = 1.
+numberofpoints = int (sys.argv[3])
+numberofaspects = int (sys.argv[4])
+
+fp.write ('POINTS\n')
+for j in range (numberofaspects):
+    aspect = 1. / (numberofaspects+1) * (j+1)
+    for i in range (numberofpoints):
+        ang = 2*math.pi / numberofpoints * i
+        x =          radius * math.cos (ang) + center_x
+        y = aspect * radius * math.sin (ang) + center_y
+        fp.write ('%i: %.20e %.20e 0.\n' % (i + j*numberofpoints, x, y))
+
+fp.write ('POLYS\n')
+for j in range (numberofaspects):
+    fp.write ('%i: ' % j)
+    for i in range (numberofpoints):
+        fp.write ('%i ' % (i + j*numberofpoints))
+    fp.write ('<\n')
+
+fp.write ('END\n')
+
+fp.close ()
+
