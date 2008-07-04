@@ -2,7 +2,7 @@
 # test script
 
 # binaries
-testdriver=../testdriver
+testdriver=../papaya
 diff=gdiff
 octave=`which octave`
 type gdiff >/dev/null 2>/dev/null || diff=diff

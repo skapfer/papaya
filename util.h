@@ -19,7 +19,6 @@
 #endif
 
 void no_return never_reached ();
-
 void no_return die (const char *fmt, ...);
 
 typedef Eigen::Vector2d vec_t;
@@ -30,9 +29,13 @@ struct rect_t {
     double top, bottom;
 };
 
+void assert_not_nan (double x);
+void assert_not_nan (const vec_t &v);
+void assert_not_nan (const mat_t &m);
+
 // return eigenvalues of a
-//  (a1 a2)
-//  (b1 b2)    quadratic real matrix.
+//  (a1  off)
+//  (off  b2)    2x2 symmetric real matrix.
 void eigensystem_symm (struct EigenSystem *, double a1, double off, double b2);
 void eigensystem_symm (struct EigenSystem *, const mat_t &);
 void swap_eigenvalues (struct EigenSystem *);
@@ -290,6 +293,28 @@ inline int Pixmap::size1 () const {
 
 inline int Pixmap::size2 () const {
     return my_ydim;
+}
+
+inline void assert_not_nan (double x) {
+#ifndef NDEBUG
+    assert (!isnan (x));
+#endif // NDEBUG
+}
+
+inline void assert_not_nan (const vec_t &v) {
+#ifndef NDEBUG
+    assert_not_nan (v(0));
+    assert_not_nan (v(1));
+#endif // NDEBUG
+}
+
+inline void assert_not_nan (const mat_t &m) {
+#ifndef NDEBUG
+    assert_not_nan (m(0,0));
+    assert_not_nan (m(1,0));
+    assert_not_nan (m(0,1));
+    assert_not_nan (m(1,1));
+#endif // NDEBUG
 }
 
 inline Pixmap::val_t &Pixmap::operator() (int x, int y) {

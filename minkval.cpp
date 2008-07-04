@@ -332,6 +332,7 @@ public:
             const vec_t &v1 = b.edge_vertex1 (pos) - ref_vertex (l);
             const vec_t &v0 = b.edge_vertex0 (pos) - ref_vertex (l);
             mat_t &acc_ = acc (l);
+            assert_not_nan (acc_);
             // xx element
             double prefactor = W0_NORMALIZATION / 12. * (v1[1] - v0[1]);
             acc_(0,0) += prefactor * (v0[0] + v1[0]) * (v0[0]*v0[0] + v1[0]*v1[0]);

@@ -153,10 +153,8 @@ int main (int argc, char **argv) {
             invert (&p);
         double threshold  = conf.floating ("segment", "threshold");
         bool connectblack = conf.boolean ("segment", "connectblack");
-        std::cerr << threshold << " is thresh\n";
         marching_squares (&b, p, threshold, connectblack);
     }
-
 
     assert_complete_boundary (b);
     assert_sensible_boundary (b);
@@ -183,7 +181,7 @@ int main (int argc, char **argv) {
 
     std::string labcrit = conf.string ("output", "labels");
     std::string point_of_ref = conf.string ("output", "point_of_reference");
-    int num_labels;
+    int num_labels = -1;
     if (labcrit == "none")
         num_labels = label_none (&b);
     else if (labcrit == "by_contour") {
@@ -230,6 +228,7 @@ int main (int argc, char **argv) {
         die ("option \"labels\" in section [output] has illegal value");
     }
 
+    assert (num_labels != -1);
     dump_labels (output_prefix + "labels", b);
 
     {
@@ -311,6 +310,9 @@ int main (int argc, char **argv) {
         MatrixMinkowskiFunctional **it;
         for (it = all_mat_begin; it != all_mat_end; ++it) {
             MatrixMinkowskiFunctional *p = *it;
+#ifndef NDEBUG
+            std::cerr << p->name () << "\n";
+#endif
             std::string filename = output_prefix + "tensor_" + p->name () + ".out";
             std::ofstream of (filename.c_str ());
             of << std::setw (20) << "#   1          label";

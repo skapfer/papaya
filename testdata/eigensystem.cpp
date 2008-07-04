@@ -44,12 +44,16 @@ int main () {
             eigensystem_symm (&es, mat);
             if (fabs (es.eval[0] - ev[i][0]) > fabs (es.eval[1] - ev[i][0]))
                 swap_eigenvalues (&es);
+            double del_ev = std::max (
+                fabs (es.eval[0]-ev[i][0]),
+                fabs (es.eval[1]-ev[i][1]));
             double retphi = atan2 (es.evec[0][1], es.evec[0][0]);
             if (retphi > M_PI/2)
                 retphi -= M_PI;
             if (retphi < -M_PI/2)
                 retphi += M_PI;
-            fprintf (stdout, "%i %.20e\n", 200*i + n, retphi-phi);
+            fprintf (stdout, "%i %.20e %.20e\n", 200*i + n,
+                retphi-phi, del_ev);
         }
     }
     mat(0,0) = -2.;
@@ -58,6 +62,6 @@ int main () {
     mat(1,1) = -3.;
     EigenSystem es;
     eigensystem_symm (&es, mat);
-    es.dump (std::cout);
+    //es.dump (std::cout);
     return 0;
 }

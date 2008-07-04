@@ -36,6 +36,7 @@ template <typename VALUE_TYPE>
 class GenericMinkowskiFunctional : public AbstractMinkowskiFunctional {
 public:
     typedef VALUE_TYPE value_t;
+    typedef GenericMinkowskiFunctional <value_t> this_t;
 
 public:
     GenericMinkowskiFunctional (const std::string &name);
@@ -130,7 +131,9 @@ inline const vec_t &AbstractMinkowskiFunctional::ref_vertex (
 
 template <typename VALUE_TYPE>
 inline GenericMinkowskiFunctional<VALUE_TYPE>::GenericMinkowskiFunctional (const std::string &name)
-    : my_name (name) { }
+    : my_name (name) {
+        assert_not_nan (this_t::dummy_acc);
+}
 
 // return accumulator for label
 template <typename VALUE_TYPE>

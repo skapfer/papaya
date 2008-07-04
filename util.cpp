@@ -634,11 +634,19 @@ void invert (Pixmap *p) {
 }
 
 void eigensystem_symm (EigenSystem *sys, double a1, double off, double b2) {
+    assert_not_nan (a1);
+    assert_not_nan (b2);
+    assert_not_nan (off);
     double evp = a1*b2 - off*off;
     double b = a1 + b2;
     double q = b*b - 4.*evp;
     // should be non-negative for symmetric matrices.
-    assert (q >= -1e-12);
+    assert_not_nan (q);
+    //assert (q >= -1e-12);
+    if (! (q >= -1e-12))
+        // this qty sometimes has a relatively large error, especially for 
+        // near-diagonal matrices. we probaly need sth. better here.
+        fprintf (stderr, "warning: a1 = %f; b2 = %f; off = %f; => q = %f\n", a1, b2, off, q);
     if (q < 0.)
         q = 1e-42;
     else 
