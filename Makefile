@@ -5,7 +5,7 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
-BINARIES = aspectstudy papaya testdata/eigensystem testdata/tsvdiff
+BINARIES = papaya testdata/eigensystem testdata/tsvdiff
 
 all: $(BINARIES)
 
@@ -22,9 +22,6 @@ papaya: ts.headers $(SUPPORT) driver.o
 
 testdata/tsvdiff: ts.headers util.o tsvdiff.o
 	$(CXX) -o $@ util.o tsvdiff.o
-
-aspectstudy: ts.headers $(SUPPORT) aspectstudy.o
-	$(CXX) -o $@ $(SUPPORT) aspectstudy.o
 
 testdata/eigensystem: ts.headers $(SUPPORT) testdata/eigensystem.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(SUPPORT) testdata/eigensystem.cpp
