@@ -444,6 +444,11 @@ inline bool Boundary::edge_has_predecessor (Boundary::edge_iterator it) const {
     return it->prev != INVALID_EDGE;
 }
 
+inline Boundary::edge_t &Boundary::edge (edge_iterator eit) {
+    assert (this == eit.my_boundary);
+    return edge(eit.my_position);
+}
+
 inline void fix_contours (Boundary *b, bool silent) {
     b->fix_contours (silent);
 }

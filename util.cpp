@@ -96,17 +96,14 @@ void Boundary::merge_contour_asc (int ed, int newc) {
     }
 }
 
-inline Boundary::edge_t &Boundary::edge (edge_iterator eit) {
-    assert (this == eit.my_boundary);
-    return edge(eit.my_position);
-}
-
+#ifndef NDEBUG
 // for fuzzy vector comparison
 static double normed_diff (const vec_t &a, const vec_t &b) {
     vec_t d = a;
     d -= b;
     return d.norm ();
 }
+#endif // NDEBUG
 
 // perform sanity checking on a Boundary.
 // this is not public code for now.

@@ -1,5 +1,10 @@
 
-CXXFLAGS += -Ieinclude -g -ggdb -Wall
+ifeq ($(DEBUG),0)
+    CXXFLAGS += -O2 -DNDEBUG
+else
+    CXXFLAGS += -g -ggdb -O0 -DDEBUG -D_DEBUG
+endif
+CXXFLAGS += -Ieinclude -Wall
 HEADERS = *.h
 SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
