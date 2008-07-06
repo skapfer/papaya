@@ -104,8 +104,8 @@ int main (int argc, const char **argv) {
         }
     }
 
-    std::cout << filename1 << " " << filename2 << "\n";
     TsvFile f1, f2;
+    bool emitted_filenames = false;
     f1.read_file (filename1);
     f2.read_file (filename2);
     if (f1.num_rows () != f2.num_rows ()) {
@@ -118,6 +118,10 @@ int main (int argc, const char **argv) {
         for (int j = 0; j != f1.num_cols (i); ++j) {
             double delta = fabs (f1(i,j) - f2(i,j));
             if (delta > tolerance) {
+                if (!emitted_filenames) {
+                    std::cout << filename1 << " " << filename2 << "\n";
+                    emitted_filenames = true;
+                }
                 std::cout << " " << std::setw (4) << i
                           << " " << std::setw (4) << j
                           << " " << std::setw (20) << std::setprecision (15) << f1(i,j)
