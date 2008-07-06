@@ -494,6 +494,9 @@ inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &
 
 #ifdef NDEBUG
 // expand to empty inlines in NDEBUG mode
+inline void assert_sensible_boundary (const Boundary &) {
+}
+
 inline void assert_complete_boundary  (const Boundary &) {
 }
 
