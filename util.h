@@ -76,8 +76,8 @@ public:
     void init_zero ();
 
     typedef float val_t;
-    static val_t min_val () { return std::numeric_limits <val_t>::min (); }
-    static val_t max_val () { return std::numeric_limits <val_t>::max (); }
+    static val_t min_val () { return 0.; }
+    static val_t max_val () { return 1.; }
 
     // x is running from left to right
     // y from top to bottom

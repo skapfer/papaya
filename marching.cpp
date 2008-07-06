@@ -44,6 +44,8 @@ void MarchingSquares::run (Boundary *b, const Pixmap &dataset_, Pixmap::val_t th
     assert (b);
     boundary = b;
     threshold = threshold_;
+    assert (threshold <= Pixmap::max_val ());
+    assert (threshold >= Pixmap::min_val ());
     connectblack = connectblack_;
     // create a copy of dataset, padded by a one pixel border
     // so that contours definitely end there
