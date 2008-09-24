@@ -17,7 +17,7 @@ static bool ends_with (const std::string &s1, const std::string &s2) {
     return std::string (s1, s1.size () - s2.size (), s2.size ()) == s2;
 }
 
-static std::string basename (const std::string &str) {
+static std::string my_basename (const std::string &str) {
     int i, j = -1;
     for (i = 0; i != (int)str.size (); ++i) {
         if (str[i] == '/')
@@ -113,7 +113,7 @@ int main (int argc, char **argv) {
     GetOpt_pp ops (argc, argv);
 
     // preparing the config file, and the command line.
-    std::string configfile = basename (argv[0]) + ".conf";
+    std::string configfile = my_basename (argv[0]) + ".conf";
     if (ops >> OptionPresent ('c', "--config")) {
         ops >> Option ('c', "--config", configfile);
     }
