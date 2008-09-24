@@ -93,6 +93,8 @@ int label_by_component (Boundary *b) {
                 intersect_buffer_t::iterator it = info.begin ();
                 intersect_info_t *found_ = 0;
                 while (it != info.end ()) {
+                    int this_contour;
+
                     intersect_buffer_t::iterator it_up =
                         std::upper_bound (it+1, info.end (), *it,
                             intersect_info_t::by_contour_id);
@@ -103,7 +105,7 @@ int label_by_component (Boundary *b) {
                     // ignore cw contours.
                     // [the contour we're processing is cw too, so self-intersects
                     //  will be detected here]
-                    int this_contour = it->iedge->contour;
+                    this_contour = it->iedge->contour;
                     if (!ccw[this_contour])
                         goto next_intersect;
                     // find closest match in this contour
