@@ -170,11 +170,12 @@ int main (int argc, char **argv) {
     VectorMinkowskiFunctional *w210 = create_w210 ();
     MatrixMinkowskiFunctional *w020 = create_w020 ();
     MatrixMinkowskiFunctional *w120 = create_w120 ();
+    MatrixMinkowskiFunctional *w102 = create_w102 ();
     MatrixMinkowskiFunctional *w220 = create_w220 ();
     MatrixMinkowskiFunctional *w211 = create_w211 ();
 
     AbstractMinkowskiFunctional *all_funcs[]
-        = { w000, w100, w200, w020, w120, w220, w211, w010, w110, w210 };
+        = { w000, w100, w200, w020, w120, w102, w220, w211, w010, w110, w210 };
     func_iterator all_funcs_begin = all_funcs;
     func_iterator all_funcs_end   = all_funcs
                                     + sizeof (all_funcs)/sizeof (*all_funcs);
@@ -305,8 +306,8 @@ int main (int argc, char **argv) {
 
     {
         // output tensors
-        MatrixMinkowskiFunctional *all_mat_begin[] = { w020, w120, w220, w211 };
-        MatrixMinkowskiFunctional **all_mat_end = all_mat_begin + 4;
+        MatrixMinkowskiFunctional *all_mat_begin[] = { w020, w120, w102, w220, w211 };
+        MatrixMinkowskiFunctional **all_mat_end = all_mat_begin + 5;
         MatrixMinkowskiFunctional **it;
         for (it = all_mat_begin; it != all_mat_end; ++it) {
             MatrixMinkowskiFunctional *p = *it;
@@ -375,6 +376,7 @@ int main (int argc, char **argv) {
     delete w120;
     delete w220;
     delete w211;
+    delete w102;
 
     return 0;
 }

@@ -80,6 +80,7 @@ VectorMinkowskiFunctional *create_w110 ();
 VectorMinkowskiFunctional *create_w210 ();
 MatrixMinkowskiFunctional *create_w020 ();
 MatrixMinkowskiFunctional *create_w120 ();
+MatrixMinkowskiFunctional *create_w102 ();
 MatrixMinkowskiFunctional *create_w220 ();
 MatrixMinkowskiFunctional *create_w211 ();
 

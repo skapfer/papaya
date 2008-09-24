@@ -307,6 +307,35 @@ public:
     }
 };
 
+// W102 = surface integral weighted with normal (tensor) normal
+//
+// contribution per edge is:
+// |vert1 - vert0| * normal (tensor) normal
+//
+// tensor is symmetric.
+//           translation invariant.
+//           rank-2.
+//           hom. degree 1.
+//
+// exact formulas for primitive bodies:
+class W102 : public MatrixMinkowskiFunctional {
+public:
+    W102 ()
+        : MatrixMinkowskiFunctional ("W102") { }
+
+    virtual void add_contour (const Boundary &b, edge_iterator pos, edge_iterator end) {
+        const double prefactor = W1_NORMALIZATION;
+        for (; pos != end; ++pos) {
+            mat_t &acc_ = acc (b.edge_label (pos));
+            assert_not_nan (acc_);
+            mat_t incr;
+            dyadic_prod_self (&incr, b.edge_normal (pos));
+            incr *= b.edge_length (pos) * prefactor;
+            acc_ += incr;
+        }
+    }
+};
+
 // W020 = volume integral weighted with location (tensor) location
 // converted to a surface integral by GaussGreen theorem.
 //
@@ -438,5 +467,6 @@ VectorMinkowskiFunctional *create_w110 () { return new W110; }
 VectorMinkowskiFunctional *create_w210 () { return new W210; }
 MatrixMinkowskiFunctional *create_w020 () { return new W020; }
 MatrixMinkowskiFunctional *create_w120 () { return new W120; }
+MatrixMinkowskiFunctional *create_w102 () { return new W102; }
 MatrixMinkowskiFunctional *create_w220 () { return new W220; }
 MatrixMinkowskiFunctional *create_w211 () { return new W211; }

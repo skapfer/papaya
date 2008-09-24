@@ -160,7 +160,7 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy) {
     for (int i = 0; i <= divy; ++i)
         introduce_divider (b, vec_t (0., bbox.bottom + ystrip*i), vec_t (1., 0.));
     // remove nonsense we just introduced
-    fix_contours (b);
+    fix_contours (b, true);
     // label everything
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;
