@@ -128,7 +128,7 @@ int main (int argc, char **argv) {
 
     std::cerr << "Using input file " << filename << "\n";
 
-    std::string output_prefix = "out/";
+    std::string output_prefix = conf.string ("output", "prefix");
     if (ops >> OptionPresent ('o', "--output")) {
         // override the output specified in config file
         ops >> Option ('o', "--output", output_prefix);
@@ -250,6 +250,8 @@ int main (int argc, char **argv) {
         ScalarMinkowskiFunctional **it;
         std::string filename = output_prefix + "scalar" + ".out";
         std::ofstream of (filename.c_str ());
+        if (!of)
+            std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
         of << std::setw (20) << "#   1          label";
         int col = 2;
         of << std::setw ( 4) << col++;
@@ -277,6 +279,8 @@ int main (int argc, char **argv) {
         VectorMinkowskiFunctional **it;
         std::string filename = output_prefix + "vector" + ".out";
         std::ofstream of (filename.c_str ());
+        if (!of)
+            std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
         of << std::setw (20) << "#   1          label";
         int col = 2;
         of << std::setw ( 4) << col++;
@@ -316,6 +320,8 @@ int main (int argc, char **argv) {
 #endif
             std::string filename = output_prefix + "tensor_" + p->name () + ".out";
             std::ofstream of (filename.c_str ());
+            if (!of)
+                std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
             of << std::setw (20) << "#   1          label";
             int col = 2;
             of << std::setw ( 4) << col++;
