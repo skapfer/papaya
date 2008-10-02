@@ -10,8 +10,12 @@
 namespace {
 
 class MarchingSquares {
+    // just a dummy class to hold the algorithm's state
 public:
-    void run (Boundary *, const Pixmap &dataset, Pixmap::val_t threshold, bool connectblack);
+    MarchingSquares (bool connect_body, bool periodic_data);
+
+    void run (Boundary *, const Pixmap &dataset,
+              Pixmap::val_t threshold);
 
 private:
     enum {
@@ -26,7 +30,9 @@ private:
     Boundary *boundary;
     Pixmap dataset;
     val_t threshold;
-    bool connectblack;
+    const bool connect_void;
+    const bool periodic_data;
+    const int padding_shift;
     Pixmap visited;
     int dualxmax;
     int dualymax;
@@ -39,24 +45,56 @@ private:
     val_t upperleft  (int x, int y);
 };
 
-void MarchingSquares::run (Boundary *b, const Pixmap &dataset_, Pixmap::val_t threshold_,
-                           bool connectblack_) {
+MarchingSquares::MarchingSquares (bool connect_void_, bool periodic_data_)
+    : connect_void (connect_void_), periodic_data (periodic_data_),
+      padding_shift (periodic_data_ ? 2 : 1)  {
+}
+
+void MarchingSquares::run (Boundary *b, const Pixmap &dataset_,
+                           Pixmap::val_t threshold_) {
     assert (b);
     boundary = b;
     threshold = threshold_;
     assert (threshold <= Pixmap::max_val ());
     assert (threshold >= Pixmap::min_val ());
-    connectblack = connectblack_;
     // create a copy of dataset, padded by a one pixel border
     // so that contours definitely end there
     log ("init\n");
-    dataset.resize (dataset_.size1 () + 2, dataset_.size2 () + 2);
+    dataset.resize (dataset_.size1 () + 2*padding_shift,
+                    dataset_.size2 () + 2*padding_shift);
     for (int j = 0; j != dataset.size2 (); ++j)
     for (int i = 0; i != dataset.size1 (); ++i)
         dataset(i,j) = Pixmap::min_val ();
     for (int j = 0; j != dataset_.size2 (); ++j)
     for (int i = 0; i != dataset_.size1 (); ++i)
-        dataset(i+1,j+1) = dataset_(i,j);
+        dataset(i+padding_shift,j+padding_shift) = dataset_(i,j);
+    if (periodic_data) {
+        // copy periodic wrappings in (incredibly messy)
+        const int frow = dataset_.size2 () - 1;
+        assert (frow+3 == dataset.size2 () - 2);
+        for (int i = 0; i != dataset_.size1 (); ++i) {
+            dataset(i+padding_shift,1)      = dataset_(i,frow);
+            dataset(i+padding_shift,frow+3) = dataset_(i,0);
+        }
+        const int fcol = dataset_.size1 () - 1;
+        assert (fcol+3 == dataset.size1 () - 2);
+        for (int j = 0; j != dataset_.size2 (); ++j) {
+            dataset(1,j+padding_shift)      = dataset_(fcol,j);
+            dataset(fcol+3,j+padding_shift) = dataset_(0,j);
+        }
+        dataset(1,1)           = dataset_(fcol,frow);
+        dataset(1,frow+3)      = dataset_(fcol,0);
+        dataset(fcol+3,frow+3) = dataset_(0,0);
+        dataset(fcol+3,1)      = dataset_(0,frow);
+        for (int i = 0; i != dataset.size1 (); ++i) {
+            assert (dataset(i,0) == Pixmap::min_val ());
+            assert (dataset(i,dataset.size2 () - 1) == Pixmap::min_val ());
+        }
+        for (int j = 0; j != dataset_.size2 (); ++j) {
+            assert (dataset(0,j) == Pixmap::min_val ());
+            assert (dataset(dataset.size1 () - 1,j) == Pixmap::min_val ());
+        }
+    }
     // dual lattice sites are centered between pixel centers
     dualxmax = dataset.size1 () - 1;
     dualymax = dataset.size2 () - 1;
@@ -148,7 +186,7 @@ void MarchingSquares::trace_contour (int thisx, int thisy) {
         case UPPERLEFT|LOWERRIGHT:
             // ambiguous squares are traversed twice
             visited(thisx,thisy) = 0;
-            if (connectblack) {
+            if (connect_void) {
                 if (prevx < thisx) {
                     moveup;
                 } else if (prevx > thisx) {
@@ -169,7 +207,7 @@ void MarchingSquares::trace_contour (int thisx, int thisy) {
         case UPPERRIGHT|LOWERLEFT:
             // ambiguous squares are traversed twice
             visited(thisx,thisy) = 0;
-            if (connectblack) {
+            if (connect_void) {
                 if (prevy > thisy) {
                     moveleft;
                 } else if (prevy < thisy) {
@@ -193,8 +231,8 @@ void MarchingSquares::trace_contour (int thisx, int thisy) {
         // add new vertex
         // bitmap is top-down, but we need right-handed coordinates later
         int thisvertex = boundary->insert_vertex (
-            vertx-1.,
-            dataset.size2() - 1. - (verty-1.));
+            vertx + .5 - padding_shift,
+            dataset.size2() - verty - .5 - padding_shift);
         // add new edge
         if (prevvertex != Boundary::INVALID_VERTEX) {
             int thisedge = boundary->insert_edge (
@@ -257,7 +295,8 @@ inline void MarchingSquares::log (const char *fmt, ...) {
 }
 
 void marching_squares (Boundary *b, const Pixmap &p,
-                       Pixmap::val_t threshold, bool connectblack) {
-    MarchingSquares m;
-    m.run (b, p, threshold, connectblack);
+                       Pixmap::val_t threshold,
+                       bool connect_void, bool periodic_data) {
+    MarchingSquares m (connect_void, periodic_data);
+    m.run (b, p, threshold);
 }

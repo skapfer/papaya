@@ -9,28 +9,37 @@ ensuredir () {
     mkdir "$1";
 }
 
+record_failure () {
+    echo "$1" >>FAILED
+}
+
 complain_if_mismatch () {
     local ref="${1%.out}.ref"
     local filelist="contours.out labels.out scalar.out tensor_W020.out tensor_W120.out tensor_W211.out tensor_W220.out vector.out tensor_W102.out"
     for F in $filelist; do 
         ./tsvdiff "$1/$F" "$ref/$F" || {
-            echo "Test $1 failed"
+            echo "[$0] Test $1 failed" >&2
+            record_failure "FAILED $1"
             return 1
         }
     done
 }
 
+rm -f FAILED
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
+echo "[$0] Running papaya testcases..." >&2
 $testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/
 $testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/
 $testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/
+echo "[$0] Comparing to reference results..." >&2
 complain_if_mismatch multiellipse.out
 complain_if_mismatch multiellipse2.out
 complain_if_mismatch multiellipse2.com.out
 
-ensuredir multirectangle.out
-$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
+# not checked in
+#ensuredir multirectangle.out
+#$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
 #complain_if_mismatch multirectangle.out
 

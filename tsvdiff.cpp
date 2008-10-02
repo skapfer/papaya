@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 #include <vector>
 #include <limits>
 #include <math.h>
@@ -15,6 +16,12 @@ public:
     int num_rows () const;
     int num_cols (int) const;
     double operator() (int i, int j) const;
+
+    struct unreadable_file : public std::runtime_error {
+        unreadable_file (const std::string &filename)
+            : std::runtime_error ("unable to read \"" + filename + "\"") {}
+    };
+
 private:
     std::vector <std::vector <double> > my_data;
     static void eat_line (std::istream &is) {
@@ -39,7 +46,10 @@ private:
 
 void TsvFile::read_file (const std::string &filename) {
     std::ifstream is (filename.c_str ());
-    is.exceptions (std::ios::badbit);
+    if (!is)
+        throw unreadable_file (filename);
+    // iostreams exceptions just suck.
+    //is.exceptions (std::ios::badbit);
     std::vector <double> line;
     for (;;) {
         eat_spaces (is);
@@ -109,11 +119,17 @@ int main (int argc, const char **argv) {
     f1.read_file (filename1);
     f2.read_file (filename2);
     if (f1.num_rows () != f2.num_rows ()) {
-        die ("Number of rows don't match");
+        fprintf (stderr, "[tsvdiff] Number of rows don't match"
+                 " comparing %s and %s\n",
+                 filename1.c_str (), filename2.c_str ());
+        return 1;
     }
     for (int i = 0; i != f1.num_rows (); ++i) {
         if (f1.num_cols (i) != f2.num_cols (i)) {
-            die ("Number of columns in row %i don't match", i);
+            fprintf (stderr, "[tsvdiff] Number of columns in row %i"
+                     " don't match comparing %s and %s\n", i,
+                     filename1.c_str (), filename2.c_str ());
+            return 1;
         }
         for (int j = 0; j != f1.num_cols (i); ++j) {
             double delta = fabs (f1(i,j) - f2(i,j));

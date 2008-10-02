@@ -133,7 +133,8 @@ string Configuration::value (const string_t &section, const string_t &key) const
         throw std::runtime_error ("No such section \"" + section + "\"");
     submap_type::const_iterator iter2 = iter->second.find (key);
     if (iter2 == iter->second.end ())
-        throw std::runtime_error ("No such key \"" + key + "\"");
+        throw std::runtime_error ("No such key \"" + key
+                                  + "\" in section \"" + section + "\"");
     return iter2->second;
 }
 

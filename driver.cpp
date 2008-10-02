@@ -117,7 +117,7 @@ int main (int argc, char **argv) {
     if (ops >> OptionPresent ('c', "--config")) {
         ops >> Option ('c', "--config", configfile);
     }
-    std::cerr << "Using config file " << configfile << "\n";
+    std::cerr << "[papaya] Using config file " << configfile << "\n";
     Configuration conf (configfile);
 
     std::string filename = conf.string ("input", "filename");
@@ -126,7 +126,7 @@ int main (int argc, char **argv) {
         ops >> Option ('i', "--input", filename);
     }
 
-    std::cerr << "Using input file " << filename << "\n";
+    std::cerr << "[papaya] Using input file " << filename << "\n";
 
     std::string output_prefix = conf.string ("output", "prefix");
     if (ops >> OptionPresent ('o', "--output")) {
@@ -134,7 +134,7 @@ int main (int argc, char **argv) {
         ops >> Option ('o', "--output", output_prefix);
     }
 
-    std::cerr << "Using output prefix " << output_prefix << "\n";
+    std::cerr << "[papaya] Using output prefix " << output_prefix << "\n";
 
     Boundary b;
 
@@ -153,7 +153,8 @@ int main (int argc, char **argv) {
             invert (&p);
         double threshold  = conf.floating ("segment", "threshold");
         bool connectblack = conf.boolean ("segment", "connectblack");
-        marching_squares (&b, p, threshold, connectblack);
+        bool periodic_data = conf.boolean ("segment", "data_is_periodic");
+        marching_squares (&b, p, threshold, connectblack, periodic_data);
     }
 
     assert_complete_boundary (b);

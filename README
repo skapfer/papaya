@@ -26,6 +26,16 @@ For your convenience, the relevant headers are included in this package.
 and is available under the GNU General Public License, version 3.
 
 
+==================
+BUILDING & TESTING
+==================
+
+Type "make" to compile.
+
+Type "make DEBUG=0" to create a version without debugging code.
+
+Type "make test" to run the (currently minimal) testsuite.
+
 ==========================
 REQUIREMENTS ON INPUT DATA
 ==========================
