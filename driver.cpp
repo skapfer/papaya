@@ -157,7 +157,8 @@ int main (int argc, char **argv) {
         marching_squares (&b, p, threshold, connectblack, periodic_data);
     }
 
-    assert_complete_boundary (b);
+    // FIXME thrown out, replace by sth. more integrated
+    //assert_complete_boundary (b);
     assert_sensible_boundary (b);
 
     std::string contfile (output_prefix + "contours.out");

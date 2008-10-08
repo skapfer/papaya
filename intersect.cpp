@@ -11,19 +11,15 @@ namespace {
         MODE_RAY_NEAREST
     };
 
-#define b() b
-#define edge_iter() eit
-#define cdir() cdir_
-#define dir() dir_
     bool does_edge_intersect (intersect_info_t *info,
-                              Boundary *b,
+                              const Boundary &b,
                               Boundary::edge_iterator eit,
                               const vec_t &r0, const vec_t &dir_) {
         vec_t cdir_ = rot90_ccw (dir_);
         // determine lambda so that v0 + lambda(v1-v0) in ray
-        double cc0 = dot (cdir (), b ()->edge_vertex0 (edge_iter ()));
-        double cc1 = dot (cdir (), b ()->edge_vertex1 (edge_iter ()));
-        double ccR = dot (cdir (), r0);
+        double cc0 = dot (cdir_, b.edge_vertex0 (eit));
+        double cc1 = dot (cdir_, b.edge_vertex1 (eit));
+        double ccR = dot (cdir_, r0);
         assert (!isnan (cc0));
         assert (!isnan (cc1));
         assert (!isnan (ccR));
@@ -48,39 +44,43 @@ namespace {
         assert (lambda <= 1.);
         assert (lambda >= 0.);
         // range of normal coordinates of current edge
-        double nc0 = dot (dir (), b ()->edge_vertex0 (edge_iter ()));
-        double ncT = dot (dir (), b ()->edge_vertex1 (edge_iter ()));
+        double nc0 = dot (dir_, b.edge_vertex0 (eit));
+        double ncT = dot (dir_, b.edge_vertex1 (eit));
         double mu = nc0;
         ncT -= nc0;
         mu += lambda * ncT;
-        double ncR = dot (dir (), r0);
+        double ncR = dot (dir_, r0);
         mu -= ncR;
         // now: mu: dir r0 + mu = dir (v0 + lambda(v1-v0))
         // update vertex-of-intersection since we have calculated
         // all the necessary things anyway
         vec_t &ivtx = info->ivtx;
-        ivtx  = (1-lambda) * b ()->edge_vertex0 (edge_iter ());
-        ivtx += lambda     * b ()->edge_vertex1 (edge_iter ());
+        ivtx  = (1-lambda) * b.edge_vertex0 (eit);
+        ivtx += lambda     * b.edge_vertex1 (eit);
         info->inc = mu;
         info->iedge = eit;
         return true;
     }
 }
-#undef b
-#undef edge_iter
-#undef dir
-#undef cdir
 
-void intersect_ray_boundary_impl (intersect_buffer_t *dst,
-                                  const vec_t &ray_0, const vec_t &ray_dir,
-                                  Boundary *b,
-                                  int mode) {
-    dst->clear ();
-    dst->reserve (200);
-    Boundary::contour_iterator cit;
-    Boundary::edge_iterator eit;
-    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit)
-    for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
+struct IntersectCollector {
+    IntersectCollector (intersect_buffer_t *dst_,
+                        const vec_t &ray_0_, const vec_t &ray_dir_,
+                        int mode_) {
+        dst = dst_;
+        assert (dst);
+        dst->clear ();
+        dst->reserve (200);
+        mode = mode_;
+        ray_0 = ray_0_;
+        ray_dir = ray_dir_;
+    }
+
+    intersect_buffer_t *dst;
+    int mode;
+    vec_t ray_0, ray_dir;
+
+    void operator() (const Boundary &b, Boundary::edge_iterator eit) const {
         intersect_info_t info;
         if (does_edge_intersect (&info, b, eit, ray_0, ray_dir)) {
             switch (mode) {
@@ -104,8 +104,9 @@ void intersect_ray_boundary_impl (intersect_buffer_t *dst,
             }
         }
     }
-}
-                            
+};
+                           
+#if 0
 bool intersect_ray_boundary (intersect_info_t *dst,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *b) {
@@ -120,20 +121,19 @@ bool intersect_ray_boundary (intersect_info_t *dst,
         return false;
     }
 }
+#endif // 0
 
 int intersect_ray_boundary  (intersect_buffer_t *dst,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *b) {
-    assert (dst);
-    intersect_ray_boundary_impl (dst, ray_0, ray_dir, b, MODE_RAY);
+    b->visit_each_edge (IntersectCollector (dst, ray_0, ray_dir, MODE_RAY));
     return (int)dst->size ();
 }
 
 int intersect_line_boundary (intersect_buffer_t *dst,
                              const vec_t &line_0, const vec_t &line_dir,
                              Boundary *b)  {
-    assert (dst);
-    intersect_ray_boundary_impl (dst, line_0, line_dir, b, MODE_LINE);
+    b->visit_each_edge (IntersectCollector (dst, line_0, line_dir, MODE_LINE));
     return (int)dst->size ();
 }
 

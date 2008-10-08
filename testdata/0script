@@ -29,14 +29,17 @@ rm -f FAILED
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
+ensuredir ma105_7o.out
 echo "[$0] Running papaya testcases..." >&2
 $testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/
 $testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/
 $testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/
+$testdriver -c ma105_7o.conf
 echo "[$0] Comparing to reference results..." >&2
 complain_if_mismatch multiellipse.out
 complain_if_mismatch multiellipse2.out
 complain_if_mismatch multiellipse2.com.out
+complain_if_mismatch ma105_7o.out
 
 # not checked in
 #ensuredir multirectangle.out

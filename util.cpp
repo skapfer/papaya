@@ -554,29 +554,8 @@ static void assert_sensible_visitor (const Boundary &b,
     // FIXME other checks.
 }
 
-void assert_sensible_contour (const Boundary &b,
-                              Boundary::contour_iterator cit) {
-    visit_possibly_unclosed_contour (b, cit, assert_sensible_visitor);
-}
-
 void assert_sensible_boundary (const Boundary &b) {
     visit_possibly_incomplete_boundary (b, assert_sensible_visitor);
-}
-
-static void assert_complete_visitor (const Boundary &b,
-                                     Boundary::edge_iterator eit) {
-    assert (b.edge_has_successor (eit));
-}
-
-void assert_complete_boundary (const Boundary &b) {
-    visit_possibly_incomplete_boundary (b, assert_complete_visitor);
-}
-
-void assert_complete_contour (const Boundary &b,
-                              Boundary::contour_iterator cit) {
-    // if the contour is closed, we should be able to get from
-    // begin to end.
-    visit_possibly_unclosed_contour (b, cit, assert_complete_visitor);
 }
 
 #endif // NDEBUG

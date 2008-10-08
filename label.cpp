@@ -13,11 +13,13 @@ static void relabel_contour (Boundary *b, Boundary::contour_iterator cit, int la
 }
 
 // reset all the labels to zero.
+// (this is not the same as NO_LABEL)
+static void set_label_zero (Boundary *b, Boundary::edge_iterator eit) {
+    b->edge_label (eit, 0);
+}
+
 int label_none (Boundary *b) {
-    Boundary::contour_iterator cit;
-    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
-        relabel_contour (b, cit, 0);
-    }
+    b->visit_each_edge (set_label_zero);
     return 1;
 }
 

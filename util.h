@@ -205,6 +205,18 @@ public:
     // the new edge is created _after_ the specified edge.
     void split_edge (edge_iterator, const vec_t &);
 
+    void finalise_boundary ();
+
+    template <typename VISITOR>
+    void visit_each_edge (const VISITOR &) const;
+    template <typename VISITOR>
+    void visit_each_edge (const VISITOR &);
+
+    template <typename VISITOR>
+    void visit_each_edge (VISITOR &) const;
+    template <typename VISITOR>
+    void visit_each_edge (VISITOR &);
+
 private:
     vec_t &vertex (int i);
     edge_t &edge (int);
@@ -271,6 +283,7 @@ void force_counterclockwise_contours (Boundary *);
 //   to treat correctly without looking at the
 //   contour as a whole.
 // this function does nothing in ndebug mode.
+// FIXME
 void assert_sensible_boundary (const Boundary &);
 
 // verify that b is a complete boundary.
@@ -278,8 +291,8 @@ void assert_sensible_boundary (const Boundary &);
 // this function does nothing in ndebug mode.
 // in debug mode, it checks the link structure of the
 // edges for consistency.
+// FIXME
 void assert_complete_boundary  (const Boundary &);
-void assert_complete_contour (const Boundary &, Boundary::contour_iterator);
 
 //
 // inline implementation
@@ -493,15 +506,55 @@ inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &
     (*mat)(1,0) = .5 * (lhs[0]*rhs[1] + lhs[1]*rhs[0]);
 }
 
+template <typename VISITOR>
+void Boundary::visit_each_edge (VISITOR &vis) const {
+    // FIXME this simplifies once the contour_iterator's are abolished
+    Boundary::contour_iterator cit;
+    Boundary::edge_iterator eit;
+    for (cit = contours_begin (); cit != contours_end (); ++cit)
+    for (eit = edges_begin (cit); eit != edges_end (cit); ++eit) {
+        vis (*this, eit);
+    }
+}
+
+// FIXME why do we need the const VISITOR variants?!
+template <typename VISITOR>
+void Boundary::visit_each_edge (const VISITOR &vis) const {
+    // FIXME this simplifies once the contour_iterator's are abolished
+    Boundary::contour_iterator cit;
+    Boundary::edge_iterator eit;
+    for (cit = contours_begin (); cit != contours_end (); ++cit)
+    for (eit = edges_begin (cit); eit != edges_end (cit); ++eit) {
+        vis (*this, eit);
+    }
+}
+
+template <typename VISITOR>
+void Boundary::visit_each_edge (VISITOR &vis) {
+    // FIXME this simplifies once the contour_iterator's are abolished
+    Boundary::contour_iterator cit;
+    Boundary::edge_iterator eit;
+    for (cit = contours_begin (); cit != contours_end (); ++cit)
+    for (eit = edges_begin (cit); eit != edges_end (cit); ++eit) {
+        vis (this, eit);
+    }
+}
+
+template <typename VISITOR>
+void Boundary::visit_each_edge (const VISITOR &vis) {
+    // FIXME this simplifies once the contour_iterator's are abolished
+    Boundary::contour_iterator cit;
+    Boundary::edge_iterator eit;
+    for (cit = contours_begin (); cit != contours_end (); ++cit)
+    for (eit = edges_begin (cit); eit != edges_end (cit); ++eit) {
+        vis (this, eit);
+    }
+}
+
+
 #ifdef NDEBUG
 // expand to empty inlines in NDEBUG mode
 inline void assert_sensible_boundary (const Boundary &) {
-}
-
-inline void assert_complete_boundary  (const Boundary &) {
-}
-
-inline void assert_complete_contour (const Boundary &, Boundary::contour_iterator) {
 }
 #endif /* NDEBUG */
 
