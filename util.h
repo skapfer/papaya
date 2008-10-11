@@ -208,12 +208,12 @@ public:
     void finalise_boundary ();
 
     template <typename VISITOR>
-    void visit_each_edge (const VISITOR &) const;
+    void visit_each_edge_const (const VISITOR &) const;
     template <typename VISITOR>
     void visit_each_edge (const VISITOR &);
 
     template <typename VISITOR>
-    void visit_each_edge (VISITOR &) const;
+    void visit_each_edge_const (VISITOR &) const;
     template <typename VISITOR>
     void visit_each_edge (VISITOR &);
 
@@ -507,7 +507,7 @@ inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &
 }
 
 template <typename VISITOR>
-void Boundary::visit_each_edge (VISITOR &vis) const {
+void Boundary::visit_each_edge_const (VISITOR &vis) const {
     // FIXME this simplifies once the contour_iterator's are abolished
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;
@@ -519,7 +519,7 @@ void Boundary::visit_each_edge (VISITOR &vis) const {
 
 // FIXME why do we need the const VISITOR variants?!
 template <typename VISITOR>
-void Boundary::visit_each_edge (const VISITOR &vis) const {
+void Boundary::visit_each_edge_const (const VISITOR &vis) const {
     // FIXME this simplifies once the contour_iterator's are abolished
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;

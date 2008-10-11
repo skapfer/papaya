@@ -126,14 +126,14 @@ bool intersect_ray_boundary (intersect_info_t *dst,
 int intersect_ray_boundary  (intersect_buffer_t *dst,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *b) {
-    b->visit_each_edge (IntersectCollector (dst, ray_0, ray_dir, MODE_RAY));
+    b->visit_each_edge_const (IntersectCollector (dst, ray_0, ray_dir, MODE_RAY));
     return (int)dst->size ();
 }
 
 int intersect_line_boundary (intersect_buffer_t *dst,
                              const vec_t &line_0, const vec_t &line_dir,
                              Boundary *b)  {
-    b->visit_each_edge (IntersectCollector (dst, line_0, line_dir, MODE_LINE));
+    b->visit_each_edge_const (IntersectCollector (dst, line_0, line_dir, MODE_LINE));
     return (int)dst->size ();
 }
 
