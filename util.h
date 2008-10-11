@@ -6,11 +6,11 @@
 #include <string>
 #include <assert.h>
 #include <limits>
-#include "vector.h"
-#include "matrix.h"
 #include <algorithm>
 #include <vector>
 #include <ostream>
+#include <math.h>
+#include "tensor.h"
 
 #ifdef __GNUC__
 #define no_return __attribute__ ((noreturn))
@@ -21,18 +21,12 @@
 void no_return never_reached ();
 void no_return die (const char *fmt, ...);
 
-typedef Eigen::Vector2d vec_t;
-typedef Eigen::Matrix2d mat_t;
-
 struct rect_t {
     double left, right;
     double top, bottom;
 };
 
-void assert_not_nan (double x);
-void assert_not_nan (const vec_t &v);
-void assert_not_nan (const mat_t &m);
-
+#ifndef PAPAYA2
 // return eigenvalues of a
 //  (a1  off)
 //  (off  b2)    2x2 symmetric real matrix.
@@ -62,6 +56,7 @@ void dyadic_prod_self (mat_t *out, const vec_t &lhs);
 // symmetrized dyadic product
 void dyadic_prod_symmetrized (mat_t *out, const vec_t &lhs, const vec_t &rhs);
 
+#endif // PAPAYA2
 
 //
 // primitive Pixmap encap
@@ -104,7 +99,7 @@ public:
     enum { INVALID_EDGE = -1, INVALID_VERTEX = -2, INVALID_CONTOUR = -3,
            NO_LABEL = -4 };
 
-    typedef ::vec_t vec_t;
+    typedef ::vec2_t vec_t;
     int insert_vertex (const vec_t &);
     int insert_vertex (double x, double y);
     const vec_t &vertex (int) const;
@@ -258,7 +253,7 @@ int  label_none (Boundary *);
 int  label_by_contour_index (Boundary *);
 int  label_by_component (Boundary *);
 int  label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy);
-vec_t label_domain_center (int label, const rect_t &bbox, int divx, int divy);
+vec2_t label_domain_center (int label, const rect_t &bbox, int divx, int divy);
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
 void dump_labels (const std::string &filename_base, const Boundary &b);
 
@@ -309,28 +304,6 @@ inline int Pixmap::size2 () const {
     return my_ydim;
 }
 
-inline void assert_not_nan (double x) {
-#ifndef NDEBUG
-    assert (!isnan (x));
-#endif // NDEBUG
-}
-
-inline void assert_not_nan (const vec_t &v) {
-#ifndef NDEBUG
-    assert_not_nan (v(0));
-    assert_not_nan (v(1));
-#endif // NDEBUG
-}
-
-inline void assert_not_nan (const mat_t &m) {
-#ifndef NDEBUG
-    assert_not_nan (m(0,0));
-    assert_not_nan (m(1,0));
-    assert_not_nan (m(0,1));
-    assert_not_nan (m(1,1));
-#endif // NDEBUG
-}
-
 inline Pixmap::val_t &Pixmap::operator() (int x, int y) {
     const Pixmap *this_ = this;
     return const_cast <val_t &> ((*this_)(x, y));
@@ -347,7 +320,7 @@ inline const Pixmap::val_t &Pixmap::operator() (int x, int y) const {
     return my_data[y * my_xdim + x];
 }
 
-inline const vec_t &Boundary::vertex (int i) const {
+inline const Boundary::vec_t &Boundary::vertex (int i) const {
 #ifndef NDEBUG
     assert (i != INVALID_VERTEX);
     return my_vert.at (i);
@@ -360,7 +333,7 @@ inline int Boundary::insert_vertex (double x, double y) {
     return insert_vertex (vec_t (x, y));
 }
 
-inline vec_t &Boundary::vertex (int i) {
+inline Boundary::vec_t &Boundary::vertex (int i) {
     const Boundary *this_ = this;
     return const_cast <vec_t &> (this_->vertex (i));
 }
@@ -467,6 +440,7 @@ inline void fix_contours (Boundary *b, bool silent) {
     b->fix_contours (silent);
 }
 
+#ifndef PAPAYA2
 inline void eigensystem_symm (EigenSystem *sys, const mat_t &mat) {
     // FIXME assert that matrix is symmetric
     eigensystem_symm (sys, mat(0,0), mat(0,1), mat(1,1));
@@ -505,6 +479,7 @@ inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &
     (*mat)(0,1) =
     (*mat)(1,0) = .5 * (lhs[0]*rhs[1] + lhs[1]*rhs[0]);
 }
+#endif // PAPAYA2
 
 template <typename VISITOR>
 void Boundary::visit_each_edge_const (VISITOR &vis) const {

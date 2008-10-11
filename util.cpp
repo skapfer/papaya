@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include <iomanip>
 
-static const double VERTEX_MERGE_TOLERANCE = 1e-5;
+static const double VERTEX_MERGE_TOLERANCE = 1e-6;
 
 
 void die (const char *fmt, ...) {
