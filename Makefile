@@ -10,6 +10,8 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
     geo.o \
+    edm.o \
+    writepgm.o \
 
 BINARIES = papaya testdata/eigensystem testdata/tsvdiff
 
