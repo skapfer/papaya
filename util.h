@@ -97,7 +97,7 @@ public:
     void clear ();
 
     enum { INVALID_EDGE = -1, INVALID_VERTEX = -2, INVALID_CONTOUR = -3,
-           NO_LABEL = -4 };
+           NO_LABEL = -4, INVALID_DOMAIN = -5 };
 
     typedef ::vec2_t vec_t;
     int insert_vertex (const vec_t &);

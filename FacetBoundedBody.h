@@ -10,12 +10,14 @@
 namespace Papaya2 {
 
 
-enum { INVALID_FACET = -1 };
+enum { INVALID_FACET = -1, INVALID_DOMAIN = -5 };
 
 // data as read in
 struct FacetPrimaryData {
     int vertex[DIMENSION];
     int neigh[DIMENSION];
+    int label;
+    int domain;
 };
 
 /* temporary data which is built by PAPAYA in order to compute Minkowski
@@ -68,6 +70,9 @@ public:
     #endif
           int    facet_neighbour_facet (int, int) const;
 
+          int    insert_vertex (const vec_t &);
+          int    insert_facet (const int []);
+
     // FIXME Domains interface
 
 public:
@@ -107,17 +112,45 @@ private:
 
 namespace Papaya2 {
 
-    int FacetBoundedBody::num_facets () const {
+    inline int FacetBoundedBody::num_facets () const {
         return primar_.size ();
     }
 
-    int FacetBoundedBody::facet_neighbour_facet (int f, int n) const {
+    inline int FacetBoundedBody::facet_label (int f) const {
+        assert (f < num_facets ());
+        assert (f >= 0);
+        return deriv_[f].label;
+    }
+
+    inline int FacetBoundedBody::facet_neighbour_facet (int f, int n) const {
         assert (f < num_facets ());
         assert (f >= 0);
         assert (n >= 0);
         assert (n < DIMENSION);
         int ret = primar_[f].neigh[n];
         assert (ret == INVALID_FACET || (ret >= 0 && ret < num_facets ()));
+        return ret;
+    }
+
+    inline int FacetBoundedBody::insert_vertex (const vec_t &coords) {
+        int ret = coords_.size ();
+        coords_.push_back (coords);
+        return ret;
+    }
+
+    inline int FacetBoundedBody::insert_facet (const int verts_[]) {
+        int ret = primar_.size ();
+        FacetPrimaryData nf;
+        nf.label = 0
+        nf.domain = INVALID_DOMAIN;
+        for (int i = 0; i != DIMENSION; ++i) {
+            assert (verts_[i] >= 0);
+            assert (verts_[i] < coords_.size ());
+            nf.vertex[i] = verts_[i];
+            nf.neigh[i] = INVALID_FACET;
+        }
+        primar_.push_back (nf);
+        deriv_.push_back (FacetDerivedData ());
         return ret;
     }
 
