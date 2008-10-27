@@ -85,7 +85,10 @@ private:
 };
 
 void load_pgm (Pixmap *, const std::string &pgmfilename);
+void write_pgm (const std::string &filename, const Pixmap &);
 void invert (Pixmap *);
+
+void euclidean_distance_map (Pixmap *edm, const Pixmap &p, double threshold);
 
 
 //
