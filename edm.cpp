@@ -11,7 +11,7 @@ void euclidean_distance_map (Pixmap *edm, const Pixmap &p, double threshold) {
 
 #define binary_value(x,y) (p(x,y) > threshold)
 
-    int value_at_0_15 = binary_value (0, 15);
+    //int value_at_0_15 = binary_value (0, 15);
 
     abort ();
 }

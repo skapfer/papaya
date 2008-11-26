@@ -38,6 +38,19 @@ void assert_not_nan (const vec2_t &);
 void assert_non_nan (const vec3_t &);
 void assert_not_nan (const mat2_t &m);
 
+namespace Papaya2 {
+    bool is_finite (double);
+
+    inline bool is_finite (const vec2_t &v) {
+        return is_finite (v[0]) && is_finite (v[1]);
+    }
+
+    inline bool is_finite (const vec3_t &v) {
+        return is_finite (v[0]) && is_finite (v[1])
+               && is_finite (v[2]);
+    }
+}
+
 
 //
 // INLINES AND TEMPLATES

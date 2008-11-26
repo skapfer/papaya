@@ -12,6 +12,8 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     geo.o \
     edm.o \
     writepgm.o \
+    readpoly3.o \
+    isfinite.o \
 
 BINARIES = papaya testdata/eigensystem testdata/tsvdiff
 
@@ -30,6 +32,9 @@ ts.headers: $(HEADERS)
 
 papaya: ts.headers $(SUPPORT) driver.o
 	$(CXX) -o $@ $(SUPPORT) driver.o
+
+fallobst: ts.headers $(SUPPORT) fallobst.o
+	$(CXX) -o $@ $(SUPPORT) fallobst.o
 
 testdata/tsvdiff: ts.headers util.o tsvdiff.o
 	$(CXX) -o $@ util.o tsvdiff.o
