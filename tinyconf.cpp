@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <stdexcept>
 #include <stdlib.h>
+#include <memory>
+#include <limits.h>
 using namespace std;
 
 typedef map <string, string> submap_type;

@@ -2,6 +2,7 @@
 #define MINKOWSKIVALUATIONS_H_INCLUDED 
 
 #include "util.h"
+#include "string.h"
 #include <map>
 #include <ostream>
 #include <iomanip>

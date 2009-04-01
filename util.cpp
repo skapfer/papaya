@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <iomanip>
 
 static const double VERTEX_MERGE_TOLERANCE = 1e-6;

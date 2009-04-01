@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <stdarg.h>
+#include <limits>
+#include <stdlib.h>
 
 namespace {
 
