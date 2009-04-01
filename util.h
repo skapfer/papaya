@@ -203,7 +203,9 @@ public:
     // the new edge is created _after_ the specified edge.
     void split_edge (edge_iterator, const vec_t &);
 
-    void finalise_boundary ();
+    // for the W0 integration case
+    void split_contour_inserting_edge (edge_iterator, edge_iterator);
+    void merge_contours_inserting_edge (edge_iterator, edge_iterator);
 
     template <typename VISITOR>
     void visit_each_edge_const (const VISITOR &) const;
@@ -234,6 +236,8 @@ private:
     bool is_self_referential (edge_iterator) const;
     void assert_valid_link_structure () const;
     void assert_valid_link_structure (int) const;
+    void set_contour_id_ (edge_iterator, edge_iterator, int);
+    void open_link_ (edge_iterator);
 
     edge_iterator edges_begin (int) const;
     edge_iterator edges_end (int) const;
@@ -256,6 +260,7 @@ int  label_none (Boundary *);
 int  label_by_contour_index (Boundary *);
 int  label_by_component (Boundary *);
 int  label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy);
+int  label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy, bool for_w0);
 vec2_t label_domain_center (int label, const rect_t &bbox, int divx, int divy);
 void dump_vertex (std::ostream &os, int vertex, const Boundary &b);
 void dump_labels (const std::string &filename_base, const Boundary &b);

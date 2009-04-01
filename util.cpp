@@ -197,6 +197,88 @@ void Boundary::split_edge (edge_iterator eit, const vec_t &newv) {
     assert_valid_link_structure ();
 }
 
+void Boundary::split_contour_inserting_edge (edge_iterator it0,
+                                             edge_iterator it1) {
+    it0.my_period = 0;
+    it1.my_period = 0;
+    // remove from lookup table
+    int del_contour = it0->contour;
+    erase_contour_by_id (del_contour);
+    assert (it1->contour == del_contour);
+    // open the contour
+    edge_iterator it0_succ = it0;
+    ++it0_succ;
+    open_link_ (it0);
+    edge_iterator it1_succ = it1;
+    ++it1_succ;
+    open_link_ (it1);
+    // splice two new edges into the contours
+    int upper_cid = insert_edge (it0.my_position, INVALID_VERTEX, INVALID_VERTEX, it1_succ.my_position);
+    int lower_cid = insert_edge (it1.my_position, INVALID_VERTEX, INVALID_VERTEX, it0_succ.my_position);
+    ++it0;
+    ++it0;
+    ++it1;
+    ++it1;
+    assert (it1_succ == it0);
+    assert (it0_succ == it1);
+    ++it0.my_period;
+    ++it1.my_period;
+    // set the proper contour id.
+    set_contour_id_ (it1_succ, it0, upper_cid);
+    set_contour_id_ (it0_succ, it1, lower_cid);
+    assert (it1_succ.my_position != it0_succ.my_position);
+    my_contours.push_back (lower_cid);
+    my_contours.push_back (upper_cid);
+    // check that everything is alright
+    assert_valid_link_structure (upper_cid);
+    assert_valid_link_structure (lower_cid);
+}
+
+void Boundary::merge_contours_inserting_edge (edge_iterator it0,
+                                              edge_iterator it1) {
+    it0.my_period = 0;
+    it1.my_period = 0;
+    // remove from lookup table
+    int del_contour = it0->contour;
+    erase_contour_by_id (del_contour);
+    assert (it1->contour != del_contour);
+    erase_contour_by_id (it1->contour);
+    // open the contours
+    edge_iterator it0_succ = it0;
+    ++it0_succ;
+    open_link_ (it0);
+    edge_iterator it1_succ = it1;
+    ++it1_succ;
+    open_link_ (it1);
+    // splice two new edges into the contours
+    int upper_cid = insert_edge (it0.my_position, INVALID_VERTEX, INVALID_VERTEX, it1_succ.my_position);
+                    insert_edge (it1.my_position, INVALID_VERTEX, INVALID_VERTEX, it0_succ.my_position);
+    it1 = it0;
+    ++it1.my_period;
+    // set the proper contour id.
+    set_contour_id_ (it0, it1, upper_cid);
+    my_contours.push_back (upper_cid);
+    // check that everything is alright
+    assert_valid_link_structure (upper_cid);
+}
+
+
+void Boundary::set_contour_id_ (edge_iterator a, edge_iterator b, int cc) {
+    for (; a != b; ++a)
+        edge (a).contour = cc;
+}
+
+// remove the connection between *it and it successor
+// (internal helper function)
+void Boundary::open_link_ (edge_iterator it) {
+    edge_t &E = edge (it);
+    assert (E.next != INVALID_EDGE);
+    edge_t &nE = edge (E.next);
+    assert (nE.prev == it.my_position);
+    E.next = INVALID_EDGE;
+    nE.prev = INVALID_EDGE;
+}
+
 bool Boundary::is_self_referential (edge_iterator eit) const {
     edge_iterator eit2 = eit;
     ++eit;
@@ -218,8 +300,13 @@ void Boundary::assert_valid_link_structure (int edge_id) const {
 #ifndef NDEBUG
     assert (edge_id != INVALID_EDGE);
     int terminal_edge = edge_id;
+    bool found_naming_edge = false;
+    int contour_id = edge (edge_id).contour;
     for (;;) {
         // check prev/next pointers
+        assert (edge (edge_id).contour == contour_id);
+        if (edge_id == contour_id)
+            found_naming_edge = true;
         int prev_edge = edge_id;
         edge_id = edge (edge_id).next;
         if (edge_id == INVALID_EDGE)
@@ -228,6 +315,7 @@ void Boundary::assert_valid_link_structure (int edge_id) const {
         if (edge_id == terminal_edge)
             break;
     }
+    assert (found_naming_edge);
     // the other direction (contour could be still open)
     edge_id = terminal_edge;
     for (;;) {
@@ -497,7 +585,7 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
                 b->inflection_after_edge (eit),
                 v0[0], v0[1], v1[0], v1[1]);
         }
-        die ("total_inflection_for_contour (countour_id = %i):\n%.20e\n%.20e",
+        die ("total_inflection_for_contour (contour_id = %i):\n%.20e\n%.20e",
             *cit, acc, 2*M_PI);
     }
     return acc;
