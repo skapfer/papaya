@@ -18,6 +18,9 @@ struct intersect_info_t {
 
 typedef std::vector <intersect_info_t> intersect_buffer_t;
 
+// save the intersect points to a GNUPLOT-readable format
+void dump_intersect_buffer (std::ostream &, const intersect_buffer_t &);
+
 bool intersect_ray_boundary (intersect_info_t *,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *);

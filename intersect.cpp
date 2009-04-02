@@ -123,6 +123,11 @@ bool intersect_ray_boundary (intersect_info_t *dst,
 }
 #endif // 0
 
+void dump_intersect_buffer (std::ostream &os, const intersect_buffer_t &buf) {
+    for (int i = 0; i != (int)buf.size (); ++i)
+        os << buf[i].ivtx[0] << " " << buf[i].ivtx[1] << "\n";
+}
+
 int intersect_ray_boundary  (intersect_buffer_t *dst,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *b) {
