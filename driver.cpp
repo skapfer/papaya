@@ -136,7 +136,8 @@ int main (int argc, char **argv) {
 
     std::cerr << "[papaya] Using output prefix " << output_prefix << "\n";
 
-    Boundary b;
+    Boundary b, b_for_w0_storage_;
+    Boundary *b_for_w0 = &b;
 
     if (ends_with (filename, ".poly")) {
         load_poly (&b, filename);
@@ -161,7 +162,7 @@ int main (int argc, char **argv) {
     //assert_complete_boundary (b);
     assert_sensible_boundary (b);
 
-    std::string contfile (output_prefix + "contours.out");
+    std::string contfile (output_prefix + "contours");
     dump_contours (contfile, b, 1);
 
     ScalarMinkowskiFunctional *w000 = create_w000 ();
@@ -219,8 +220,10 @@ int main (int argc, char **argv) {
         r.left   = conf.floating ("domains", "clip_left");
         int xdomains = conf.integer ("domains", "xdomains");
         int ydomains = conf.integer ("domains", "ydomains");
-        num_labels =
-            label_by_domain (&b, r, xdomains, ydomains);
+        b_for_w0_storage_ = b;
+        b_for_w0 = &b_for_w0_storage_;
+        num_labels = label_by_domain (&b, r, xdomains, ydomains, false);
+                     label_by_domain (b_for_w0, r, xdomains, ydomains, true);
         if (point_of_ref == "origin")
             set_refvert_origin (all_funcs_begin, all_funcs_end, num_labels);
         else if (point_of_ref == "domain_center")
@@ -239,7 +242,10 @@ int main (int argc, char **argv) {
         func_iterator it;
 
         for (it = all_funcs_begin; it != all_funcs_end; ++it) {
-            calculate_functional (*it, b);
+            if (*it == w000 || *it == w010 || *it == w020)
+                calculate_functional (*it, *b_for_w0);
+            else
+                calculate_functional (*it, b);
         }
     }
 
