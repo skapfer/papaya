@@ -128,10 +128,15 @@ void dump_intersect_buffer (std::ostream &os, const intersect_buffer_t &buf) {
         os << buf[i].ivtx[0] << " " << buf[i].ivtx[1] << "\n";
 }
 
+static bool by_inc (const intersect_info_t &lhs, const intersect_info_t &rhs) {
+    return lhs.inc < rhs.inc;
+}
+
 int intersect_ray_boundary  (intersect_buffer_t *dst,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *b) {
     b->visit_each_edge_const (IntersectCollector (dst, ray_0, ray_dir, MODE_RAY));
+    std::sort (dst->begin (), dst->end (), by_inc);
     return (int)dst->size ();
 }
 
@@ -139,6 +144,7 @@ int intersect_line_boundary (intersect_buffer_t *dst,
                              const vec_t &line_0, const vec_t &line_dir,
                              Boundary *b)  {
     b->visit_each_edge_const (IntersectCollector (dst, line_0, line_dir, MODE_LINE));
+    std::sort (dst->begin (), dst->end (), by_inc);
     return (int)dst->size ();
 }
 
