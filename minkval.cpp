@@ -3,11 +3,18 @@
 #include <math.h>
 
 
-static const double TWOPI = 2*M_PI;
+// change the 1 to a 0 in order to use the normalization
+// described in the paper
+#if 1
 // Breidenbach normalization
 static const double W0_NORMALIZATION = 1.;
 static const double W1_NORMALIZATION = 1.;
 static const double W2_NORMALIZATION = 1.;
+#else
+static const double W0_NORMALIZATION = 1.;
+static const double W1_NORMALIZATION = .5;
+static const double W2_NORMALIZATION = .5;
+#endif
 
 
 // W000 = volume integral
