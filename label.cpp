@@ -151,35 +151,100 @@ static void introduce_divider (Boundary *b, const vec_t &line_0, const vec_t &li
     }
 }
 
-int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy) {
+static void introduce_divider_w0 (Boundary *b, const vec_t &line_0, const vec_t &line_dir) {
+    typedef Boundary::edge_iterator edge_iterator;
+
+    intersect_buffer_t buff;
+    intersect_line_boundary (&buff, line_0, line_dir, b);
+    intersect_buffer_t::iterator it;
+    assert (buff.size () % 2 == 0);
+    std::cerr << "[introduce_divider_w0] edges in: " << b->num_edges () << "\n";
+    for (it = buff.begin (); it != buff.end (); ++it) {
+        b->split_edge (it->iedge, it->ivtx);
+        edge_iterator frst_edge_split = it->iedge;
+        edge_iterator sec_edge_split = (++it)->iedge;
+        b->split_edge (it->iedge, it->ivtx);
+        if (frst_edge_split->contour == sec_edge_split->contour)
+            b->split_contour_inserting_edge (frst_edge_split, sec_edge_split);
+        else
+            b->merge_contours_inserting_edge (frst_edge_split, sec_edge_split);
+    }
+    std::cerr << "[introduce_divider_w0] edges out: " << b->num_edges () << "\n";
+}
+
+int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
+                     bool for_nu_equals_zero) {
+
     // split edges crossing domain boundaries 
     double xstrip = bbox.right - bbox.left;
     assert (xstrip > 0.);
     xstrip /= divx;
-    for (int i = 0; i <= divx; ++i)
-        introduce_divider (b, vec_t (bbox.left + xstrip*i, 0.), vec_t (0., 1.));
+    for (int i = 0; i <= divx; ++i) {
+        if (for_nu_equals_zero)
+            introduce_divider_w0 (b, vec_t (bbox.left + xstrip*i, 0.), vec_t (0., 1.));
+        else
+            introduce_divider (b, vec_t (bbox.left + xstrip*i, 0.), vec_t (0., 1.));
+    }
     double ystrip = bbox.top - bbox.bottom;
     assert (ystrip > 0.);
     ystrip /= divy;
-    for (int i = 0; i <= divy; ++i)
-        introduce_divider (b, vec_t (0., bbox.bottom + ystrip*i), vec_t (1., 0.));
+    for (int i = 0; i <= divy; ++i) {
+        if (for_nu_equals_zero)
+            introduce_divider_w0 (b, vec_t (0., bbox.bottom + ystrip*i), vec_t (1., 0.));
+        else
+            introduce_divider (b, vec_t (0., bbox.bottom + ystrip*i), vec_t (1., 0.));
+    }
+
     // remove nonsense we just introduced
     fix_contours (b, true);
+
     // label everything
-    Boundary::contour_iterator cit;
-    Boundary::edge_iterator eit;
-    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit)
-    for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
-        vec_t p = b->edge_vertex0 (eit);
-        p += b->edge_vertex1 (eit);
-        p /= 2.;
-        if (intersect_vertex_rect (p, bbox)) {
-            p -= vec_t (bbox.left, bbox.bottom);
-            p.x () /= xstrip;
-            p.y () /= ystrip;
-            b->edge_label (eit, int (p.x ()) + int (p.y ()) * divy);
-        } else {
-            b->edge_label (eit, Boundary::NO_LABEL);
+    if (!for_nu_equals_zero) {
+        Boundary::contour_iterator cit;
+        Boundary::edge_iterator eit;
+        for (cit = b->contours_begin (); cit != b->contours_end (); ++cit)
+        for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
+            vec_t p = b->edge_vertex0 (eit);
+            p += b->edge_vertex1 (eit);
+            p /= 2.;
+            int the_label;
+            if (intersect_vertex_rect (p, bbox)) {
+                p -= vec_t (bbox.left, bbox.bottom);
+                p.x () /= xstrip;
+                p.y () /= ystrip;
+                the_label = int (p.x ()) + int (p.y ()) * divy;
+            } else {
+                the_label = Boundary::NO_LABEL;
+            }
+            b->edge_label (eit, the_label);
+        }
+    } else {
+        Boundary::contour_iterator cit;
+        Boundary::edge_iterator eit;
+        for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
+            // calculate "center of gravity" for this contour.
+            // we need this to assign coinciding border edges
+            // to the proper label.
+            vec_t cog_ = vec_t (0., 0.);
+            int cog_i = 0;
+            for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit) {
+                cog_ += b->edge_vertex0 (eit);
+                ++cog_i;
+            }
+            // after cutting, each contour is in exactly one label.
+            int the_label;
+            if (intersect_vertex_rect (cog_/cog_i, bbox)) {
+                vec_t p = cog_/cog_i;
+                p -= vec_t (bbox.left, bbox.bottom);
+                p.x () /= xstrip;
+                p.y () /= ystrip;
+                the_label = int (p.x ()) + int (p.y ()) * divy;
+            } else {
+                the_label = Boundary::NO_LABEL;
+            }
+            std::cerr << "[label_by_domain] " << *cit << " gets label " << the_label << "\n";
+            for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit)
+                b->edge_label (eit, the_label);
         }
     }
     return divx*divy;
@@ -209,25 +274,24 @@ void dump_labels (const std::string &filename, const Boundary &b) {
         Boundary::edge_iterator eit, eit_end;
         eit = b.edges_begin (cit);
         eit_end = b.edges_end (cit);
-        ++eit_end;
-        int label = b.edges_begin (cit)->label;
 
         while (eit != eit_end) {
-            if (label != eit->label) {
+            if (eit->label == Boundary::NO_LABEL) {
+                // skip unlabelled edges
+                for (; eit != eit_end && eit->label == Boundary::NO_LABEL; ++eit);
+            } else {
+                // dump a sequence of equal-labelled edges to ofdat
+                int label = eit->label;
+                for (; eit != eit_end && eit->label == label; ++eit) {
+                    dump_vertex (ofdat, eit->vert0, b);
+                }
                 dump_vertex (ofdat, eit->vert0, b);
                 ofdat << "\n\n";  // index sep. (for gnuplot)
                 ofscr << "\t\"" << filename << ".out\" index "
                       << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
                 ofscr << "\t,\\\n";
-                label = eit->label;
             }
-            dump_vertex (ofdat, eit->vert0, b);
-            ++eit;
         }
-        ofdat << "\n\n";  // index sep. (for gnuplot)
-        ofscr << "\t\"" << filename << ".out\" index "
-              << index++ << " w lp lt " << label+1 << " pt " << label+1 << "\\\n";
-        ofscr << "\t,\\\n";
     }
     ofscr << "\t(1./0)\n";
 }
