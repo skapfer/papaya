@@ -650,8 +650,10 @@ void assert_sensible_boundary (const Boundary &b) {
 #endif // NDEBUG
 
 void dump_contours (const std::string &filename, const Boundary &a, int flags) {
-    std::ofstream os (filename.c_str ());
+    std::ofstream os ((filename + ".out").c_str ());
     dump_contours (os, a);
+    std::ofstream scr ((filename + ".gp").c_str ());
+    scr << "plot \"" << filename << ".out\" w lp\n"; 
 }
 
 enum { BY_DIRECTION = 1 };
