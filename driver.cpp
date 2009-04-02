@@ -236,6 +236,7 @@ int main (int argc, char **argv) {
 
     assert (num_labels != -1);
     dump_labels (output_prefix + "labels", b);
+    dump_labels (output_prefix + "nu0labels", *b_for_w0);
 
     {
         // calculate all functionals
