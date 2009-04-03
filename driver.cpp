@@ -114,33 +114,42 @@ int main (int argc, char **argv) {
 
     // preparing the config file, and the command line.
     std::string configfile = my_basename (argv[0]) + ".conf";
-    if (ops >> OptionPresent ('c', "--config")) {
-        ops >> Option ('c', "--config", configfile);
+    if (ops >> OptionPresent ('c', "config")) {
+        ops >> Option ('c', "config", configfile);
     }
     std::cerr << "[papaya] Using config file " << configfile << "\n";
     Configuration conf (configfile);
 
     std::string filename = conf.string ("input", "filename");
-    if (ops >> OptionPresent ('i', "--input")) {
+    if (ops >> OptionPresent ('i', "input")) {
         // override the input specified in config file
-        ops >> Option ('i', "--input", filename);
+        ops >> Option ('i', "input", filename);
     }
 
     std::cerr << "[papaya] Using input file " << filename << "\n";
 
     std::string output_prefix = conf.string ("output", "prefix");
-    if (ops >> OptionPresent ('o', "--output")) {
+    if (ops >> OptionPresent ('o', "output")) {
         // override the output specified in config file
-        ops >> Option ('o', "--output", output_prefix);
+        ops >> Option ('o', "output", output_prefix);
     }
-
     std::cerr << "[papaya] Using output prefix " << output_prefix << "\n";
+
+    double thresh_override = -INFINITY;
+    if (ops >> OptionPresent ('\0', "threshold")) {
+        ops >> Option ('\0', "threshold", thresh_override);
+        std::cerr << "[papaya] Using threshold " << thresh_override << "\n";
+    }
 
     Boundary b, b_for_w0_storage_;
     Boundary *b_for_w0 = &b;
 
     if (ends_with (filename, ".poly")) {
         load_poly (&b, filename);
+        if (thresh_override != -INFINITY) {
+            std::cerr << "--threshold is not useful in .poly mode.\n";
+            abort ();
+        }
         bool runfix   = conf.boolean ("polyinput", "fix_contours");
         bool forceccw = conf.boolean ("polyinput", "force_counterclockwise");
         if (runfix)
@@ -153,15 +162,16 @@ int main (int argc, char **argv) {
         if (conf.boolean ("segment", "invert"))
             invert (&p);
         double threshold  = conf.floating ("segment", "threshold");
+        if (thresh_override != -INFINITY)
+            threshold = thresh_override;
         bool connectblack = conf.boolean ("segment", "connectblack");
         bool periodic_data = conf.boolean ("segment", "data_is_periodic");
         marching_squares (&b, p, threshold, connectblack, periodic_data);
     }
 
-    // FIXME thrown out, replace by sth. more integrated
-    //assert_complete_boundary (b);
     assert_sensible_boundary (b);
 
+    // write contours prior to labelling (in case that crashes...)
     std::string contfile (output_prefix + "contours");
     dump_contours (contfile, b, 1);
 

@@ -1,3 +1,8 @@
 
 Check for self-intersecting polygons (!)
 
+Replace GetOptpp by a more sensible library
+
+Write a proper tensor class
+
+
