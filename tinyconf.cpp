@@ -159,8 +159,7 @@ int Configuration::integer (const string_t &section, const string_t &key) const 
     long x = strtol (v.c_str (), NULL, 0);
     if (errno != 0 || x > INT_MAX || x < INT_MIN)
         throw std::runtime_error ("Invalid integer \"" + v + "\"");
-    else
-        return x;
+    return x;
 }
 
 double Configuration::floating (const string_t &section, const string_t &key) const {

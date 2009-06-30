@@ -97,7 +97,7 @@ inline AbstractMinkowskiFunctional::AbstractMinkowskiFunctional () {
 // allocate new labels (i.e. reference vertices for more labels)
 inline void AbstractMinkowskiFunctional::reszref (label_t l) const {
     if (l < MAX_LABELS) {
-        unsigned new_size = std::max (my_ref_vertex_.size (), l+1u);
+        unsigned new_size = std::max (unsigned (my_ref_vertex_.size ()), l+1u);
         my_ref_vertex_.resize (new_size, vec_t (0., 0.));
     } else {
         die ("AbstractMinkowskiFunctional: too many labels");
@@ -139,7 +139,7 @@ inline GenericMinkowskiFunctional<VALUE_TYPE>::GenericMinkowskiFunctional (const
 
 // return accumulator for label
 template <typename VALUE_TYPE>
-inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (int label) {
+inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (label_t label) {
     if (label == Boundary::NO_LABEL)
         return dummy_acc;
     reszacc (label);
@@ -147,7 +147,7 @@ inline VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::acc (int label) {
 }
 
 template <typename VALUE_TYPE>
-inline const VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::value (int label) const {
+inline const VALUE_TYPE &GenericMinkowskiFunctional<VALUE_TYPE>::value (label_t label) const {
     assert (label >= 0);
     return const_cast <GenericMinkowskiFunctional<VALUE_TYPE> *> (this)->acc (label);
 }
@@ -161,7 +161,7 @@ inline const std::string &GenericMinkowskiFunctional <VALUE_TYPE>::name () const
 template <typename VALUE_TYPE>
 void GenericMinkowskiFunctional<VALUE_TYPE>::reszacc (label_t l) {
     if (l < MAX_LABELS) {
-        unsigned new_size = std::max (my_acc.size (), l+1u);
+        unsigned new_size = std::max (unsigned (my_acc.size ()), l+1u);
         value_t zero;
         memset (&zero, 0, sizeof (zero));
         my_acc.resize (new_size, zero);
