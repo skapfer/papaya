@@ -15,7 +15,7 @@ BINARIES = papaya testdata/eigensystem testdata/tsvdiff
 all: $(BINARIES)
 
 clean:
-	rm -f $(BINARIES) *.o
+	rm -f $(BINARIES) *.o ts.*
 
 test: $(BINARIES)
 	$(MAKE) -C testdata/ test
