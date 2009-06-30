@@ -235,7 +235,7 @@ private:
     // i.e. a degenerate single-vertex contour
     bool is_self_referential (edge_iterator) const;
     void assert_valid_link_structure () const;
-    void assert_valid_link_structure (int) const;
+    void assert_valid_link_structure_helper_ (int) const;
     void set_contour_id_ (edge_iterator, edge_iterator, int);
     void open_link_ (edge_iterator);
 

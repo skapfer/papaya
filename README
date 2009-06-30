@@ -4,9 +4,7 @@
 2D MINKOWSKI TENSOR PACKAGE
 ===========================
 
-
-
-
+This program calculates the Minkowski valuations of planar shapes.
 
 The program uses an external library called "Eigen" for the vector subroutines.
 For your convenience, the relevant headers are included in this package.
@@ -36,6 +34,7 @@ Type "make DEBUG=0" to create a version without debugging code.
 
 Type "make test" to run the (currently minimal) testsuite.
 
+
 ==========================
 REQUIREMENTS ON INPUT DATA
 ==========================
@@ -63,5 +62,30 @@ DOCUMENTATION OF POLY FILE FORMAT
 
 FIXME
 
+
+================================
+DOCUMENTATION OF PGM FILE FORMAT
+================================
+
+These files are plain portable graymaps, as introduced by the netpbm
+package ages ago.  Note that for example GIMP defaults to writing
+binary PGM ("P5").  Choose ASCII instead ("P2").
+
+
+==============
+KNOWN PROBLEMS
+==============
+
+0. Documentation incomplete, and I know it.  I'm sorry.  If you have a
+   problem using this package, don't hesitate to contact me.
+
+   sebastian.kapfer@physik.uni-erlangen.de
+
+1. When calculating the MV of a pixelised dataset, and using domainwise
+   analysis, you should not choose the clipping rectangle on integral
+   coordinates.  Instead, choose coordinates like 10.5, or even 10.0001.
+
+   This avoids a bug where an odd number of intersects between a ray
+   and a contour is found.
 
 

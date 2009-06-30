@@ -59,7 +59,6 @@ int Boundary::insert_edge (int a, int b, int c, int d) {
     }
     if (d != INVALID_EDGE) {
         assert (edge(d).prev == INVALID_EDGE);
-        edge(d).prev = ret;
         if (contour != INVALID_CONTOUR) {
             // merge contours edge(ret).contour and edge(d).contour
             if (contour != edge(d).contour) {
@@ -69,6 +68,7 @@ int Boundary::insert_edge (int a, int b, int c, int d) {
         } else {
             contour = edge(d).contour;
         }
+        edge(d).prev = ret;
     }
     if (d == INVALID_EDGE && a == INVALID_EDGE) {
         my_contours.push_back (ret);
@@ -230,19 +230,15 @@ void Boundary::split_contour_inserting_edge (edge_iterator it0,
     my_contours.push_back (lower_cid);
     my_contours.push_back (upper_cid);
     // check that everything is alright
-    assert_valid_link_structure (upper_cid);
-    assert_valid_link_structure (lower_cid);
+    assert_valid_link_structure ();
+    assert_valid_link_structure ();
 }
 
 void Boundary::merge_contours_inserting_edge (edge_iterator it0,
                                               edge_iterator it1) {
     it0.my_period = 0;
     it1.my_period = 0;
-    // remove from lookup table
-    int del_contour = it0->contour;
-    erase_contour_by_id (del_contour);
-    assert (it1->contour != del_contour);
-    erase_contour_by_id (it1->contour);
+    assert (it1->contour != it0->contour);
     // open the contours
     edge_iterator it0_succ = it0;
     ++it0_succ;
@@ -251,15 +247,9 @@ void Boundary::merge_contours_inserting_edge (edge_iterator it0,
     ++it1_succ;
     open_link_ (it1);
     // splice two new edges into the contours
-    int upper_cid = insert_edge (it0.my_position, INVALID_VERTEX, INVALID_VERTEX, it1_succ.my_position);
-                    insert_edge (it1.my_position, INVALID_VERTEX, INVALID_VERTEX, it0_succ.my_position);
-    it1 = it0;
-    ++it1.my_period;
-    // set the proper contour id.
-    set_contour_id_ (it0, it1, upper_cid);
-    my_contours.push_back (upper_cid);
-    // check that everything is alright
-    assert_valid_link_structure (upper_cid);
+    insert_edge (it0.my_position, INVALID_VERTEX, INVALID_VERTEX, it1_succ.my_position);
+    insert_edge (it1.my_position, INVALID_VERTEX, INVALID_VERTEX, it0_succ.my_position);
+    assert_valid_link_structure ();
 }
 
 
@@ -269,6 +259,7 @@ void Boundary::set_contour_id_ (edge_iterator a, edge_iterator b, int cc) {
 }
 
 // remove the connection between *it and it successor
+// this may cause a contour to become disconnected!
 // (internal helper function)
 void Boundary::open_link_ (edge_iterator it) {
     edge_t &E = edge (it);
@@ -290,23 +281,21 @@ bool Boundary::is_self_referential (edge_iterator eit) const {
 void Boundary::assert_valid_link_structure () const {
 #ifndef NDEBUG
     contour_iterator cit = contours_begin ();
-    for (; cit != contours_end (); ++cit) {
-        assert_valid_link_structure (*cit);
-    }
+    for (; cit != contours_end (); ++cit)
+        assert_valid_link_structure_helper_ (*cit);
 #endif
 }
 
-void Boundary::assert_valid_link_structure (int edge_id) const {
+// helper function, should not be called directly
+void Boundary::assert_valid_link_structure_helper_ (int edge_id) const {
 #ifndef NDEBUG
     assert (edge_id != INVALID_EDGE);
     int terminal_edge = edge_id;
-    bool found_naming_edge = false;
     int contour_id = edge (edge_id).contour;
+    assert (contour_id == edge_id);
     for (;;) {
-        // check prev/next pointers
         assert (edge (edge_id).contour == contour_id);
-        if (edge_id == contour_id)
-            found_naming_edge = true;
+        // check prev/next pointers
         int prev_edge = edge_id;
         edge_id = edge (edge_id).next;
         if (edge_id == INVALID_EDGE)
@@ -315,7 +304,6 @@ void Boundary::assert_valid_link_structure (int edge_id) const {
         if (edge_id == terminal_edge)
             break;
     }
-    assert (found_naming_edge);
     // the other direction (contour could be still open)
     edge_id = terminal_edge;
     for (;;) {
