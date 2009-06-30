@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# vim: et:sw=4:ts=4
+# generate a circle in POLY format.
+# usage: mkcircle output.poly radius numberofpoints
+
+
+import sys
+import math
+
+fp = open (sys.argv[1], 'w')
+contours = []
+base_vid = 1
+
+def make_circle (num_points, x, y, radius, direction = 1):
+    global fp, base_vid, contours
+    for i in range (num_points):
+        ang = direction * 2*math.pi / num_points * i
+        vx = x + radius * math.cos (ang)
+        vy = y + radius * math.sin (ang)
+        fp.write ('%i: %.20e %.20e 0.\n' % (i+base_vid, vx, vy))
+    contours.append (range (base_vid, base_vid+num_points))
+    base_vid += num_points
+
+fp.write ('POINTS\n')
+make_circle (100, 0., 0.,   radius=1.)
+make_circle (25,  0., -.75, radius=.1, direction=-1)
+make_circle (25,  0., .75,  radius=.1, direction=-1)
+
+fp.write ('POLYS\n')
+base_cid = 1
+
+def write_contour (c):
+    global fp, base_cid
+    fp.write ('%i: ' % base_cid)
+    for X in c:
+        fp.write ('%i ' % X)
+    fp.write ('<\n')
+    base_cid += 1
+
+for c in contours:
+    write_contour (c)
+
+fp.write ('END\n')
+
+
+fp.close ()
+
