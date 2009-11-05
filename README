@@ -88,4 +88,18 @@ KNOWN PROBLEMS
    This avoids a bug where an odd number of intersects between a ray
    and a contour is found.
 
+2. Version 1.0 had a bug in W020 tensor, more specifically in the off
+   diagonal components.  This has been fixed in 1.1.
 
+   line 379 in minkval.cpp should not have read
+
+        379             t += (v0[0] + v1[0]) * (v0[1] + v1[1]);
+
+   but
+
+        379             t +=  v0[0] * v1[0]  * (v0[1] + v1[1]);
+
+   (Papaya 1.0 did not use the result from the article, which had a
+   different problem.)
+
+   Again, this has been corrected in the present version.
