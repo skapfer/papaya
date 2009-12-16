@@ -390,13 +390,19 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
 #ifndef NDEBUG
     if (isnan (sinphi)) {
         std::string msg;
+        int label1 = it->label;
+        --it;
+        int label0 = it->label;
+        ++it;
         if (! (tang0.norm () > 1e-6))
             msg += "norm0 is close to zero or NaN\n";
         if (! (tang1.norm () < 1e-6))
             msg += "norm1 is close to zero or NaN\n";
-        msg += "nan in Boundary::inflection_after_edge (%s), vector product\n";
+        msg += "NaN in Boundary::inflection_after_edge (it), in vector product\n"
+               "  Edge iterator it is: %s\n"
+               "  Label of affected edges: edge0.label = %i; edge1.label = %i\n";
         std::string itstr = it.to_string ();
-        die (msg.c_str (), itstr.c_str ());
+        die (msg.c_str (), itstr.c_str (), label0, label1);
     }
 #endif
     double cosphi = dot (tang0, tang1);
