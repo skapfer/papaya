@@ -388,7 +388,7 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     // z component of cross prod.
     double sinphi = tang0[0] * tang1[1] - tang1[0] * tang0[1];
 #ifndef NDEBUG
-    if (isnan (sinphi)) {
+    if (!not_nan (sinphi)) {
         std::string msg;
         int label1 = it->label;
         --it;
@@ -408,7 +408,7 @@ double Boundary::inflection_after_edge (Boundary::edge_iterator it) const {
     double cosphi = dot (tang0, tang1);
     double ret = atan2 (sinphi, cosphi);
 #ifndef NDEBUG
-    if (isnan (ret)) {
+    if (!not_nan (ret)) {
         die ("Boundary::inflection_after_edge: NaN in atan2");
     }
 #endif // NDEBUG

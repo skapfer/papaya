@@ -30,7 +30,8 @@ BUILDING & TESTING
 
 Type "make" to compile.
 
-Type "make DEBUG=0" to create a version without debugging code.
+Type "make DEBUG=0 clean all" to create a version without debugging code.
+Normally, this is not necessary as Papaya is relatively quick.
 
 Type "make test" to run the (currently minimal) testsuite.
 
@@ -103,3 +104,17 @@ KNOWN PROBLEMS
    different problem.)
 
    Again, this has been corrected in the present version.
+
+=========
+CHANGELOG
+=========
+
+version 1.2
+ * fix compilation on cygwin by using a custom isnan
+ * fix a testcase lacking a directory
+
+version 1.1
+ * fix bug in W020 tensor
+
+version 1.0
+ * initial public release

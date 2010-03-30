@@ -79,9 +79,14 @@ struct TensorRank<0> {
 
 // FIXME move tensor products etc. here.
 
+// seems we can't rely on isnan being available everywhere.
+inline bool not_nan (double x) {
+    return x==x;
+}
+
 inline void assert_not_nan (double x) {
 #ifndef NDEBUG
-    assert (!isnan (x));
+    assert (not_nan (x));
 #endif // NDEBUG
 }
 

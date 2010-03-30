@@ -20,9 +20,9 @@ namespace {
         double cc0 = dot (cdir_, b.edge_vertex0 (eit));
         double cc1 = dot (cdir_, b.edge_vertex1 (eit));
         double ccR = dot (cdir_, r0);
-        assert (!isnan (cc0));
-        assert (!isnan (cc1));
-        assert (!isnan (ccR));
+        assert (not_nan (cc0));
+        assert (not_nan (cc1));
+        assert (not_nan (ccR));
         double lambda;
         if (cc0 <= ccR and ccR < cc1) {
             double l1 = ccR - cc0;
