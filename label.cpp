@@ -158,7 +158,7 @@ static void introduce_divider_w0 (Boundary *b, const vec_t &line_0, const vec_t 
     intersect_line_boundary (&buff, line_0, line_dir, b);
     intersect_buffer_t::iterator it;
     assert (buff.size () % 2 == 0);
-    std::cerr << "[introduce_divider_w0] edges in: " << b->num_edges () << "\n";
+    //std::cerr << "[introduce_divider_w0] edges in: " << b->num_edges () << "\n";
     for (it = buff.begin (); it != buff.end (); ++it) {
         b->split_edge (it->iedge, it->ivtx);
         edge_iterator frst_edge_split = it->iedge;
@@ -169,7 +169,7 @@ static void introduce_divider_w0 (Boundary *b, const vec_t &line_0, const vec_t 
         else
             b->merge_contours_inserting_edge (frst_edge_split, sec_edge_split);
     }
-    std::cerr << "[introduce_divider_w0] edges out: " << b->num_edges () << "\n";
+    //std::cerr << "[introduce_divider_w0] edges out: " << b->num_edges () << "\n";
 }
 
 int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
@@ -242,7 +242,7 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
             } else {
                 the_label = Boundary::NO_LABEL;
             }
-            std::cerr << "[label_by_domain] " << *cit << " gets label " << the_label << "\n";
+            //std::cerr << "[label_by_domain] " << *cit << " gets label " << the_label << "\n";
             for (eit = b->edges_begin (cit); eit != b->edges_end (cit); ++eit)
                 b->edge_label (eit, the_label);
         }
