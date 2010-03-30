@@ -2,6 +2,6 @@ test:
 	./0script
 
 clean:
-	rm -rf *.res
+	rm -rf *.res *.out
 
 .PHONY: test clean

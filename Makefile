@@ -16,9 +16,10 @@ all: $(BINARIES)
 
 clean:
 	rm -f $(BINARIES) *.o ts.*
+	$(MAKE) -C testdata clean
 
 test: $(BINARIES)
-	$(MAKE) -C testdata/ test
+	$(MAKE) -C testdata test
 
 # trick to recompile everything when the headers change.
 ts.headers: $(HEADERS)
