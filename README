@@ -112,6 +112,7 @@ CHANGELOG
 version 1.2
  * fix compilation on cygwin by using a custom isnan
  * fix a testcase lacking a directory
+ * remove debugging messages
 
 version 1.1
  * fix bug in W020 tensor
