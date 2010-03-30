@@ -35,6 +35,7 @@ $testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/
 $testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/
 $testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/
 $testdriver -c ma105_7o.conf
+ensuredir counterexample.out
 $testdriver -c counterexample.conf
 echo "[$0] Comparing to reference results..." >&2
 complain_if_mismatch multiellipse.out
