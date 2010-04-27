@@ -15,12 +15,12 @@ for i in range (numberofpoints):
     ang = 2*math.pi / numberofpoints * i
     x = radius * math.cos (ang)
     y = radius * math.sin (ang)
-    fp.write ('%i: %.20e %.20e 0.\n' % (i, x, y))
+    fp.write ('%i: %.20e %.20e 0.\n' % (i+1, x, y))
 
 fp.write ('POLYS\n')
-fp.write ('0: ')
+fp.write ('1: ')
 for i in range (numberofpoints):
-    fp.write ('%i ' % i)
+    fp.write ('%i ' % (i+1))
 fp.write ('<\n')
 
 fp.write ('END\n')

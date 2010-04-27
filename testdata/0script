@@ -25,27 +25,54 @@ complain_if_mismatch () {
     done
 }
 
+complain_if_different () {
+    if ! diff -q "$1" "$2"; then
+        echo "[$0] Test $1 == $2 failed" >&2
+        record_failure "FAILED $1"
+        return 1
+    fi    
+}
+
 rm -f FAILED
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
 ensuredir ma105_7o.out
 echo "[$0] Running papaya testcases..." >&2
-$testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/
-$testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/
-$testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/
-$testdriver -c ma105_7o.conf
+$testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/ &
+$testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/ &
+$testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/ &
+wait
+$testdriver -c ma105_7o.conf &
 ensuredir counterexample.out
-$testdriver -c counterexample.conf
+$testdriver -c counterexample.conf &
+wait
+ensuredir viereck-new.out 
+ensuredir viereck.out
+$testdriver -c counterexample.conf -i viereck-new.poly  -o viereck-new.out/ &
+$testdriver -c counterexample.conf -i viereck.poly  -o viereck.out/ &
+wait
+
 echo "[$0] Comparing to reference results..." >&2
+
+# standard ellipses, at origin and not...
 complain_if_mismatch multiellipse.out
 complain_if_mismatch multiellipse2.out
 complain_if_mismatch multiellipse2.com.out
+
+# test of a larger pixel data input
 complain_if_mismatch ma105_7o.out
+
 # this testcase is near degenerate and eigenvectors are indeterminate
 cp counterexample.ref/tensor_W102.out counterexample.out
 cp counterexample.ref/tensor_W211.out counterexample.out
 complain_if_mismatch counterexample.out
+
+# test to see if Papaya is still able to read old-style (zero-based) polys.
+# please write new .poly files in one-based format.
+# (gnuplot scripts will be different obviously since they contain path names)
+rm -f viereck{,-new}.out/*.gp
+complain_if_different viereck-new.out viereck.out
 
 # not checked in
 #ensuredir multirectangle.out

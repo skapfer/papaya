@@ -28,12 +28,25 @@ and is available under the GNU General Public License, version 3.
 BUILDING & TESTING
 ==================
 
-Type "make" to compile.
+Type "make" to compile Papaya.
 
-Type "make DEBUG=0 clean all" to create a version without debugging code.
-Normally, this is not necessary as Papaya is relatively quick.
+Type instead "make DEBUG=0 clean all" to create a version without debugging
+code.  Normally, this is not necessary as Papaya is relatively quick.
 
 Type "make test" to run the (currently minimal) testsuite.
+
+
+=====
+DEMOS
+=====
+
+There are a number of demos on how to use Papaya in the demos/ folder.
+
+1. Poisson-Voronoi cells   (poisson-voronoi)
+
+Creates a realization of a Poisson point process, and calculates the Minkowski
+Tensors of its Voronoi diagram.  Driver script written in Python, uses qhull
+(qhull.org) to calculate the Voronoi diagram.
 
 
 ==========================
@@ -61,7 +74,37 @@ function fix_contours).
 DOCUMENTATION OF POLY FILE FORMAT
 =================================
 
-FIXME
+A .poly file consists of two sections, separated by the keywords "POINTS",
+"POLYS", and "END".
+
+The second section defines the actual polygons.  Each polygon is introduced by
+a number, and a colon (:), followed by references to the vertices (integers >=
+1) in counterclockwise order.  Finally, to indicate a closed polyon, the
+character "<" terminates the line.
+
+Non-closed polygons are presently unsupported; Papaya ignores the request to
+construct an open polygon and constructs a closed one.
+
+Vertices in clockwise order describe a hole in a body (an inner contour as
+opposed to the outer contour).
+
+The actual coordinates of each vertex are defined in the first section; again,
+each vertex is introduced by a number and a colon; coordinates are given as
+floating-point numbers, and the third component (z) is zero.
+
+Minimal example of a file describing a quadrilateral:
+
+POINTS
+1: 2.00000000000000000000e+00 1.00000000000000000000e+00 0.
+2: 1.00000000000000000000e+00 1.50000000000000000000e+00 0.
+3: 0.00000000000000000000e+00 1.00000000000000000000e+00 0.
+4: 9.99999999999999777955e-01 5.00000000000000000000e-01 0.
+POLYS
+1: 1 2 3 4 <
+END
+
+There is example code how to write a simple .poly file from Python in the
+testdata/mkcircle script.
 
 
 ================================
@@ -109,7 +152,10 @@ KNOWN PROBLEMS
 CHANGELOG
 =========
 
-version 1.2
+version 1.3
+ * add Poisson-Voronoi demo.
+
+version 2.2
  * fix compilation on cygwin by using a custom isnan
  * fix a testcase lacking a directory
  * remove debugging messages
