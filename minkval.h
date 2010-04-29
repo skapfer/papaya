@@ -199,4 +199,6 @@ inline void GenericMinkowskiFunctional<VALUE_TYPE>::dump_accu (std::ostream &os,
     os << "("  << std::setw (16) << v(1,0) << " " << std::setw (15) << v(1,1) << "))";
 }
 
+void print_version_header (std::ostream &);
+
 #endif /* MINKOWSKIVALUATIONS_H_INCLUDED */

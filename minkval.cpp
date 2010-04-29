@@ -17,6 +17,12 @@ static const double W2_NORMALIZATION = .5;
 #endif
 
 
+void print_version_header (std::ostream &of) {
+    of << "# papaya version " << VERSION <<
+        "\n# (c) 2008-2010 Sebastian Kapfer "
+        "<sebastian.kapfer@physik.uni-erlangen.de>\n";
+}
+
 // W000 = volume integral
 // converted to a surface integral by GaussGreen theorem.
 //

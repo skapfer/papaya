@@ -10,6 +10,8 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
+CXXFLAGS += -DVERSION=\"1.3\"
+
 BINARIES = papaya testdata/eigensystem testdata/tsvdiff
 
 all: $(BINARIES)

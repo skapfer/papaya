@@ -112,6 +112,11 @@ static void set_refvert_domain_center (func_iterator begin, func_iterator end,
 int main (int argc, char **argv) {
     GetOpt_pp ops (argc, argv);
 
+    if (ops >> OptionPresent ('v', "version")) {
+        std::cerr << "papaya " << VERSION << "\n";
+        return 0;
+    }
+
     // preparing the config file, and the command line.
     std::string configfile = my_basename (argv[0]) + ".conf";
     if (ops >> OptionPresent ('c', "config")) {
@@ -271,6 +276,7 @@ int main (int argc, char **argv) {
         std::ofstream of (filename.c_str ());
         if (!of)
             std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
+        print_version_header (of);
         of << std::setw (20) << "#   1          label";
         int col = 2;
         of << std::setw ( 4) << col++;
@@ -300,6 +306,7 @@ int main (int argc, char **argv) {
         std::ofstream of (filename.c_str ());
         if (!of)
             std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
+        print_version_header (of);
         of << std::setw (20) << "#   1          label";
         int col = 2;
         of << std::setw ( 4) << col++;
@@ -341,6 +348,7 @@ int main (int argc, char **argv) {
             std::ofstream of (filename.c_str ());
             if (!of)
                 std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
+            print_version_header (of);
             of << std::setw (20) << "#   1          label";
             int col = 2;
             of << std::setw ( 4) << col++;
