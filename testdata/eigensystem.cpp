@@ -1,8 +1,6 @@
-
-
 #include "../util.h"
 #include <iostream>
-
+#include <stdio.h>
 
 void rot (double phi, mat_t *m) {
     double c = cos (phi);
