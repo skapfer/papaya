@@ -8,6 +8,7 @@ import xyz
 import bc
 import tempfile
 import qhulldriver
+from shared import die, break_line_into_string
 
 # read .xyz data
 infile = sys.argv[1]
@@ -61,6 +62,9 @@ elif bounds == 'periodic_hexagonal':
 
 elif bounds == 'minus_sample':
     die ('Not there')
+
+else:
+    die ('Not implemented')
 
 # we could compute a generalized Voronoi diagram here
 # (we don't)

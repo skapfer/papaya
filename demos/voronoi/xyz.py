@@ -1,6 +1,4 @@
-
-import fileio
-
+from shared import break_line_into_string
 
 def read_xyz_with_comment (infilename):
 	fp = open (infilename)
@@ -10,7 +8,7 @@ def read_xyz_with_comment (infilename):
 	label = 0
 	ret = []
 	for l in fp.readlines ():
-		bl = fileio.break_line_into_string (l)
+		bl = break_line_into_string (l)
 		x = float (bl[1])
 		y = float (bl[2])
 		R = 0.

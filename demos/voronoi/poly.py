@@ -1,3 +1,5 @@
+from shared import break_line_into_string
+
 class poly:
 
     # constructor 
@@ -6,7 +8,6 @@ class poly:
               self.polys = []                            # (label, first_index, ... , last_index)
        
        def read_from_off(self,infilename):
-              from fileio import break_line_into_string
               from string import atoi, atof              
               offfile=open(infilename,'r')
               # read first line: must be "POINTS"
