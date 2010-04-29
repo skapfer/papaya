@@ -17,3 +17,4 @@ papaya
 testdata/eigensystem
 testdata/tsvdiff
 ts.headers
+*.pyc
