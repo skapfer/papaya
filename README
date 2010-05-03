@@ -148,12 +148,24 @@ KNOWN PROBLEMS
 
    Again, this has been corrected in the present version.
 
+
+===============
+ACKNOLEDGEMENTS
+===============
+
+Thanks to:  Gerd Schroeder-Turk, Michael Klatt, Walter Mickel, Matthias
+Hoffmann.
+
+
 =========
 CHANGELOG
 =========
 
 version 1.3
  * add Poisson-Voronoi demo.
+ * fix compilation issues (missing header)
+ * add version number to the output files produced
+ * more docs
 
 version 2.2
  * fix compilation on cygwin by using a custom isnan
