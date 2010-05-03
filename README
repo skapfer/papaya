@@ -167,7 +167,7 @@ version 1.3
  * add version number to the output files produced
  * more docs
 
-version 2.2
+version 1.2
  * fix compilation on cygwin by using a custom isnan
  * fix a testcase lacking a directory
  * remove debugging messages

@@ -42,6 +42,6 @@ testdata/eigensystem: ts.headers $(SUPPORT) testdata/eigensystem.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(SUPPORT) testdata/eigensystem.cpp
 
 tar:
-	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_3 | bzip2 >../papaya-$(VERSION_NUMBER).tar.bz2
+	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_3 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
 
 .PHONY: all clean tar
