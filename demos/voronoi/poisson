@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+from math import sqrt
+import random
+import os
+import sys
+
+num_spheres = 16384
+num_realizations = 50
+
+box_sizes = [ 1 ]
+
+for bs in box_sizes:
+    try:
+        os.mkdir ('size%i' % bs)
+    except:
+        pass
+    for re in range (num_realizations):
+        fp = open ('size%i/conf-%02i.xyz' % (bs, re+1), 'w')
+        print >>fp, num_spheres
+        comment = 'num_sph = %i, boundary_condition = periodic_rectangular, boxsz_x = %i, boxsz_y = %i, part_radius = 0' \
+            % (num_spheres, bs, bs)
+        print >>fp, comment
+        for x in range (num_spheres):
+            print >>fp, 'P %f %f %f' \
+                % (random.uniform (0, bs),
+                   random.uniform (0, bs),
+                   0.)

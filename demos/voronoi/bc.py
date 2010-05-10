@@ -1,3 +1,6 @@
+import sys
+from shared import die
+
 def add (x, y):
     assert len (x) == len (y)
     if len (x) == 2:
@@ -19,3 +22,11 @@ def add_periodic_copies (points, box, lattice_vectors, overlap_factor):
             ret.append (np)
 
     return ret
+
+def check_germs (germs, xlo, ylo, sizex, sizey):
+    for G in germs:
+        if G[0] < xlo or G[1] < ylo or G[0] > xlo+sizex or G[1] > ylo+sizey:
+            print >>sys.stderr, 'germ found outside bounding box: %f %f' \
+                % (G[0], G[1])
+            if not ('--ignore-germs-outside-bbox' in sys.argv):
+                die ('germs found outside boundary box. aborting.')

@@ -43,6 +43,8 @@ if bounds_override:
 if bounds == 'periodic_rectangular' or bounds == 'periodic_rectangular_4p':
     sizex = None
     sizey = None
+    xlo = 0.
+    ylo = 0.
     if bounds == 'periodic_rectangular_4p':
         # Walter's format
         xhi = float (data_from_comment['boxsz_xhi'])
@@ -54,6 +56,9 @@ if bounds == 'periodic_rectangular' or bounds == 'periodic_rectangular_4p':
     else:
         sizex = float (data_from_comment['boxsz_x'])
         sizey = float (data_from_comment['boxsz_y'])
+    # sanity check that all germs are within the box
+    bc.check_germs (germs, xlo, ylo, sizex, sizey)
+
     germs.extend (bc.add_periodic_copies (germs,
         (sizex,sizey),
         [(sizex,0.), (0.,sizey), (sizex,sizey),
@@ -69,6 +74,9 @@ elif bounds == 'periodic_hexagonal':
     # boundary conditions. this equivalent to real hexagons tiling the plane.
     sizex = float (data_from_comment['boxsz_x'])
     sizey = float (data_from_comment['boxsz_y'])
+    # sanity check that all germs are within the box
+    bc.check_germs (germs, 0., 0., sizex, sizey)
+
     germs.extend (bc.add_periodic_copies (germs,
         (sizex,sizey),
         [(sizex,.5*sizey), (0.,sizey), (sizex,-.5*sizey),
@@ -139,11 +147,12 @@ def subtr (c1, c2):
     else:
         return (c1[0]-c2[0], c1[1]-c2[1], c1[2]-c2[2])
 
-for i in range (len (voro.polys)):
-    s = germs[voro.polys[i][0]]
-    for j in voro.polys[i][1:]:
-        voro.coords[j] = subtr (voro.coords[j], s)
-        voro.coords[j] = (voro.coords[j][0], voro.coords[j][1], i)
+if not ('--do-not-move-to-origin' in sys.argv):
+    for i in range (len (voro.polys)):
+        s = germs[voro.polys[i][0]]
+        for j in voro.polys[i][1:]:
+            voro.coords[j] = subtr (voro.coords[j], s)
+            voro.coords[j] = (voro.coords[j][0], voro.coords[j][1], i)
 
 # compute MT
 poly_fn = qhulldriver.get_temp_file_name (suffix = ".poly")  # papaya is a little picky about suffixes

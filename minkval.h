@@ -13,7 +13,7 @@ public:
     typedef Boundary::edge_iterator edge_iterator;
     typedef int label_t;
     // can be increased; this value is this low to catch runaway processes.
-    enum { MAX_LABELS = 20000 };
+    enum { MAX_LABELS = 400000 };
 
     AbstractMinkowskiFunctional ();
     virtual ~AbstractMinkowskiFunctional () { }

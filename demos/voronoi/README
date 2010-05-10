@@ -1,0 +1,10 @@
+
+Poisson-Voronoi demo
+
+The Python script 'poisson' creates a few realizations of a Poisson process;
+the script can be used to run them through Papaya, for example like this:
+
+    echo size1/*.xyz | xargs -n1 ./voronoi
+
+The resulting data files can be evaluated to reproduce the known results for
+Poisson-Voronoi tesselations.

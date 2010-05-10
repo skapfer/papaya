@@ -161,6 +161,13 @@ Hoffmann.
 CHANGELOG
 =========
 
+version 1.4
+ * read binary PGM images (previously only ASCII) and PBM images
+ * add error checking to Poisson-Voronoi demo
+ * increase maximum number of labels (you can always set an even larger number
+   by choosing the constant MAX_LABELS in minkval.h)
+ * fix a warning, better error messages, remove spurious header file
+
 version 1.3
  * add Poisson-Voronoi demo.
  * fix compilation issues (missing header)
