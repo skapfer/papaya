@@ -4,13 +4,16 @@
 # binaries
 testdriver=../papaya
 
+some_tests_failed=false
+
 ensuredir () {
     rm -rf "$1"
     mkdir "$1";
 }
 
 record_failure () {
-    echo "$1" >>FAILED
+    some_tests_failed=true
+    echo "$1" >>failed.log
 }
 
 complain_if_mismatch () {
@@ -80,5 +83,8 @@ complain_if_different viereck-new.out viereck.out
 #$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
 #complain_if_mismatch multirectangle.out
 
-cat FAILED
-
+if $some_tests_failed; then
+    echo 'The following tests failed:' >&2
+    cat failed.log
+fi
+rm -f failed.log
