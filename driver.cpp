@@ -161,7 +161,7 @@ int main (int argc, char **argv) {
             fix_contours (&b, conf.boolean ("polyinput", "silent_fix_contours"));
         if (forceccw)
             force_counterclockwise_contours (&b);
-    } else if (ends_with (filename, ".pgm")) {
+    } else if (ends_with (filename, ".pgm") || ends_with (filename, ".pbm")) {
         Pixmap p;
         load_pgm (&p, filename);
         if (conf.boolean ("segment", "invert"))
@@ -172,7 +172,12 @@ int main (int argc, char **argv) {
         bool connectblack = conf.boolean ("segment", "connectblack");
         bool periodic_data = conf.boolean ("segment", "data_is_periodic");
         marching_squares (&b, p, threshold, connectblack, periodic_data);
+    } else {
+        std::cerr << "only .pgm, .pbm and .poly files are valid input"
+                  << "(\"" <<  filename << "\")" << std::endl;
+        abort ();
     }
+
 
     assert_sensible_boundary (b);
 
