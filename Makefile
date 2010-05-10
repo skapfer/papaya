@@ -10,7 +10,7 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
-VERSION_NUMBER = 1.3
+VERSION_NUMBER = 1.4
 CXXFLAGS += -DVERSION=\"$(VERSION_NUMBER)\"
 
 BINARIES = papaya testdata/eigensystem testdata/tsvdiff
@@ -42,6 +42,6 @@ testdata/eigensystem: ts.headers $(SUPPORT) testdata/eigensystem.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(SUPPORT) testdata/eigensystem.cpp
 
 tar:
-	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_3 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
+	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_4 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
 
 .PHONY: all clean tar
