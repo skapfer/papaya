@@ -5,6 +5,7 @@
 testdriver=../papaya
 
 some_tests_failed=false
+fail_log=failed.log
 
 ensuredir () {
     rm -rf "$1"
@@ -13,7 +14,7 @@ ensuredir () {
 
 record_failure () {
     some_tests_failed=true
-    echo "$1" >>failed.log
+    echo "$1" >>$fail_log
 }
 
 complain_if_mismatch () {
@@ -36,8 +37,7 @@ complain_if_different () {
     fi    
 }
 
-rm -f FAILED
-touch FAILED
+echo 'The following tests failed:' >$fail_log
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
@@ -84,7 +84,6 @@ complain_if_different viereck-new.out viereck.out
 #complain_if_mismatch multirectangle.out
 
 if $some_tests_failed; then
-    echo 'The following tests failed:' >&2
-    cat failed.log
+    cat $fail_log >&2
 fi
-rm -f failed.log
+rm -f $fail_log
