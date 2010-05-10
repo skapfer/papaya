@@ -40,9 +40,20 @@ if bounds_override:
     bounds = bounds_override
 
 # treat boundary conditions
-if bounds == 'periodic_rectangular':
-    sizex = float (data_from_comment['boxsz_x'])
-    sizey = float (data_from_comment['boxsz_y'])
+if bounds == 'periodic_rectangular' or bounds == 'periodic_rectangular_4p':
+    sizex = None
+    sizey = None
+    if bounds == 'periodic_rectangular_4p':
+        # Walter's format
+        xhi = float (data_from_comment['boxsz_xhi'])
+        yhi = float (data_from_comment['boxsz_yhi'])
+        xlo = float (data_from_comment['boxsz_xlo'])
+        ylo = float (data_from_comment['boxsz_ylo'])
+        sizex = xhi-xlo
+        sizey = yhi-ylo
+    else:
+        sizex = float (data_from_comment['boxsz_x'])
+        sizey = float (data_from_comment['boxsz_y'])
     germs.extend (bc.add_periodic_copies (germs,
         (sizex,sizey),
         [(sizex,0.), (0.,sizey), (sizex,sizey),
@@ -80,7 +91,8 @@ elif bounds == 'minus_sample_rectangular':
                 abs (germs[i][1] - .5*sizey) > .4*sizey:
             analyze[i] = False
             num_dropped_points += 1
-    print >>sys.stderr, 'dropping %i of the %i germs' % (num_dropped_points, num_original_points)
+    print >>sys.stderr, '[%s] dropping %i of the %i germs' %\
+        ('minus_sample_rectangular', num_dropped_points, num_original_points)
 
 else:
     die ('Not implemented')
