@@ -34,6 +34,7 @@ complain_if_different () {
 }
 
 rm -f FAILED
+touch FAILED
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
@@ -78,4 +79,6 @@ complain_if_different viereck-new.out viereck.out
 #ensuredir multirectangle.out
 #$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
 #complain_if_mismatch multirectangle.out
+
+cat FAILED
 
