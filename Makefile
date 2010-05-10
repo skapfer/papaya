@@ -4,7 +4,7 @@ ifeq ($(DEBUG),0)
 else
     CXXFLAGS += -g -ggdb -O0 -DDEBUG -D_DEBUG
 endif
-CXXFLAGS += -Ieinclude -Wall
+CXXFLAGS += -Ieinclude -Wall -ansi -pedantic
 HEADERS = *.h
 SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
