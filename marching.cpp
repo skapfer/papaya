@@ -22,7 +22,7 @@ private:
         UPPERLEFT  = 1,
         UPPERRIGHT = 2,
         LOWERLEFT  = 4,
-        LOWERRIGHT = 8,
+        LOWERRIGHT = 8
     };
 
     typedef Pixmap::val_t val_t;
