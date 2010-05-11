@@ -78,6 +78,8 @@ complain_if_mismatch counterexample.out
 rm -f viereck{,-new}.out/*.gp
 complain_if_different viereck-new.out viereck.out
 
+./pgmreader || record_failure "pgm reader test"
+
 # not checked in
 #ensuredir multirectangle.out
 #$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/

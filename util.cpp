@@ -30,6 +30,12 @@ void Pixmap::init_zero () {
     memset ((void *)(&my_data[0]), 0, sizeof (val_t) * my_data.size ());
 }
 
+bool operator== (const Pixmap &a, const Pixmap &b) {
+    return a.my_xdim == b.my_xdim && a.my_ydim == b.my_ydim &&
+        0 == memcmp ((void *)(&a.my_data[0]), (void *)(&b.my_data[0]),
+                     sizeof (Pixmap::val_t) * a.my_data.size ());
+}
+
 Boundary::Boundary () {
 }
 

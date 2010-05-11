@@ -16,5 +16,6 @@ writepgm.o
 papaya
 testdata/eigensystem
 testdata/tsvdiff
+testdata/pgmreader
 ts.headers
 *.pyc

@@ -79,6 +79,8 @@ public:
     val_t &operator() (int x, int y);
     const val_t &operator() (int x, int y) const;
 
+    friend bool operator== (const Pixmap &, const Pixmap &);
+
 private:
     std::vector <val_t> my_data;
     int my_xdim, my_ydim;
@@ -87,8 +89,6 @@ private:
 void load_pgm (Pixmap *, const std::string &pgmfilename);
 void write_pgm (const std::string &filename, const Pixmap &);
 void invert (Pixmap *);
-
-void euclidean_distance_map (Pixmap *edm, const Pixmap &p, double threshold);
 
 
 //

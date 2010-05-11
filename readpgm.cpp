@@ -61,17 +61,18 @@ void load_pgm (Pixmap *p, const string &filename) {
     else if (magic == "P4") // PBM binary
     {
         for (int j = 0; j != p->size2 (); ++j)
-        for (int i = 0; i != p->size1 (); i += 8) {
+        for (int i = 0; i != p->size1 (); ) {
             char tmp;
             is.get(tmp); 
             // 1 byte=8 pixel, split accordingly
-            int k = 0;
-            while (k < 8) {
-                // extract i'th bit
-                int value = !! (static_cast <unsigned char> (tmp) & (0x80>>k));
-                (*p)(i+k,j) = Pixmap::val_t (1-value); // black=1, white=0
-                if (i + ++k == p->size1())
+            unsigned char mask = 0x80;
+            while (mask) {
+                // extract bit
+                int value = !! (static_cast <unsigned char> (tmp) & mask);
+                (*p)(i,j) = Pixmap::val_t (1-value); // black=1, white=0
+                if (++i == p->size1())
                     break;
+                mask >>= 1;
             }
         }
     }
