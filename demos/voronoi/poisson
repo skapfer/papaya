@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# create a realization of a Poisson point process and write it to a .xyz file
 from math import sqrt
 import random
 import os
