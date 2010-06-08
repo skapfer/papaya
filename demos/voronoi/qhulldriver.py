@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import tempfile
 import poly
@@ -7,7 +8,7 @@ def get_temp_file_name (suffix = ''):
     os.close (number)
     return name
 
-def qvoronoi (points):
+def qvoronoi (points, command = 'qvoronoi'):
 
     point_fn = get_temp_file_name ()
     fp = open (point_fn, "w")
@@ -18,10 +19,10 @@ def qvoronoi (points):
 
     off_fn = get_temp_file_name ();
     print off_fn
-    cmd = 'cat %s | qvoronoi s o >%s' % (point_fn, off_fn)
+    cmd = 'cat %s | %s s o >%s' % (point_fn, command, off_fn)
     print cmd
     if os.system (cmd) != 0:
-        die ("qvoronoi failed")
+        die ("%s failed" % command)
 
     tessel = poly.poly ()
     tessel.read_from_off (off_fn)
@@ -30,3 +31,6 @@ def qvoronoi (points):
     #os.remove (point_fn)
 
     return tessel
+
+def qdelaunay (points):
+	return qvoronoi (points, command = 'qdelaunay')
