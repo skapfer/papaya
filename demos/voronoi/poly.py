@@ -10,7 +10,6 @@ class poly:
        def read_from_off(self,infilename):
               from string import atoi, atof              
               offfile=open(infilename,'r')
-              # read first line: must be "POINTS"
               lines = offfile.readlines()
               s = break_line_into_string(lines[1])
               no_of_points=atoi(s[0])
