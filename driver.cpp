@@ -108,6 +108,39 @@ static void set_refvert_domain_center (func_iterator begin, func_iterator end,
     }
 }
 
+static void save_ref_vertex_map (AbstractMinkowskiFunctional  *w020,
+                                 std::string output_prefix,
+                                 int precision,
+                                 int xdomains, int ydomains) {
+    std::string filename = output_prefix + "by_domain_ref_vertex.out";
+    std::ofstream of (filename.c_str ());
+    if (!of)
+        std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
+    print_version_header (of);
+
+    of << std::setw (20) << "#   1          label";
+    int col = 2;
+    of << std::setw ( 4) << col++;
+    of << std::setw (16) << "domain no x";
+    of << std::setw ( 4) << col++;
+    of << std::setw (16) << "domain no y";
+    of << std::setw ( 4) << col++;
+    of << std::setw (16) << "refvert x W020";
+    of << std::setw ( 4) << col++;
+    of << std::setw (16) << "refvert y W020";
+    of << "\n";
+
+    for (int l = 0; l != xdomains*ydomains; ++l) {
+        of << " " << std::setw (19) << l;
+        of << " " << std::setw (19) << (l%xdomains);
+        of << " " << std::setw (19) << (l/xdomains);
+        of << " " << std::setw (19) << std::setprecision (precision) << (w020->ref_vertex (l)[0]);
+        of << " " << std::setw (19) << std::setprecision (precision) << (w020->ref_vertex (l)[1]);
+        of << "\n";
+    }
+}
+
+
 // the gigantic main function of the program.
 int main (int argc, char **argv) {
     GetOpt_pp ops (argc, argv);
@@ -145,6 +178,8 @@ int main (int argc, char **argv) {
         ops >> Option ('\0', "threshold", thresh_override);
         std::cerr << "[papaya] Using threshold " << thresh_override << "\n";
     }
+
+    int precision = conf.integer ("output", "precision");
 
     Boundary b, b_for_w0_storage_;
     Boundary *b_for_w0 = &b;
@@ -251,6 +286,8 @@ int main (int argc, char **argv) {
             set_refvert_domain_center (all_funcs_begin, all_funcs_end, r, xdomains, ydomains);
         else 
             die ("option \"point_of_reference\" in section [output] has illegal value");
+
+        save_ref_vertex_map (w020, output_prefix, precision, xdomains, ydomains);
     } else {
         die ("option \"labels\" in section [output] has illegal value");
     }
@@ -271,14 +308,12 @@ int main (int argc, char **argv) {
         }
     }
 
-    int precision = conf.integer ("output", "precision");
-
     {
         // output scalars
         ScalarMinkowskiFunctional *all_sca_begin[] = { w000, w100, w200 };
         ScalarMinkowskiFunctional **all_sca_end = all_sca_begin + 3;
         ScalarMinkowskiFunctional **it;
-        std::string filename = output_prefix + "scalar" + ".out";
+        std::string filename = output_prefix + "scalar.out";
         std::ofstream of (filename.c_str ());
         if (!of)
             std::cerr << "[papaya] WARNING unable to open " << filename << "\n";
@@ -308,7 +343,7 @@ int main (int argc, char **argv) {
         VectorMinkowskiFunctional *all_sca_begin[] = { w010, w110, w210 };
         VectorMinkowskiFunctional **all_sca_end = all_sca_begin + 3;
         VectorMinkowskiFunctional **it;
-        std::string filename = output_prefix + "vector" + ".out";
+        std::string filename = output_prefix + "vector.out";
         std::ofstream of (filename.c_str ());
         if (!of)
             std::cerr << "[papaya] WARNING unable to open " << filename << "\n";

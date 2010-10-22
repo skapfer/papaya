@@ -25,7 +25,6 @@ public:
     void ref_vertex (label_t, const vec_t &);
     void global_ref_vertex (const vec_t &);
 
-protected:
     const vec_t &ref_vertex (label_t) const;
 private:
     vec_t global_ref_vertex_;
