@@ -206,9 +206,10 @@ int main (int argc, char **argv) {
     std::string labcrit = conf.string ("output", "labels");
     std::string point_of_ref = conf.string ("output", "point_of_reference");
     int num_labels = -1;
-    if (labcrit == "none")
+    if (labcrit == "none") {
         num_labels = label_none (&b);
-    else if (labcrit == "by_contour") {
+        set_refvert_origin (all_funcs_begin, all_funcs_end, num_labels);
+    } else if (labcrit == "by_contour") {
         num_labels = label_by_contour_index (&b);
         if (point_of_ref == "contour_com")
             set_refvert_com (all_funcs_begin, all_funcs_end, b, num_labels);

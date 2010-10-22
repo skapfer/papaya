@@ -212,7 +212,7 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
                 p -= vec_t (bbox.left, bbox.bottom);
                 p.x () /= xstrip;
                 p.y () /= ystrip;
-                the_label = int (p.x ()) + int (p.y ()) * divy;
+                the_label = int (p.x ()) + int (p.y ()) * divx;
             } else {
                 the_label = Boundary::NO_LABEL;
             }
@@ -238,7 +238,7 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
                 p -= vec_t (bbox.left, bbox.bottom);
                 p.x () /= xstrip;
                 p.y () /= ystrip;
-                the_label = int (p.x ()) + int (p.y ()) * divy;
+                the_label = int (p.x ()) + int (p.y ()) * divx;
             } else {
                 the_label = Boundary::NO_LABEL;
             }
@@ -255,8 +255,8 @@ vec_t label_domain_center (int label, const rect_t &bbox, int divx, int divy) {
     xstrip /= divx;
     double ystrip = bbox.top - bbox.bottom;
     ystrip /= divy;
-    int x = label % divy;
-    int y = label / divy;
+    int x = label % divx;
+    int y = label / divx;
     return vec_t (bbox.left   + (x+.5) * xstrip,
                   bbox.bottom + (y+.5) * ystrip);
 }
