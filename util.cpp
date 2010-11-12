@@ -1,5 +1,4 @@
 // vim: et:sw=4:ts=4
-
 #include "util.h"
 #include <fstream>
 #include <stdio.h>
@@ -236,7 +235,6 @@ void Boundary::split_contour_inserting_edge (edge_iterator it0,
     my_contours.push_back (lower_cid);
     my_contours.push_back (upper_cid);
     // check that everything is alright
-    assert_valid_link_structure ();
     assert_valid_link_structure ();
 }
 
@@ -751,5 +749,3 @@ void EigenSystem::dump (std::ostream &os) {
     }
 }
 #endif
-
-
