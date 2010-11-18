@@ -152,7 +152,7 @@ namespace
         const Boundary &b,
         const vec_t &r0, const vec_t &dir_)
     {
-        //assert_complete_boundary (b); FIXME
+        assert_complete_boundary (b);
         Boundary::contour_iterator cit;
         for (cit = b.contours_begin (); cit != b.contours_end (); ++cit)
             find_intersecting_edges (st, b, cit, r0, dir_);

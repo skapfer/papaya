@@ -41,9 +41,8 @@ namespace {
     }
 }
 
-int label_by_component (Boundary *b) {
-    double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterator cit);
-
+int label_by_component (Boundary *b)
+{
     // find clockwise contours which correspond to
     // interior boundary segments. these are assigned to the
     // first counterclockwise contour that is found via an
@@ -57,7 +56,7 @@ int label_by_component (Boundary *b) {
         Boundary::contour_iterator cit;
         int label = 0;
         for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
-            bool is_ccw = (total_inflection_for_contour (b, cit) > 0.);
+            bool is_ccw = (total_inflection_for_contour (*b, cit) > 0.);
             if (is_ccw)
                 // ccw contours have a label assigned now.
                 // cw contours are merged into their containing ccw contour in

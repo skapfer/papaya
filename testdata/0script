@@ -2,7 +2,7 @@
 # test script
 
 # binaries
-testdriver=../papaya
+papaya=../papaya
 
 some_tests_failed=false
 fail_log=failed.log
@@ -42,21 +42,21 @@ ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
 echo "[$0] Running papaya testcases..." >&2
-$testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/ &
-$testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/ &
-$testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/ &
+$papaya -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/ &
+$papaya -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/ &
+$papaya -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/ &
 wait
 ensuredir ma105_7o.out
 ensuredir ma105_7o_cropped.out
-$testdriver -c ma105_7o.conf &
-$testdriver -c ma105_7o_cropped.conf &
+$papaya -c ma105_7o.conf &
+$papaya -c ma105_7o_cropped.conf &
 ensuredir counterexample.out
-$testdriver -c counterexample.conf &
+$papaya -c counterexample.conf &
 wait
 ensuredir viereck-new.out 
 ensuredir viereck.out
-$testdriver -c counterexample.conf -i viereck-new.poly  -o viereck-new.out/ &
-$testdriver -c counterexample.conf -i viereck.poly  -o viereck.out/ &
+$papaya -c counterexample.conf -i viereck-new.poly  -o viereck-new.out/ &
+$papaya -c counterexample.conf -i viereck.poly  -o viereck.out/ &
 wait
 
 echo "[$0] Comparing to reference results..." >&2
@@ -68,6 +68,7 @@ complain_if_mismatch multiellipse2.com.out
 
 # test of a larger pixel data input
 complain_if_mismatch ma105_7o.out
+complain_if_mismatch ma105_7o_cropped.out
 
 # this testcase is near degenerate and eigenvectors are indeterminate
 cp counterexample.ref/tensor_W102.out counterexample.out
@@ -84,7 +85,7 @@ complain_if_different viereck-new.out viereck.out
 
 # not checked in
 #ensuredir multirectangle.out
-#$testdriver -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
+#$papaya -c multiellipse.conf -i multirectangle.poly -o multirectangle.out/
 #complain_if_mismatch multirectangle.out
 
 if $some_tests_failed; then

@@ -189,6 +189,7 @@ public:
 
     bool edge_has_successor (edge_iterator) const;
     bool edge_has_predecessor (edge_iterator) const;
+    bool contour_is_complete (contour_iterator) const;
 
     // reverse the direction of a contour
     // expects that the contour is complete (i.e. closed)
@@ -273,6 +274,7 @@ void dump_labels (const std::string &filename_base, const Boundary &b);
 // * remove spikes with exterior angle = pi
 void fix_contours (Boundary *, bool silent = false);
 void force_counterclockwise_contours (Boundary *);
+double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterator cit);
 
 // verify that b is a sensible boundary.
 // a boundary is called sensible iff
@@ -286,16 +288,12 @@ void force_counterclockwise_contours (Boundary *);
 //   to treat correctly without looking at the
 //   contour as a whole.
 // this function does nothing in ndebug mode.
-// FIXME
 void assert_sensible_boundary (const Boundary &);
 
 // verify that b is a complete boundary.
-// a boundary is called complete iff all its contours are closed.
+// (i.e. each contour is closed)
 // this function does nothing in ndebug mode.
-// in debug mode, it checks the link structure of the
-// edges for consistency.
-// FIXME
-void assert_complete_boundary  (const Boundary &);
+void assert_complete_boundary (const Boundary &);
 
 //
 // inline implementation
@@ -539,6 +537,8 @@ void Boundary::visit_each_edge_in_contour_const (VISITOR &vis, Boundary::contour
 #ifdef NDEBUG
 // expand to empty inlines in NDEBUG mode
 inline void assert_sensible_boundary (const Boundary &) {
+}
+inline void assert_complete_boundary (const Boundary &) {
 }
 #endif /* NDEBUG */
 

@@ -531,15 +531,6 @@ void Boundary::fix_contours (bool silent) {
     assert_boundary (*this);
 }
 
-void force_counterclockwise_contours (Boundary *b) {
-    Boundary::contour_iterator cit;
-    double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterator);
-    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
-        if (total_inflection_for_contour (*b, cit) < 0)
-            b->reverse_contour (cit);
-    }
-}
-
 void Boundary::reverse_contour (Boundary::contour_iterator cit) {
     edge_iterator eit     = edges_begin (cit);
     edge_iterator eit_end = edges_end (cit);
@@ -556,31 +547,33 @@ void dump_vertex (std::ostream &os, int vertex, const Boundary &b) {
        << std::setprecision (18) << v.y () << "\n";
 }
 
-static double total_inflection_for_contour_unchecked (
-        const Boundary *b, Boundary::contour_iterator cit) {
-    Boundary::edge_iterator eit = b->edges_begin (cit),
-        eit_end = b->edges_end (cit);
+static
+double total_inflection_for_contour_unchecked (
+    const Boundary &b, Boundary::contour_iterator cit)
+{
+    Boundary::edge_iterator eit = b.edges_begin (cit),
+        eit_end = b.edges_end (cit);
     double acc = 0.;
-    for (; eit != eit_end; ++eit) {
-        acc += b->inflection_after_edge (eit);
-    }
-    //fprintf (stderr, "%i: %f\n", *cit, acc/2/M_PI);
+    for (; eit != eit_end; ++eit)
+        acc += b.inflection_after_edge (eit);
     return acc;
 }
 
-double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterator cit) {
+double total_inflection_for_contour (const Boundary &b,
+    Boundary::contour_iterator cit)
+{
     double acc = total_inflection_for_contour_unchecked (b, cit);
     // total inflection should be +/-2pi.
     if (! (fabs (fabs (acc) - 2*M_PI) < 1e-3)) {
-        Boundary::edge_iterator eit = b->edges_begin (cit),
-            eit_end = b->edges_end (cit);
+        Boundary::edge_iterator eit = b.edges_begin (cit),
+            eit_end = b.edges_end (cit);
         int ctr = 0;
-        for (eit = b->edges_begin (cit); eit != eit_end; ++eit) {
-            vec_t v0 = b->edge_vertex0 (eit);
-            vec_t v1 = b->edge_vertex1 (eit);
+        for (eit = b.edges_begin (cit); eit != eit_end; ++eit) {
+            vec_t v0 = b.edge_vertex0 (eit);
+            vec_t v1 = b.edge_vertex1 (eit);
             fprintf (stderr, "infl at edge %.4i = %f\n"
                 "(%f,%f) (%f,%f)\n", ctr++,
-                b->inflection_after_edge (eit),
+                b.inflection_after_edge (eit),
                 v0[0], v0[1], v1[0], v1[1]);
         }
         die ("total_inflection_for_contour (contour_id = %i):\n%.20e\n%.20e",
@@ -589,8 +582,22 @@ double total_inflection_for_contour (const Boundary *b, Boundary::contour_iterat
     return acc;
 }
 
-double total_inflection_for_contour (const Boundary &b, Boundary::contour_iterator cit) {
-    return total_inflection_for_contour (&b, cit);
+void force_counterclockwise_contours (Boundary *b) {
+    Boundary::contour_iterator cit;
+    for (cit = b->contours_begin (); cit != b->contours_end (); ++cit) {
+        if (total_inflection_for_contour (*b, cit) < 0)
+            b->reverse_contour (cit);
+    }
+}
+
+bool Boundary::contour_is_complete (contour_iterator cit) const
+{
+    edge_iterator eit = edges_begin (cit);
+    edge_iterator end = edges_end (cit);
+    for (; eit != end; ++eit)
+        if (!edge_has_successor (eit))
+            return false;
+    return true;
 }
 
 #ifndef NDEBUG
@@ -630,9 +637,8 @@ template <typename BOUNDARY, typename VISITOR>
 static void visit_possibly_incomplete_boundary (BOUNDARY &b,
                                                 VISITOR &vis) {
     typename BOUNDARY::contour_iterator cit = b.contours_begin ();
-    for (; cit != b.contours_end (); ++cit) {
+    for (; cit != b.contours_end (); ++cit)
         visit_possibly_unclosed_contour (b, cit, vis);
-    }
 }
 
 static void assert_sensible_visitor (const Boundary &b, 
@@ -643,6 +649,12 @@ static void assert_sensible_visitor (const Boundary &b,
 
 void assert_sensible_boundary (const Boundary &b) {
     visit_possibly_incomplete_boundary (b, assert_sensible_visitor);
+}
+
+void assert_complete_boundary (const Boundary &b) {
+    Boundary::contour_iterator cit = b.contours_begin ();
+    for (; cit != b.contours_end (); ++cit)
+        assert (b.contour_is_complete (cit));
 }
 
 #endif // NDEBUG
@@ -661,7 +673,7 @@ void dump_contours (std::ostream &os, const Boundary &a, int flags) {
     Boundary::edge_iterator eit, eit_end;
     for (cit = a.contours_begin (); cit != a.contours_end (); ++cit) {
         if (flags & BY_DIRECTION) {
-            if (total_inflection_for_contour (&a, cit) < 0)
+            if (total_inflection_for_contour (a, cit) < 0)
                 continue;
         }
         eit = a.edges_begin (cit);
@@ -677,7 +689,7 @@ void dump_contours (std::ostream &os, const Boundary &a, int flags) {
         return;
     for (cit = a.contours_begin (); cit != a.contours_end (); ++cit) {
         if (flags & BY_DIRECTION) {
-            if (total_inflection_for_contour (&a, cit) > 0)
+            if (total_inflection_for_contour (a, cit) > 0)
                 continue;
         }
         eit = a.edges_begin (cit);
