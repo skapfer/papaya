@@ -11,6 +11,7 @@ struct intersect_info_t {
     vec_t ivtx;
     double inc;
     edge_iterator iedge;
+    int sign;
 
     static bool by_contour_id (const this_t &, const this_t &);
     static bool by_normal_coordinate (const this_t &, const this_t &);
@@ -21,14 +22,12 @@ typedef std::vector <intersect_info_t> intersect_buffer_t;
 // save the intersect points to a GNUPLOT-readable format
 void dump_intersect_buffer (std::ostream &, const intersect_buffer_t &);
 
-bool intersect_ray_boundary (intersect_info_t *,
-                             const vec_t &ray_0, const vec_t &ray_dir,
-                             Boundary *);
-
+unsigned
 int  intersect_ray_boundary (intersect_buffer_t *,
                              const vec_t &ray_0, const vec_t &ray_dir,
                              Boundary *);
 
+unsigned
 int intersect_line_boundary (intersect_buffer_t *,
                              const vec_t &r0, const vec_t &dir,
                              Boundary *);

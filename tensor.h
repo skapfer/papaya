@@ -11,20 +11,8 @@ typedef Eigen::Matrix3d mat3_t;
 typedef Eigen::Vector2d vec2_t;
 typedef Eigen::Vector3d vec3_t;
 
-#ifndef PAPAYA2
 typedef Eigen::Vector2d vec_t;
 typedef Eigen::Matrix2d mat_t;
-#else
-#ifdef DIMENSION
-#if (DIMENSION==2)
-typedef vec2_t vec_t;
-typedef mat2_t mat_t;
-#elif (DIMENSION==3)
-typedef mat3_t mat_t;
-typedef vec3_t vec_t;
-#endif // DIMENSION == 2, 3
-#endif // DIMENSION
-#endif
 
 // TensorRank <N>::value_type is the class which stores
 // rank-N tensors.

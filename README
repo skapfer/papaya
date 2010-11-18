@@ -111,9 +111,9 @@ testdata/mkcircle script.
 DOCUMENTATION OF PGM FILE FORMAT
 ================================
 
-These files are plain portable graymaps, as introduced by the netpbm
-package ages ago.  Note that for example GIMP defaults to writing
-binary PGM ("P5").  Choose ASCII instead ("P2").
+These files are plain portable graymaps / bitmaps (*.pbm, *.pgm), as introduced
+by the netpbm package ages ago.  Most graphics software can write this format,
+e.g. ImageMagick, GIMP.
 
 
 ==============
@@ -125,14 +125,7 @@ KNOWN PROBLEMS
 
    sebastian.kapfer@physik.uni-erlangen.de
 
-1. When calculating the MV of a pixelised dataset, and using domainwise
-   analysis, you should not choose the clipping rectangle on integral
-   coordinates.  Instead, choose coordinates like 10.5, or even 10.0001.
-
-   This avoids a bug where an odd number of intersects between a ray
-   and a contour is found.
-
-2. Version 1.0 had a bug in W020 tensor, more specifically in the off
+1. Version 1.0 had a bug in W020 tensor, more specifically in the off
    diagonal components.  This has been fixed in 1.1.
 
    line 379 in minkval.cpp should not have read
@@ -160,6 +153,13 @@ Hoffmann.
 =========
 CHANGELOG
 =========
+
+version 1.5
+ * fix the odd number of intersects problem when processing
+   pixelized data in by_domain mode; it is no longer necessary to use
+   fudged coordinates for the clipping box.
+ * fix W020 labelling in by_domain mode -- this was broken as a result
+   of the previous bug.  this affected only the W000, W010, W020 tensors.
 
 version 1.4
  * read binary PGM images (previously only ASCII) and PBM images

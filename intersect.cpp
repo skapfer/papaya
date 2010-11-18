@@ -1,151 +1,232 @@
 // vim:et:sw=4:ts=4
 // simple N^2 intersection algorithm
+// it is tricky in a few points to make the algorithm
+// return consistent results, i.e. that every closed contour
+// has an even number of intersects with a test ray.
+// this is very important for the introduce_divider_w0 function.
+// to that end, some intersects are not returned.
+//
+// consider the signs of the signed distance between vertices
+// and the test ray
+//
+// + + + + + +         0 intersects
+// + + - + + +         2 intersects
+// + 0 - - + +         2 intersects
+// + 0 + + + +         0 intersects (!)
+// + 0 - + + +         2 intersects
+// + 0 0 0 0 +         0 intersects
 
 #include "intersect.h"
 
+namespace
+{
+    static
+    double sgn (double x)
+    {
+        if (x > 0.)
+            return 1.;
+        else if (x < 0.)
+            return -1.;
+        else
+            return x;
+    }
 
-namespace {
-    enum {
-        MODE_RAY,
-        MODE_LINE,
-        MODE_RAY_NEAREST
-    };
+    static
+    bool is_ordered (double a, double b, double c)
+    {
+        return (a <= b && b <= c) || (c <= b && b <= a);
+    }
 
-    bool does_edge_intersect (intersect_info_t *info,
-                              const Boundary &b,
-                              Boundary::edge_iterator eit,
-                              const vec_t &r0, const vec_t &dir_) {
-        vec_t cdir_ = rot90_ccw (dir_);
-        // determine lambda so that v0 + lambda(v1-v0) in ray
-        double cc0 = dot (cdir_, b.edge_vertex0 (eit));
-        double cc1 = dot (cdir_, b.edge_vertex1 (eit));
-        double ccR = dot (cdir_, r0);
-        assert (not_nan (cc0));
-        assert (not_nan (cc1));
-        assert (not_nan (ccR));
-        double lambda;
-        if (cc0 <= ccR and ccR < cc1) {
-            double l1 = ccR - cc0;
-            double l2 = cc1 - cc0;
-            if (l2 <= l1)        // keep underflows in check
-                lambda = 1.;     // (exact value is irrelevant)
-            else
-                lambda = l1/l2;
-        } else if (cc1 < ccR and ccR <= cc0) {
-            double l1 = cc0 - ccR;
-            double l2 = cc0 - cc1;
-            if (l2 <= l1)
-                lambda = 1.;
-            else
-                lambda = l1/l2;
-        } else {
-            return false;
+    // this function does its best to return a sensible
+    // intersection point between a line and a boundary
+    // segment.  it does not decide whether there is an intersect,
+    // that is decided from an exact predicate before this function is invoked.
+    // (otherwise, inconsistent results may be generated)
+    static
+    void compute_intersection_point (
+        intersect_info_t *dst, const Boundary &b,
+        Boundary::edge_iterator eit, const vec_t &r0, const vec_t &dir_)
+    {
+        // solve r0 + lambda dir = mu v0 + (1-mu) v1
+        // first, project on ortho(dir)
+        const vec_t cdir_ = rot90_ccw (dir_);
+        const double cn = dot (r0 - b.edge_vertex1 (eit), cdir_);
+        const vec_t edge = b.edge_vertex0 (eit) - b.edge_vertex1 (eit);
+        const double cn2 = dot (edge, cdir_);
+        double mu = cn/cn2;
+        mu = (mu < 1.) ? mu : 1.;  // clip to allowed range
+        mu = (mu > 0.) ? mu : 0.;  // note that mu may be NaN before this
+
+        // update inc parameter
+        const double dn = mu * dot (edge, dir_)
+            - dot (r0 - b.edge_vertex1 (eit), dir_);
+        const double dn2 = dot (dir_, dir_);
+        const double lambda = dn/dn2;
+        const vec_t ivtx = r0 + lambda * dir_;
+        dst->inc = lambda;
+        dst->ivtx = ivtx;
+        dst->iedge = eit;
+
+        // check if the results are consistent
+        if (! is_ordered (dot (r0 - b.edge_vertex0 (eit), dir_),
+                          dot (r0 - ivtx, dir_),
+                          dot (r0 - b.edge_vertex1 (eit), dir_)))
+        {
+            std::cerr << "Inconsistency found while intersecting line/point\n";
+            std::cerr << "(mu = " << cn/cn2 << ") "
+                << dot (r0 - b.edge_vertex0 (eit), dir_) << ", "
+                << dot (r0 - ivtx, dir_) << ", "
+                << dot (r0 - b.edge_vertex1 (eit), dir_) << std::endl;
+            std::abort ();
         }
-        assert (lambda <= 1.);
-        assert (lambda >= 0.);
-        // range of normal coordinates of current edge
-        double nc0 = dot (dir_, b.edge_vertex0 (eit));
-        double ncT = dot (dir_, b.edge_vertex1 (eit));
-        double mu = nc0;
-        ncT -= nc0;
-        mu += lambda * ncT;
-        double ncR = dot (dir_, r0);
-        mu -= ncR;
-        // now: mu: dir r0 + mu = dir (v0 + lambda(v1-v0))
-        // update vertex-of-intersection since we have calculated
-        // all the necessary things anyway
-        vec_t &ivtx = info->ivtx;
-        ivtx  = (1-lambda) * b.edge_vertex0 (eit);
-        ivtx += lambda     * b.edge_vertex1 (eit);
-        info->inc = mu;
-        info->iedge = eit;
-        return true;
-    }
-}
 
-struct IntersectCollector {
-    IntersectCollector (intersect_buffer_t *dst_,
-                        const vec_t &ray_0_, const vec_t &ray_dir_,
-                        int mode_) {
-        dst = dst_;
-        assert (dst);
-        dst->clear ();
-        dst->reserve (200);
-        mode = mode_;
-        ray_0 = ray_0_;
-        ray_dir = ray_dir_;
+        const vec_t alternative_ivtx = mu * edge + b.edge_vertex1 (eit);
+        const vec_t diff = ivtx - alternative_ivtx;
+        if (dot (diff, diff) > 0.01*0.01 * dot (edge, edge))
+        {
+            std::cerr << "Inconsistency found while intersecting line/point\n";
+            std::cerr << dot (diff, diff) << std::endl;
+            std::abort ();
+        }
     }
 
-    intersect_buffer_t *dst;
-    int mode;
-    vec_t ray_0, ray_dir;
+    // find the intersecting edges in the specified contour,
+    // and store them in a STORE object.
+    template <typename STORE>
+    static
+    unsigned find_intersecting_edges (
+        STORE *st,
+        const Boundary &b, Boundary::contour_iterator cit,
+        const vec_t &r0, const vec_t &dir_)
+    {
+        unsigned ret = 0u;
+        const vec_t cdir_ = rot90_ccw (dir_);
+        const double offset = dot (cdir_, r0);
 
-    void operator() (const Boundary &b, Boundary::edge_iterator eit) const {
-        intersect_info_t info;
-        if (does_edge_intersect (&info, b, eit, ray_0, ray_dir)) {
-            switch (mode) {
-            /* FIXME broken
-            case MODE_RAY_NEAREST:
-                if (info.inc >= 0.) {
-                    if (dst->size () && (*dst)[0].inc > info.inc)
-                        dst->pop_back ();
-                    dst->push_back (info);
-                }
-                break;
-            */
-            case MODE_RAY:
-                if (info.inc >= 0.) {
-            case MODE_LINE:
-                    dst->push_back (info);
-                }
-                break;
-            default:
-                assert (0);
+        Boundary::edge_iterator it = b.edges_begin (cit),
+            end = b.edges_end (cit);
+        int sign = sgn (dot (b.edge_vertex0 (it), cdir_) - offset);
+
+        // make sure we don't start _on_ the line
+        // zeroes are a problem since we don't know if we actually cross
+        // the line here.
+        if (sign == 0) {
+            Boundary::edge_iterator a = it, aend = end;
+            while (sign == 0) {
+                ++a, ++aend;
+                if (a == end)
+                    // contour lies entirely on the ray, your call
+                    return 0u;
+                sign = sgn (dot (b.edge_vertex0 (a), cdir_) - offset);
+            }
+            it = a, end = aend;
+        }
+
+        // actually find the intersects
+        for (; it != end; ++it) {
+            int nsign = sgn (dot (b.edge_vertex1 (it), cdir_) - offset);
+            // skip over on-the-line points until something interesting happens
+            while (nsign == 0) {
+                ++it;
+                assert (it != end);
+                nsign = sgn (dot (b.edge_vertex1 (it), cdir_) - offset);
+            }
+            if (nsign != sign) {
+                intersect_info_t info;
+                compute_intersection_point (&info, b, it, r0, dir_);
+                info.sign = nsign;
+                (*st)(info);
+                sign = nsign;
             }
         }
+
+        assert (ret % 2 == 0);
+        return ret;
     }
-};
-                           
-#if 0
-bool intersect_ray_boundary (intersect_info_t *dst,
-                             const vec_t &ray_0, const vec_t &ray_dir,
-                             Boundary *b) {
-    assert (dst);
-    intersect_buffer_t tmp;
-    intersect_ray_boundary_impl (&tmp, ray_0, ray_dir, b, MODE_RAY_NEAREST);
-    assert (tmp.size () == 0 || tmp.size () == 1);
-    if (tmp.size ()) {
-        *dst = tmp[0];
-        return true;
-    } else {
-        return false;
+
+    // collect all the intersects in the boundary
+    template <typename STORE>
+    static
+    void find_intersections (
+        STORE *st,
+        const Boundary &b,
+        const vec_t &r0, const vec_t &dir_)
+    {
+        //assert_complete_boundary (b); FIXME
+        Boundary::contour_iterator cit;
+        for (cit = b.contours_begin (); cit != b.contours_end (); ++cit)
+            find_intersecting_edges (st, b, cit, r0, dir_);
+    }
+
+    class IntersectCollector : public intersect_buffer_t
+    {
+    public:
+        IntersectCollector (intersect_buffer_t *dst)
+        {
+            dst_ = dst;
+            dst_->clear ();
+            dst_->reserve (200u);
+        }
+
+        void operator() (const intersect_info_t &info)
+        {
+            dst_->push_back (info);
+        }
+
+    private:
+        intersect_buffer_t *dst_;
+    };
+
+    class RayIntersectCollector : public IntersectCollector
+    {
+    public:
+        RayIntersectCollector (intersect_buffer_t *dst)
+            : IntersectCollector (dst)
+        {
+        }
+
+        void operator() (const intersect_info_t &info)
+        {
+            if (info.inc >= 0.)
+                static_cast <IntersectCollector &> (*this) (info);
+        }
+    };
+
+    static
+    void sort_intersections (intersect_buffer_t *dst)
+    {
+        std::sort (dst->begin (), dst->end (),
+            intersect_info_t::by_normal_coordinate);
     }
 }
-#endif // 0
+
+unsigned
+intersect_line_boundary (intersect_buffer_t *dst,
+                         const vec_t &line_0, const vec_t &line_dir,
+                         Boundary *b)  {
+    IntersectCollector st (dst);
+    find_intersections (&st, *b, line_0, line_dir);
+    sort_intersections (dst);
+    return (int)dst->size ();
+}
+
+unsigned
+intersect_ray_boundary (intersect_buffer_t *dst,
+                        const vec_t &line_0, const vec_t &line_dir,
+                        Boundary *b)  {
+    RayIntersectCollector st (dst);
+    find_intersections (&st, *b, line_0, line_dir);
+    sort_intersections (dst);
+    return (int)dst->size ();
+}
+
+
+
+// implement assert_complete_boundary
 
 void dump_intersect_buffer (std::ostream &os, const intersect_buffer_t &buf) {
     for (int i = 0; i != (int)buf.size (); ++i)
         os << buf[i].ivtx[0] << " " << buf[i].ivtx[1] << "\n";
-}
-
-static bool by_inc (const intersect_info_t &lhs, const intersect_info_t &rhs) {
-    return lhs.inc < rhs.inc;
-}
-
-int intersect_ray_boundary  (intersect_buffer_t *dst,
-                             const vec_t &ray_0, const vec_t &ray_dir,
-                             Boundary *b) {
-    b->visit_each_edge_const (IntersectCollector (dst, ray_0, ray_dir, MODE_RAY));
-    std::sort (dst->begin (), dst->end (), by_inc);
-    return (int)dst->size ();
-}
-
-int intersect_line_boundary (intersect_buffer_t *dst,
-                             const vec_t &line_0, const vec_t &line_dir,
-                             Boundary *b)  {
-    b->visit_each_edge_const (IntersectCollector (dst, line_0, line_dir, MODE_LINE));
-    std::sort (dst->begin (), dst->end (), by_inc);
-    return (int)dst->size ();
 }
 
 bool intersect_vertex_rect (const vec_t &v, const rect_t &r) {

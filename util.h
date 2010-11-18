@@ -26,7 +26,6 @@ struct rect_t {
     double top, bottom;
 };
 
-#ifndef PAPAYA2
 // return eigenvalues of a
 //  (a1  off)
 //  (off  b2)    2x2 symmetric real matrix.
@@ -55,8 +54,6 @@ void dyadic_prod      (mat_t *out, const vec_t &lhs, const vec_t &rhs);
 void dyadic_prod_self (mat_t *out, const vec_t &lhs);
 // symmetrized dyadic product
 void dyadic_prod_symmetrized (mat_t *out, const vec_t &lhs, const vec_t &rhs);
-
-#endif // PAPAYA2
 
 //
 // primitive Pixmap encap
@@ -216,6 +213,9 @@ public:
     void visit_each_edge_const (VISITOR &) const;
     template <typename VISITOR>
     void visit_each_edge (VISITOR &);
+
+    template <typename VISITOR>
+    void visit_each_edge_in_contour_const (VISITOR &, contour_iterator) const;
 
 private:
     vec_t &vertex (int i);
@@ -448,7 +448,6 @@ inline void fix_contours (Boundary *b, bool silent) {
     b->fix_contours (silent);
 }
 
-#ifndef PAPAYA2
 inline void eigensystem_symm (EigenSystem *sys, const mat_t &mat) {
     // FIXME assert that matrix is symmetric
     eigensystem_symm (sys, mat(0,0), mat(0,1), mat(1,1));
@@ -487,11 +486,9 @@ inline void dyadic_prod_symmetrized (mat_t *mat, const vec_t &lhs, const vec_t &
     (*mat)(0,1) =
     (*mat)(1,0) = .5 * (lhs[0]*rhs[1] + lhs[1]*rhs[0]);
 }
-#endif // PAPAYA2
 
 template <typename VISITOR>
 void Boundary::visit_each_edge_const (VISITOR &vis) const {
-    // FIXME this simplifies once the contour_iterator's are abolished
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;
     for (cit = contours_begin (); cit != contours_end (); ++cit)
@@ -503,7 +500,6 @@ void Boundary::visit_each_edge_const (VISITOR &vis) const {
 // FIXME why do we need the const VISITOR variants?!
 template <typename VISITOR>
 void Boundary::visit_each_edge_const (const VISITOR &vis) const {
-    // FIXME this simplifies once the contour_iterator's are abolished
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;
     for (cit = contours_begin (); cit != contours_end (); ++cit)
@@ -514,7 +510,6 @@ void Boundary::visit_each_edge_const (const VISITOR &vis) const {
 
 template <typename VISITOR>
 void Boundary::visit_each_edge (VISITOR &vis) {
-    // FIXME this simplifies once the contour_iterator's are abolished
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;
     for (cit = contours_begin (); cit != contours_end (); ++cit)
@@ -525,7 +520,6 @@ void Boundary::visit_each_edge (VISITOR &vis) {
 
 template <typename VISITOR>
 void Boundary::visit_each_edge (const VISITOR &vis) {
-    // FIXME this simplifies once the contour_iterator's are abolished
     Boundary::contour_iterator cit;
     Boundary::edge_iterator eit;
     for (cit = contours_begin (); cit != contours_end (); ++cit)
@@ -534,6 +528,13 @@ void Boundary::visit_each_edge (const VISITOR &vis) {
     }
 }
 
+template <typename VISITOR>
+void Boundary::visit_each_edge_in_contour_const (VISITOR &vis, Boundary::contour_iterator cit) const {
+    Boundary::edge_iterator eit;
+    for (eit = edges_begin (cit); eit != edges_end (cit); ++eit) {
+        vis (*this, eit);
+    }
+}
 
 #ifdef NDEBUG
 // expand to empty inlines in NDEBUG mode

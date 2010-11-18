@@ -41,13 +41,15 @@ echo 'The following tests failed:' >$fail_log
 ensuredir multiellipse.out
 ensuredir multiellipse2.out
 ensuredir multiellipse2.com.out
-ensuredir ma105_7o.out
 echo "[$0] Running papaya testcases..." >&2
 $testdriver -c multiellipse.conf -i multiellipse.poly -o multiellipse.out/ &
 $testdriver -c multiellipse.conf -i multiellipse2.poly -o multiellipse2.out/ &
 $testdriver -c multiellipse.com.conf -i multiellipse2.poly -o multiellipse2.com.out/ &
 wait
+ensuredir ma105_7o.out
+ensuredir ma105_7o_cropped.out
 $testdriver -c ma105_7o.conf &
+$testdriver -c ma105_7o_cropped.conf &
 ensuredir counterexample.out
 $testdriver -c counterexample.conf &
 wait

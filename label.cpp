@@ -151,14 +151,43 @@ static void introduce_divider (Boundary *b, const vec_t &line_0, const vec_t &li
     }
 }
 
+struct EdgePrinter {
+    EdgePrinter (std::ostream &os = std::cerr)
+        : stream_ (os)
+    {}
+
+    void operator() (const Boundary &b, Boundary::edge_iterator eit) const {
+        stream_ << b.edge_vertex0 (eit) << " -> ";
+    }
+
+private:
+    std::ostream &stream_;
+};
+
 static void introduce_divider_w0 (Boundary *b, const vec_t &line_0, const vec_t &line_dir) {
     typedef Boundary::edge_iterator edge_iterator;
 
+    // compute all the intersections
     intersect_buffer_t buff;
     intersect_line_boundary (&buff, line_0, line_dir, b);
     intersect_buffer_t::iterator it;
-    assert (buff.size () % 2 == 0);
-    //std::cerr << "[introduce_divider_w0] edges in: " << b->num_edges () << "\n";
+    if (! even (buff.size ())) {
+        std::cerr << "An odd number of intersects was found while dividing the dataset into labels.\n";
+        std::cerr << "This indicates a bug in PAPAYA, or a sufficiently degenerate dataset.\n";
+        std::abort ();
+    }
+
+    // preprocessing: some intersects coincide, and we have to take care to use
+    // the correct one
+    for (it = buff.begin (); it != buff.end (); ++it) {
+        assert (it->sign == -1);
+        ++it;
+        if (it->sign == -1)
+            std::swap (it[0], it[1]);
+        assert (it->sign == +1);
+    }
+
+    // add new edges along the divider
     for (it = buff.begin (); it != buff.end (); ++it) {
         b->split_edge (it->iedge, it->ivtx);
         edge_iterator frst_edge_split = it->iedge;
@@ -169,8 +198,8 @@ static void introduce_divider_w0 (Boundary *b, const vec_t &line_0, const vec_t 
         else
             b->merge_contours_inserting_edge (frst_edge_split, sec_edge_split);
     }
-    //std::cerr << "[introduce_divider_w0] edges out: " << b->num_edges () << "\n";
 }
+
 
 int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
                      bool for_nu_equals_zero) {
@@ -195,7 +224,8 @@ int label_by_domain (Boundary *b, const rect_t &bbox, int divx, int divy,
             introduce_divider (b, vec_t (0., bbox.bottom + ystrip*i), vec_t (1., 0.));
     }
 
-    // remove nonsense we just introduced
+    // the subdividing process generates a lot of small edges in some cases.
+    // get rid of them...
     fix_contours (b, true);
 
     // label everything
