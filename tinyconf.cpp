@@ -144,6 +144,21 @@ string Configuration::string (const string_t &section, const string_t &key) cons
     return value (section, key);
 }
 
+string Configuration::string (
+    const string_t &section,
+    const string_t &key,
+    const string_t &default_) const
+{
+    map_type *m = (map_type *)mem;
+    map_type::const_iterator iter = m->find (section);
+    if (iter == m->end ())
+        return default_;
+    submap_type::const_iterator iter2 = iter->second.find (key);
+    if (iter2 == iter->second.end ())
+        return default_;
+    return iter2->second;
+}
+
 bool Configuration::boolean (const string_t &section, const string_t &key) const {
     string_t v = value (section, key);
     if (v == "false" || v == "FALSE" || v == "0")

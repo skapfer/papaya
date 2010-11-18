@@ -160,6 +160,8 @@ version 1.5
    fudged coordinates for the clipping box.
  * fix W020 labelling in by_domain mode -- this was broken as a result
    of the previous bug.  this affected only the W000, W010, W020 tensors.
+ * normalization of the Minkowski functionals can be changed to the 'new'
+   style by using --normalization=new.  Default is still unnormalized.
 
 version 1.4
  * read binary PGM images (previously only ASCII) and PBM images

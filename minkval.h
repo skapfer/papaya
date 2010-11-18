@@ -7,6 +7,7 @@
 #include <ostream>
 #include <iomanip>
 
+extern double W0_NORMALIZATION, W1_NORMALIZATION, W2_NORMALIZATION;
 
 class AbstractMinkowskiFunctional {
 public:

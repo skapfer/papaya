@@ -17,6 +17,20 @@ static bool ends_with (const std::string &s1, const std::string &s2) {
     return std::string (s1, s1.size () - s2.size (), s2.size ()) == s2;
 }
 
+static
+std::string detect_fileformat (std::string filename)
+{
+    if (ends_with (filename, ".poly")) {
+        return "poly";
+    } else if (ends_with (filename, ".pgm") || ends_with (filename, ".pbm")) {
+        return "pgm";
+    } else {
+        die ("Cannot deduce the input file format from filename %s.  "
+            "Please specify --format=poly or --format=pgm.",
+            filename.c_str ());
+    }
+}
+
 static std::string my_basename (const std::string &str) {
     int i, j = -1;
     for (i = 0; i != (int)str.size (); ++i) {
@@ -159,10 +173,14 @@ int main (int argc, char **argv) {
     Configuration conf (configfile);
 
     std::string filename = conf.string ("input", "filename");
-    if (ops >> OptionPresent ('i', "input")) {
+    std::string in_fileformat = conf.string ("input", "format", "deduce_from_filename");
+    if (ops >> OptionPresent ('i', "input"))
         // override the input specified in config file
         ops >> Option ('i', "input", filename);
-    }
+    if (ops >> OptionPresent ('F', "format"))
+        ops >> Option ('F', "format", in_fileformat);
+    if (in_fileformat == "deduce_from_filename")
+        in_fileformat = detect_fileformat (filename);
 
     std::cerr << "[papaya] Using input file " << filename << "\n";
 
@@ -181,10 +199,24 @@ int main (int argc, char **argv) {
 
     int precision = conf.integer ("output", "precision");
 
+    std::string normalization = conf.string ("output", "normalization", "code_default");
+    if (ops >> OptionPresent ('N', "normalization"))
+        ops >> Option ('N', "normalization", normalization);
+    if (normalization == "breidenbach") {
+        W0_NORMALIZATION = W1_NORMALIZATION = W2_NORMALIZATION = 1.;
+    } else if (normalization == "new") {
+        W0_NORMALIZATION = 1.;
+        W1_NORMALIZATION = W2_NORMALIZATION = .5;
+    } else if (normalization == "code_default") {
+    } else {
+        std::cerr << "Invalid normalization setting: " << normalization << std::endl;
+        return 1;
+    }
+
     Boundary b, b_for_w0_storage_;
     Boundary *b_for_w0 = &b;
 
-    if (ends_with (filename, ".poly")) {
+    if (in_fileformat == "poly") {
         load_poly (&b, filename);
         if (thresh_override != -INFINITY) {
             std::cerr << "--threshold is not useful in .poly mode.\n";
@@ -196,7 +228,7 @@ int main (int argc, char **argv) {
             fix_contours (&b, conf.boolean ("polyinput", "silent_fix_contours"));
         if (forceccw)
             force_counterclockwise_contours (&b);
-    } else if (ends_with (filename, ".pgm") || ends_with (filename, ".pbm")) {
+    } else if (in_fileformat == "pgm" || in_fileformat == "pbm") {
         Pixmap p;
         load_pgm (&p, filename);
         if (conf.boolean ("segment", "invert"))
@@ -382,9 +414,6 @@ int main (int argc, char **argv) {
         MatrixMinkowskiFunctional **it;
         for (it = all_mat_begin; it != all_mat_end; ++it) {
             MatrixMinkowskiFunctional *p = *it;
-#ifndef NDEBUG
-            std::cerr << p->name () << "\n";
-#endif
             std::string filename = output_prefix + "tensor_" + p->name () + ".out";
             std::ofstream of (filename.c_str ());
             if (!of)

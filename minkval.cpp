@@ -1,19 +1,18 @@
-
 #include "minkval.h"
 #include <math.h>
-
 
 // change the 1 to a 0 in order to use the normalization
 // described in the paper
 #if 1
 // Breidenbach normalization
-static const double W0_NORMALIZATION = 1.;
-static const double W1_NORMALIZATION = 1.;
-static const double W2_NORMALIZATION = 1.;
+double W0_NORMALIZATION = 1.;
+double W1_NORMALIZATION = 1.;
+double W2_NORMALIZATION = 1.;
 #else
-static const double W0_NORMALIZATION = 1.;
-static const double W1_NORMALIZATION = .5;
-static const double W2_NORMALIZATION = .5;
+// new normalization, as described in the paper
+double W0_NORMALIZATION = 1.;
+double W1_NORMALIZATION = .5;
+double W2_NORMALIZATION = .5;
 #endif
 
 
@@ -21,6 +20,10 @@ void print_version_header (std::ostream &of) {
     of << "# papaya version " << VERSION <<
         "\n# (c) 2008-2010 Sebastian Kapfer "
         "<sebastian.kapfer@physik.uni-erlangen.de>\n";
+    of << "# normalization in use for this calculation: "
+       << W0_NORMALIZATION << " "
+       << W1_NORMALIZATION << " "
+       << W2_NORMALIZATION << "\n";
 }
 
 // W000 = volume integral

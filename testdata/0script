@@ -57,7 +57,15 @@ ensuredir viereck-new.out
 ensuredir viereck.out
 $papaya -c counterexample.conf -i viereck-new.poly  -o viereck-new.out/ &
 $papaya -c counterexample.conf -i viereck.poly  -o viereck.out/ &
+$papaya -c circle_normalization_test.conf -o circle_normalization_breidenbach.out/ &
+$papaya -c circle_normalization_test.conf --normalization new -o circle_normalization_new.out/ &
 wait
+
+ensuredir dummy.out
+$papaya -c counterexample.conf -i <(cat viereck.poly)  -o dummy.out/ \
+    || record_failure "Give format in config file"
+$papaya -c counterexample.conf -F poly -i <(cat viereck.poly)  -o dummy.out/  \
+    || record_failure "Give format at commandline"
 
 echo "[$0] Comparing to reference results..." >&2
 
@@ -74,6 +82,10 @@ complain_if_mismatch ma105_7o_cropped.out
 cp counterexample.ref/tensor_W102.out counterexample.out
 cp counterexample.ref/tensor_W211.out counterexample.out
 complain_if_mismatch counterexample.out
+
+# test of different normalizations
+complain_if_mismatch circle_normalization_new.out
+complain_if_mismatch circle_normalization_breidenbach.out
 
 # test to see if Papaya is still able to read old-style (zero-based) polys.
 # please write new .poly files in one-based format.

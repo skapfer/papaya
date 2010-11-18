@@ -1,0 +1,5 @@
+# papaya version 1.5-beta
+# (c) 2008-2010 Sebastian Kapfer <sebastian.kapfer@physik.uni-erlangen.de>
+# normalization in use for this calculation: 1 0.5 0.5
+#   1          label   2             a11   3             a12   4             a21   5             a22   6           eval1   7           eval2   8     eval1/eval2   9          evec1x  10          evec1y  11          evec2x  12          evec2y
+                   0         785.3968715    -9.089257125e-14    -9.089257125e-14         785.3968715         785.3968715         785.3968715                   1         0.624456658        0.7810594614        0.7810594614        -0.624456658
