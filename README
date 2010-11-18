@@ -42,12 +42,16 @@ DEMOS
 
 There are a number of demos on how to use Papaya in the demos/ folder.
 
-1. Poisson-Voronoi cells   (poisson-voronoi)
+1. Poisson-Voronoi cells   (demos/voronoi)
 
 Creates a realization of a Poisson point process, and calculates the Minkowski
 Tensors of its Voronoi diagram.  Driver script written in Python, uses qhull
 (qhull.org) to calculate the Voronoi diagram.
 
+2. Writing .poly data  (demos/poly_circle)
+
+A small script that produces a circle in .poly file format, and a Papaya .conf
+file to calculate all the tensors.
 
 ==========================
 REQUIREMENTS ON INPUT DATA
