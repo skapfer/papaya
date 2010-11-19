@@ -168,6 +168,14 @@ bool Configuration::boolean (const string_t &section, const string_t &key) const
     throw std::runtime_error ("Invalid boolean \"" + v + "\"");
 }
 
+bool Configuration::boolean (const string_t &section, const string_t &key, bool default_) const {
+    try {
+        return boolean (section, key);
+    } catch (...) {
+        return default_;
+    }
+}
+
 int Configuration::integer (const string_t &section, const string_t &key) const {
     string_t v = value (section, key);
     errno = 0;

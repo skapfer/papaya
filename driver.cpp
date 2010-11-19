@@ -1,9 +1,12 @@
 // vim: et:sw=4:ts=4
-// driver code
-
+// driver code, the Papaya command-line tool.
 #include <iostream>
 #include <fstream>
 #include <getopt_pp_standalone.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <string>
+#include <errno.h>
 #include "util.h"
 #include "minkval.h"
 #include "tinyconf.h"
@@ -41,6 +44,21 @@ static std::string my_basename (const std::string &str) {
         return str;
     else
         return std::string (str, j+1, str.npos);
+}
+
+// recursively create directories for the output files
+static
+void prefix_mkdir (std::string prefix)
+{
+    std::string::size_type p = prefix.find_last_of ("/");
+    if (p == prefix.npos) return;
+    prefix.assign (prefix, 0u, p);
+    prefix_mkdir (prefix);
+    errno = 0;
+    std::cerr << "[papaya] mkdir " << prefix << "\n";
+    mkdir (prefix.c_str (), 0777);
+    if (errno && errno != EEXIST)
+        perror ("mkdir");
 }
 
 static void calculate_functional (AbstractMinkowskiFunctional *p,
@@ -190,6 +208,8 @@ int main (int argc, char **argv) {
         ops >> Option ('o', "output", output_prefix);
     }
     std::cerr << "[papaya] Using output prefix " << output_prefix << "\n";
+    if (conf.boolean ("output", "mkdir", false))
+        prefix_mkdir (output_prefix);
 
     double thresh_override = -INFINITY;
     if (ops >> OptionPresent ('\0', "threshold")) {
