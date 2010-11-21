@@ -59,6 +59,7 @@ $papaya -c counterexample.conf -i viereck-new.poly  -o viereck-new.out/ &
 $papaya -c counterexample.conf -i viereck.poly  -o viereck.out/ &
 $papaya -c circle_normalization_test.conf -o circle_normalization_breidenbach.out/ &
 $papaya -c circle_normalization_test.conf --normalization new -o circle_normalization_new.out/ &
+$papaya -c degenerate_contour_repair.conf &
 wait
 
 ensuredir dummy.out
@@ -92,6 +93,9 @@ complain_if_mismatch circle_normalization_breidenbach.out
 # (gnuplot scripts will be different obviously since they contain path names)
 rm -f viereck{,-new}.out/*.gp
 complain_if_different viereck-new.out viereck.out
+
+# see if broken contours can be fixed
+complain_if_mismatch degenerate_contour_repair.out
 
 ./pgmreader || record_failure "pgm reader test"
 

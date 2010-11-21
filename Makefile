@@ -10,7 +10,7 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
-VERSION_NUMBER = 1.5-beta
+VERSION_NUMBER = 1.5
 CXXFLAGS += -DVERSION=\"$(VERSION_NUMBER)\"
 
 BINARIES = papaya testdata/eigensystem testdata/tsvdiff testdata/pgmreader
