@@ -42,6 +42,6 @@ testdata/pgmreader: ts.headers $(SUPPORT) testdata/pgmreader.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(SUPPORT) testdata/pgmreader.cpp
 
 tar:
-	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_4 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
+	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_5 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
 
 .PHONY: all clean tar
