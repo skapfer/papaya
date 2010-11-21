@@ -143,7 +143,7 @@ CHANGELOG
 =========
 
 version 1.5
- * fix the odd number of intersects problem when processing
+ * fix the odd number of intersects numerical problem when processing
    pixelized data in by_domain mode; it is no longer necessary to use
    fudged coordinates for the clipping box.
  * fix W020 labelling in by_domain mode -- this was broken as a result
