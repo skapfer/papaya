@@ -142,6 +142,10 @@ Hoffmann.
 CHANGELOG
 =========
 
+version 1.6
+ * fix the comment at the top of the tensor* files produced by PAPAYA.
+   it previously said eval1/eval2 eventhough the value was eval2/eval1.
+
 version 1.5
  * fix the odd number of intersects numerical problem when processing
    pixelized data in by_domain mode; it is no longer necessary to use

@@ -454,7 +454,7 @@ int main (int argc, char **argv) {
             of << std::setw ( 4) << col++;
             of << std::setw (16) << "eval2";
             of << std::setw ( 4) << col++;
-            of << std::setw (16) << "eval1/eval2";
+            of << std::setw (16) << "eval2/eval1";
             of << std::setw ( 4) << col++;
             of << std::setw (16) << "evec1x";
             of << std::setw ( 4) << col++;
