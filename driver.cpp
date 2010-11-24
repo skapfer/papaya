@@ -34,7 +34,8 @@ std::string detect_fileformat (std::string filename)
     }
 }
 
-static std::string my_basename (const std::string &str) {
+static
+std::string my_basename (const std::string &str) {
     int i, j = -1;
     for (i = 0; i != (int)str.size (); ++i) {
         if (str[i] == '/')
@@ -44,6 +45,65 @@ static std::string my_basename (const std::string &str) {
         return str;
     else
         return std::string (str, j+1, str.npos);
+}
+
+typedef std::vector <std::string> string_vector;
+
+static
+bool vector_contains (const string_vector &v, const std::string &value)
+{
+    return std::find (v.begin (), v.end (), value) != v.end ();
+}
+
+static
+string_vector split_at_comma (std::string input)
+{
+    string_vector ret;
+    std::string::size_type x = 0u, y = input.find_first_of (',');
+    for(;;)
+    {
+        if (y == input.npos) {
+            ret.push_back (input.substr (x));
+            return ret;
+        } else {
+            ret.push_back (input.substr (x, y-x));
+            x = y+1;
+            y = input.find_first_of (',', x);
+        }
+    }
+}
+
+static
+string_vector parse_what_to_compute (std::string what)
+{
+    string_vector what_to_c = split_at_comma (what);
+    const char *const tensors[] = { "W020", "W120", "W220", "W211", "W102" };
+    const int num_tensors = sizeof(tensors)/sizeof(*tensors);
+    string_vector legal_options (tensors, tensors+num_tensors);
+    legal_options.push_back ("contours");
+    legal_options.push_back ("labels");
+    legal_options.push_back ("scalars");
+    legal_options.push_back ("vectors");
+    legal_options.push_back ("tensors");
+
+    // check that only legal options are given
+    string_vector::iterator it;
+    for (it = what_to_c.begin (); it != what_to_c.end (); ++it)
+    {
+        std::cerr << *it << " ";
+        if (!vector_contains (legal_options, *it))
+        {
+            std::cerr << "invalid value in \"compute\" option: " << *it << std::endl;
+            std::abort ();
+        }
+    }
+    std::cerr << "\n";
+
+    // if "tensors" is given, expand this to /all/ the tensors we can compute
+    if (vector_contains (what_to_c, "tensors"))
+        what_to_c.insert (what_to_c.end (), tensors, tensors+num_tensors);
+
+    return what_to_c;
 }
 
 // recursively create directories for the output files
@@ -265,12 +325,23 @@ int main (int argc, char **argv) {
         abort ();
     }
 
-
     assert_sensible_boundary (b);
 
+    // find out what we're supposed to compute
+    std::string default_what = "contours,labels,scalars,vectors,tensors";
+    string_vector what_to_compute =
+        parse_what_to_compute (conf.string ("output", "compute", default_what));
+    if (ops >> OptionPresent (' ', "compute")) {
+        std::string what;
+        ops >> Option (' ', "compute", what);
+        what_to_compute = parse_what_to_compute (what);
+    }
+
     // write contours prior to labelling (in case that crashes...)
-    std::string contfile (output_prefix + "contours");
-    dump_contours (contfile, b, 1);
+    if (vector_contains (what_to_compute, "contours")) {
+        std::string contfile (output_prefix + "contours");
+        dump_contours (contfile, b, 1);
+    }
 
     ScalarMinkowskiFunctional *w000 = create_w000 ();
     ScalarMinkowskiFunctional *w100 = create_w100 ();
@@ -345,8 +416,10 @@ int main (int argc, char **argv) {
     }
 
     assert (num_labels != -1);
-    dump_labels (output_prefix + "labels", b);
-    dump_labels (output_prefix + "nu0labels", *b_for_w0);
+    if (vector_contains (what_to_compute, "labels")) {
+        dump_labels (output_prefix + "labels", b);
+        dump_labels (output_prefix + "nu0labels", *b_for_w0);
+    }
 
     {
         // calculate all functionals
@@ -360,6 +433,7 @@ int main (int argc, char **argv) {
         }
     }
 
+    if (vector_contains (what_to_compute, "scalars"))
     {
         // output scalars
         ScalarMinkowskiFunctional *all_sca_begin[] = { w000, w100, w200 };
@@ -390,6 +464,7 @@ int main (int argc, char **argv) {
         }
     }
 
+    if (vector_contains (what_to_compute, "vectors"))
     {
         // output vectors
         VectorMinkowskiFunctional *all_sca_begin[] = { w010, w110, w210 };
@@ -434,6 +509,8 @@ int main (int argc, char **argv) {
         MatrixMinkowskiFunctional **it;
         for (it = all_mat_begin; it != all_mat_end; ++it) {
             MatrixMinkowskiFunctional *p = *it;
+            if (!vector_contains (what_to_compute, p->name ()))
+                continue;
             std::string filename = output_prefix + "tensor_" + p->name () + ".out";
             std::ofstream of (filename.c_str ());
             if (!of)
