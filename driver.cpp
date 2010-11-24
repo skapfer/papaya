@@ -89,15 +89,11 @@ string_vector parse_what_to_compute (std::string what)
     // check that only legal options are given
     string_vector::iterator it;
     for (it = what_to_c.begin (); it != what_to_c.end (); ++it)
-    {
-        std::cerr << *it << " ";
         if (!vector_contains (legal_options, *it))
         {
             std::cerr << "invalid value in \"compute\" option: " << *it << std::endl;
             std::abort ();
         }
-    }
-    std::cerr << "\n";
 
     // if "tensors" is given, expand this to /all/ the tensors we can compute
     if (vector_contains (what_to_c, "tensors"))
