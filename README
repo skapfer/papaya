@@ -145,6 +145,13 @@ CHANGELOG
 version 1.6
  * fix the comment at the top of the tensor* files produced by PAPAYA.
    it previously said eval1/eval2 eventhough the value was eval2/eval1.
+ * new --compute option; this allows to save only a subset of the computed data
+   to disk.  for example papaya --compute tensors,scalars would compute the
+   tensors and scalar functionals, but not the vector functionals, and not
+   write the "contours.gp" and "labels.gp" GNUPLOT scripts.
+   valid values include:  scalars, vectors, w020, w120, w220, w102, w211,
+   contours, labels, tensors (= shorthand for w020,w120,w220,w102,w211)
+   the default is to write everything to disk.
 
 version 1.5
  * fix the odd number of intersects numerical problem when processing

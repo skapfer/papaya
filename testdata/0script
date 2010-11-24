@@ -60,6 +60,7 @@ $papaya -c counterexample.conf -i viereck.poly  -o viereck.out/ &
 $papaya -c circle_normalization_test.conf -o circle_normalization_breidenbach.out/ &
 $papaya -c circle_normalization_test.conf --normalization new -o circle_normalization_new.out/ &
 $papaya -c degenerate_contour_repair.conf &
+$papaya -c kartoffel_use_compute_option.conf &
 wait
 
 ensuredir dummy.out
@@ -96,6 +97,9 @@ complain_if_different viereck-new.out viereck.out
 
 # see if broken contours can be fixed
 complain_if_mismatch degenerate_contour_repair.out
+
+[ $(find kartoffel_use_compute_option.out | wc -l ) -lt 3 ] \
+    || record_failure "Disable writing some results to disk"
 
 ./pgmreader || record_failure "pgm reader test"
 

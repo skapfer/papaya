@@ -52,7 +52,5 @@ int main (int argc, char **argv) {
         failed = true;
     }
 
-    if (!failed) std::cerr << "OK\n";
-
     return int (failed);
 }
