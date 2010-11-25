@@ -149,8 +149,8 @@ version 1.6
    to disk.  for example papaya --compute tensors,scalars would compute the
    tensors and scalar functionals, but not the vector functionals, and not
    write the "contours.gp" and "labels.gp" GNUPLOT scripts.
-   valid values include:  scalars, vectors, w020, w120, w220, w102, w211,
-   contours, labels, tensors (= shorthand for w020,w120,w220,w102,w211)
+   valid values include:  scalars, vectors, W020, W120, W220, W102, W211,
+   contours, labels, tensors (= shorthand for W020,W120,W220,W102,W211)
    the default is to write everything to disk.
 
 version 1.5
