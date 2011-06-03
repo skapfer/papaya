@@ -31,12 +31,6 @@ namespace
             return x;
     }
 
-    static
-    bool is_ordered (double a, double b, double c)
-    {
-        return (a <= b && b <= c) || (c <= b && b <= a);
-    }
-
     // this function does its best to return a sensible
     // intersection point between a line and a boundary
     // segment.  it does not decide whether there is an intersect,

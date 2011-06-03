@@ -167,6 +167,13 @@ static void set_refvert_coc (func_iterator begin, func_iterator end,
     calculate_functional (w200, b);
     for (; begin != end; ++begin) {
         for (int l = 0; l != num_labels; ++l) {
+            if (fabs (w200->value (l) / W2_NORMALIZATION) < .95*M_PI)
+            {
+                std::cerr << "error: some labels have vanishing total curvature.\n"
+                             "the _coc reference vertex does not exist in this case.\n"
+                             "you probably want to use point_of_reference = contour_com or component_com instead.\n";
+                exit (1);
+            }
             vec_t refvert = w210->value (l) / w200->value (l);
             (*begin)->ref_vertex (l, refvert);
         }

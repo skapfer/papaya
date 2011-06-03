@@ -156,6 +156,8 @@ version 1.6
         'Inconsistency found while intersecting line/point'
    on some pixelized inputs.  The reason was a flawed test consistency
    test retained from a development version.
+ * Papaya will refuse to do center of curvature reference points when
+   curvature vanishes for some labels.
 
 version 1.5
  * fix the odd number of intersects numerical problem when processing

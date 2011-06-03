@@ -76,24 +76,20 @@ inline bool not_nan (const vec2_t &v) {
     return not_nan (v[0]) && not_nan (v[1]);
 }
 
+inline bool not_nan (const vec3_t &v) {
+    return not_nan (v[0]) && not_nan (v[1]) && not_nan (v[2]);
+}
+
 inline void assert_not_nan (double x) {
-#ifndef NDEBUG
     assert (not_nan (x));
-#endif // NDEBUG
 }
 
 inline void assert_not_nan (const vec2_t &v) {
-#ifndef NDEBUG
     assert (not_nan (v));
-#endif // NDEBUG
 }
 
 inline void assert_not_nan (const vec3_t &v) {
-#ifndef NDEBUG
-    assert_not_nan (v(0));
-    assert_not_nan (v(1));
-    assert_not_nan (v(2));
-#endif // NDEBUG
+    assert (not_nan (v));
 }
 
 inline void assert_not_nan (const mat2_t &m) {

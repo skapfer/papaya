@@ -68,6 +68,10 @@ for thresh in 3 5 7 9; do
     ensuredir slika$thresh.out/
     $papaya -c slika.conf --threshold .$thresh -o slika$thresh.out/ &
 done
+
+# this should not work, because there are W2=0 labels in the input file.
+ensuredir dummy.out
+($papaya -c slika_coc.conf -o dummy.out/; exit $?) >&/dev/null && record_failure "vanishing curvature not detected"
 wait
 
 ensuredir dummy.out
@@ -121,5 +125,7 @@ done
 
 if $some_tests_failed; then
     cat $fail_log >&2
+else
+    echo All tests successful. >&2
 fi
 rm -f $fail_log
