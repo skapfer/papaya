@@ -152,6 +152,10 @@ version 1.6
    valid values include:  scalars, vectors, W020, W120, W220, W102, W211,
    contours, labels, tensors (= shorthand for W020,W120,W220,W102,W211)
    the default is to write everything to disk.
+ * fix a bug causing the message
+        'Inconsistency found while intersecting line/point'
+   on some pixelized inputs.  The reason was a flawed test consistency
+   test retained from a development version.
 
 version 1.5
  * fix the odd number of intersects numerical problem when processing

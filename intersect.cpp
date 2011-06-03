@@ -63,24 +63,13 @@ namespace
         const double dn2 = dot (dir_, dir_);
         const double lambda = dn/dn2;
         const vec_t ivtx = r0 + lambda * dir_;
+        const vec_t alternative_ivtx = mu * edge + b.edge_vertex1 (eit);
         dst->inc = lambda;
         dst->ivtx = ivtx;
         dst->iedge = eit;
+        assert_not_nan (lambda);
+        assert_not_nan (ivtx);
 
-        // check if the results are consistent
-        if (! is_ordered (dot (r0 - b.edge_vertex0 (eit), dir_),
-                          dot (r0 - ivtx, dir_),
-                          dot (r0 - b.edge_vertex1 (eit), dir_)))
-        {
-            std::cerr << "Inconsistency found while intersecting line/point\n";
-            std::cerr << "(mu = " << cn/cn2 << ") "
-                << dot (r0 - b.edge_vertex0 (eit), dir_) << ", "
-                << dot (r0 - ivtx, dir_) << ", "
-                << dot (r0 - b.edge_vertex1 (eit), dir_) << std::endl;
-            std::abort ();
-        }
-
-        const vec_t alternative_ivtx = mu * edge + b.edge_vertex1 (eit);
         const vec_t diff = ivtx - alternative_ivtx;
         if (dot (diff, diff) > 0.01*0.01 * dot (edge, edge))
         {

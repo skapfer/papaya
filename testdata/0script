@@ -20,6 +20,7 @@ record_failure () {
 complain_if_mismatch () {
     local ref="${1%.out}.ref"
     local filelist="contours.out labels.out scalar.out tensor_W020.out tensor_W120.out tensor_W211.out tensor_W220.out vector.out tensor_W102.out"
+    [ -z "$2" ] || filelist="$2"
     for F in $filelist; do 
         ./tsvdiff "$1/$F" "$ref/$F" || {
             echo "[$0] Test $1 failed" >&2
@@ -63,6 +64,12 @@ $papaya -c degenerate_contour_repair.conf &
 $papaya -c kartoffel_use_compute_option.conf &
 wait
 
+for thresh in 3 5 7 9; do
+    ensuredir slika$thresh.out/
+    $papaya -c slika.conf --threshold .$thresh -o slika$thresh.out/ &
+done
+wait
+
 ensuredir dummy.out
 $papaya -c counterexample.conf -i <(cat viereck.poly)  -o dummy.out/ \
     || record_failure "Give format in config file"
@@ -100,6 +107,10 @@ complain_if_mismatch degenerate_contour_repair.out
 
 [ $(find kartoffel_use_compute_option.out | wc -l ) -lt 3 ] \
     || record_failure "Disable writing some results to disk"
+
+for thresh in 3 5 7 9; do
+    complain_if_mismatch slika$thresh.out tensor_W020.out
+done
 
 ./pgmreader || record_failure "pgm reader test"
 

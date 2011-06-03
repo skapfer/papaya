@@ -23,7 +23,7 @@ struct TensorRank;
 
 void assert_not_nan (double x);
 void assert_not_nan (const vec2_t &);
-void assert_non_nan (const vec3_t &);
+void assert_not_nan (const vec3_t &);
 void assert_not_nan (const mat2_t &m);
 
 namespace Papaya2 {
@@ -72,6 +72,10 @@ inline bool not_nan (double x) {
     return x==x;
 }
 
+inline bool not_nan (const vec2_t &v) {
+    return not_nan (v[0]) && not_nan (v[1]);
+}
+
 inline void assert_not_nan (double x) {
 #ifndef NDEBUG
     assert (not_nan (x));
@@ -80,8 +84,7 @@ inline void assert_not_nan (double x) {
 
 inline void assert_not_nan (const vec2_t &v) {
 #ifndef NDEBUG
-    assert_not_nan (v(0));
-    assert_not_nan (v(1));
+    assert (not_nan (v));
 #endif // NDEBUG
 }
 
