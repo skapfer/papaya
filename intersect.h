@@ -9,9 +9,9 @@ struct intersect_info_t {
     typedef intersect_info_t this_t;
 
     vec_t ivtx;
-    double inc;
+    double inc; // ivtx = r0 + inc * dir
     edge_iterator iedge;
-    int sign;
+    int sign; // - = in, +1=out, 0=tangent
 
     static bool by_contour_id (const this_t &, const this_t &);
     static bool by_normal_coordinate (const this_t &, const this_t &);
