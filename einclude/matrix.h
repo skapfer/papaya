@@ -170,7 +170,7 @@ public:
       */
     Matrix( const Matrix & other )
     {
-        readArray( other.array() );
+        this->readArray( other.array() );
     }
 
     /**
@@ -179,7 +179,7 @@ public:
       */
     Matrix( const T * array )
     {
-        readArray( array );
+        this->readArray( array );
     }
 
     /**

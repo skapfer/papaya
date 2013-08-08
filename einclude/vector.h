@@ -141,7 +141,7 @@ public:
       */
     Vector( const Vector &v )
     {
-        readArray( v.array() );
+        this->readArray( v.array() );
     }
 
     /**
@@ -149,7 +149,7 @@ public:
       */
     Vector( const T *array )
     {
-        readArray( array );
+        this->readArray( array );
     }
 
     /**
@@ -160,7 +160,7 @@ public:
     Vector( int unused_size, const T *array )
     {
         assert( unused_size == this->size() );
-        readArray( array );
+        this->readArray( array );
     }
 
     /**
