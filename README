@@ -142,6 +142,9 @@ Hoffmann.
 CHANGELOG
 =========
 
+version 1.7
+ * fix reading of multi-line comments in PGM files.
+
 version 1.6
  * fix compilation of Eigen with later GCC (4.7 and up)
  * fix the comment at the top of the tensor* files produced by PAPAYA.

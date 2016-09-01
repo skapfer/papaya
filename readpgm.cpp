@@ -16,8 +16,12 @@ static long read_header (Pixmap *p, string *magic, std::string *comment, istream
             *magic != "P5")
         format_error ("magic incorrect");
     is >> ws;
-    if (is.peek () == '#')
-        getline (is, *comment); // ignore comment
+    while (is.peek () == '#') {
+        string tmp;
+        getline (is, tmp);
+        *comment += tmp;
+        *comment += " ";
+    }
     int w, h;
     long max_value = 1;
     is >> w >> h;
