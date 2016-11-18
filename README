@@ -54,6 +54,11 @@ Use a configuration file, but override the input file and output path:
 
     papaya -c a.conf -i input.poly -o outputdir
 
+You can also override the segmentation threshold using the --threshold
+argument:
+
+    papaya -i input.pgm -o outputdir --threshold 0.5
+
 
 =====
 DEMOS
