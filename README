@@ -143,6 +143,14 @@ These files are plain portable graymaps / bitmaps (*.pbm, *.pgm), as introduced
 by the netpbm package ages ago.  Most graphics software can write this format,
 e.g. ImageMagick, GIMP.
 
+On most unixoid systems (Linux, Mac), you can use the convert command to produce
+PGM images.
+
+    convert a.png a.pgm
+
+Note that pixelization inherently introduces artificial anisotropy.  If you can
+avoid pixelization, you should provide .poly input to Papaya.
+
 
 ==============
 KNOWN PROBLEMS
