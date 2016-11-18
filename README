@@ -36,6 +36,25 @@ code.  Normally, this is not necessary as Papaya is relatively quick.
 Type "make test" to run the (currently minimal) testsuite.
 
 
+==========
+INVOCATION
+==========
+
+Parameters to Papaya are set in a configuration file.  A commented example
+can be found in "papaya.conf", some more in the "demos" folder.
+
+By default, Papaya uses the values found in the "papaya.conf" file.
+
+Some command-line flags are supported to overide values there, for ease
+of scripting.  To load a configuration file different from the default:
+
+    papaya -c another.conf
+
+Use a configuration file, but override the input file and output path:
+
+    papaya -c a.conf -i input.poly -o outputdir
+
+
 =====
 DEMOS
 =====
