@@ -10,7 +10,7 @@ SUPPORT = util.o marching.o minkval.o readpgm.o tinyconf.o readpoly.o \
     label.o \
     intersect.o \
 
-VERSION_NUMBER = 1.6
+VERSION_NUMBER = 1.8
 CXXFLAGS += -DVERSION=\"$(VERSION_NUMBER)\"
 
 BINARIES = papaya testdata/eigensystem testdata/tsvdiff testdata/pgmreader
@@ -42,6 +42,6 @@ testdata/pgmreader: ts.headers $(SUPPORT) testdata/pgmreader.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(SUPPORT) testdata/pgmreader.cpp
 
 tar:
-	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_6 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
+	git archive --format=tar --prefix=papaya-$(VERSION_NUMBER)/ VERSION_1_8 | gzip -9 >../papaya-$(VERSION_NUMBER).tar.gz
 
 .PHONY: all clean tar
